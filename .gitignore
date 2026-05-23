@@ -334,3 +334,7 @@ test-results/
 playwright-report/
 playwright/.cache/
 blob-report/
+
+
+# Local documentation
+docs/
