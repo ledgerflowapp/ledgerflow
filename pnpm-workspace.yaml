@@ -1,0 +1,14 @@
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@tanstack/eslint-plugin-query@5.100.13'
+  - '@tanstack/query-core@5.100.13'
+  - '@tanstack/query-devtools@5.100.13'
+  - '@tanstack/react-query-devtools@5.100.13'
+  - '@tanstack/react-query@5.100.13'
+  - baseline-browser-mapping@2.10.32
+  - date-fns@4.3.0
+  - react-hook-form@7.76.1
+onlyBuiltDependencies:
+  - unrs-resolver

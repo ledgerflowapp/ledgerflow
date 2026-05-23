@@ -8,12 +8,16 @@ test.describe('Authentication Flow', () => {
         await expect(page.getByText(/Welcome to LedgerFlow/i)).toBeVisible();
 
         // Check for phone input
+        await page.getByRole('button', { name: /Sign in with Phone \(Legacy\)/i }).click();
         await expect(page.getByPlaceholder('9999999999')).toBeVisible();
         await expect(page.getByRole('button', { name: /Send OTP/i })).toBeVisible();
     });
 
     test('should allow user to login with phone and OTP', async ({ page }) => {
         await page.goto('/login');
+
+        // Click on Phone auth
+        await page.getByRole('button', { name: /Sign in with Phone \(Legacy\)/i }).click();
 
         // Fill phone number
         await page.getByPlaceholder('9999999999').fill('9999999999');

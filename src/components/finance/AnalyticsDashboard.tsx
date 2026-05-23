@@ -73,7 +73,7 @@ export function AnalyticsDashboard() {
                                 ))}
                             </Pie>
                             <Tooltip
-                                formatter={(value: number | string | undefined) =>
+                                formatter={(value: any) =>
                                     value !== undefined ? `₹${Number(value).toLocaleString()}` : '₹0'
                                 }
                             />

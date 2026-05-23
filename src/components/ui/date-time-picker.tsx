@@ -81,7 +81,7 @@ export function DateTimePicker({
                     mode="single"
                     selected={selectedDateTime}
                     onSelect={handleDateSelect}
-                    initialFocus
+                    autoFocus
                 />
                 <div className="p-3 border-t border-border">
                     <Label className="text-xs">Time</Label>
