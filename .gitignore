@@ -329,3 +329,8 @@ Temporary Items
 
 # Built Visual Studio Code Extensions
 *.vsix
+# Playwright testing
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
