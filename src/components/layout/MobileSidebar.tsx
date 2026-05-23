@@ -76,10 +76,10 @@ export function MobileSidebar() {
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                    <Menu className="h-6 w-6" />
-                </Button>
+            <SheetTrigger render={
+                <Button variant="ghost" size="icon" className="md:hidden" />
+            }>
+                <Menu className="h-6 w-6" />
             </SheetTrigger>
             <SheetContent side="left">
                 <SheetHeader className="text-left">

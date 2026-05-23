@@ -128,7 +128,7 @@ export function SettleUpDrawer({ children, groupId, members, currentUserId }: Se
                     <div className="space-y-2">
                         <Label>Who paid?</Label>
                         <Select value={payerMemberId} onValueChange={(val) => {
-                            setPayerMemberId(val)
+                            if (val) setPayerMemberId(val)
                             // Reset receiver if same as new payer
                             if (receiverMemberId === val) setReceiverMemberId('')
                         }}>
@@ -156,7 +156,7 @@ export function SettleUpDrawer({ children, groupId, members, currentUserId }: Se
                     {/* To whom */}
                     <div className="space-y-2">
                         <Label>To whom?</Label>
-                        <Select value={receiverMemberId} onValueChange={setReceiverMemberId} disabled={!payerMemberId}>
+                        <Select value={receiverMemberId} onValueChange={(val) => val && setReceiverMemberId(val)} disabled={!payerMemberId}>
                             <SelectTrigger>
                                 <SelectValue placeholder={payerMemberId ? "Select receiver" : "Select payer first"} />
                             </SelectTrigger>

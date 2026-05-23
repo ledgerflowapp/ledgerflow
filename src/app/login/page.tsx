@@ -321,7 +321,7 @@ function LoginContent() {
                                                 <FormControl>
                                                     <div className="flex gap-2">
                                                         <div className="w-[100px]">
-                                                            <Select defaultValue="+91" onValueChange={(value) => setCountryCode(value)}>
+                                                            <Select defaultValue="+91" onValueChange={(value) => value && setCountryCode(value)}>
                                                                 <SelectTrigger>
                                                                     <SelectValue placeholder="+91" />
                                                                 </SelectTrigger>

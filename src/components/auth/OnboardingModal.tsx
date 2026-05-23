@@ -79,8 +79,8 @@ export function OnboardingModal() {
     if (isLoading || !profile?.id) return null
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <Dialog open={isOpen} onOpenChange={setIsOpen} disablePointerDismissal={true}>
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <div className="flex items-center justify-between">
                         <DialogTitle>Choose a Username</DialogTitle>

@@ -179,9 +179,8 @@ export function RecurringTransactionDrawer({
                                                 <FormLabel>Category</FormLabel>
                                                 <FormControl>
                                                     <ToggleGroup
-                                                        type="single"
-                                                        value={field.value}
-                                                        onValueChange={field.onChange}
+                                                        value={field.value ? [field.value] : []}
+                                                        onValueChange={(val) => field.onChange(val[0] || undefined)}
                                                         className="justify-start flex-wrap gap-2"
                                                     >
                                                         {budgets?.map((cat) => (
@@ -211,9 +210,8 @@ export function RecurringTransactionDrawer({
                                             <FormLabel>Account</FormLabel>
                                             <FormControl>
                                                 <ToggleGroup
-                                                    type="single"
-                                                    value={field.value}
-                                                    onValueChange={field.onChange}
+                                                    value={field.value ? [field.value] : []}
+                                                    onValueChange={(val) => field.onChange(val[0] || undefined)}
                                                     className="justify-start flex-wrap gap-2"
                                                 >
                                                     {accounts?.map((acc) => (

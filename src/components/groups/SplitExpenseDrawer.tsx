@@ -209,7 +209,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
 
                             <div className="space-y-2">
                                 <Label>Paid from</Label>
-                                <Select value={accountId} onValueChange={setAccountId}>
+                                <Select value={accountId} onValueChange={(val) => val && setAccountId(val)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select account" />
                                     </SelectTrigger>

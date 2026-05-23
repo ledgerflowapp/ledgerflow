@@ -133,7 +133,7 @@ export function BusinessContactList({
                     />
                 </div>
 
-                <ToggleGroup type="single" value={filter} onValueChange={(val) => val && setFilter(val)} className="justify-start w-full">
+                <ToggleGroup value={filter ? [filter] : []} onValueChange={(val) => setFilter(val[0] || 'ALL')} className="justify-start w-full">
                     <ToggleGroupItem value="ALL" className="flex-1">All</ToggleGroupItem>
                     <ToggleGroupItem value="CUSTOMER" className="flex-1">Customers</ToggleGroupItem>
                     <ToggleGroupItem value="SUPPLIER" className="flex-1">Suppliers</ToggleGroupItem>

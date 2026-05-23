@@ -220,9 +220,8 @@ export function PersonalTransactionDrawer({
                                                 <FormLabel>Category</FormLabel>
                                                 <FormControl>
                                                     <ToggleGroup
-                                                        type="single"
-                                                        value={field.value || undefined}
-                                                        onValueChange={field.onChange}
+                                                        value={field.value ? [field.value] : []}
+                                                        onValueChange={(val) => field.onChange(val[0] || null)}
                                                         className="justify-start flex-wrap gap-2"
                                                     >
                                                         {budgets?.map((cat) => (
@@ -251,9 +250,8 @@ export function PersonalTransactionDrawer({
                                             <FormLabel>Account</FormLabel>
                                             <FormControl>
                                                 <ToggleGroup
-                                                    type="single"
-                                                    value={field.value || undefined}
-                                                    onValueChange={field.onChange}
+                                                    value={field.value ? [field.value] : []}
+                                                    onValueChange={(val) => field.onChange(val[0] || null)}
                                                     className="justify-start flex-wrap gap-2"
                                                 >
                                                     {accounts?.map((acc) => (

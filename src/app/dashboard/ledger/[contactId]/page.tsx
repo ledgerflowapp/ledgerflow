@@ -155,10 +155,10 @@ export default function LedgerPage() {
                 </div>
                 <div className="ml-auto">
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
+                        <DropdownMenuTrigger render={
+                            <Button variant="ghost" size="icon" />
+                        }>
+                            <MoreVertical className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => setContactEditOpen(true)}>

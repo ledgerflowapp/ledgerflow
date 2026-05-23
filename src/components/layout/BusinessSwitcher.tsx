@@ -67,23 +67,23 @@ export function BusinessSwitcher() {
     return (
         <Dialog open={showNewBusinessDialog} onOpenChange={setShowNewBusinessDialog}>
             <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
+                <PopoverTrigger render={
                     <Button
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
                         className="w-[200px] justify-between"
-                    >
-                        {selectedBusiness ? (
-                            <div className="flex items-center gap-2 truncate">
-                                <Building2 className="h-4 w-4 shrink-0 opacity-50" />
-                                <span className="truncate">{selectedBusiness.name}</span>
-                            </div>
-                        ) : (
-                            "Select Business"
-                        )}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
+                    />
+                }>
+                    {selectedBusiness ? (
+                        <div className="flex items-center gap-2 truncate">
+                            <Building2 className="h-4 w-4 shrink-0 opacity-50" />
+                            <span className="truncate">{selectedBusiness.name}</span>
+                        </div>
+                    ) : (
+                        "Select Business"
+                    )}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                     <Command>

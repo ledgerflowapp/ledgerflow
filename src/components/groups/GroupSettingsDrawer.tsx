@@ -221,16 +221,16 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                                             <div className="flex items-center gap-1">
                                                 {!member.user_id && friends && (
                                                     <Popover>
-                                                        <PopoverTrigger asChild>
+                                                        <PopoverTrigger render={
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="h-8 w-8 text-muted-foreground hover:text-primary"
                                                                 title="Link to Friend"
                                                                 disabled={isLinking}
-                                                            >
-                                                                <Link2 className="h-4 w-4" />
-                                                            </Button>
+                                                            />
+                                                        }>
+                                                            <Link2 className="h-4 w-4" />
                                                         </PopoverTrigger>
                                                         <PopoverContent align="end" className="w-[280px] p-0">
                                                             <div className="p-3 border-b text-sm font-medium">
@@ -291,15 +291,15 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                             <h4 className="text-sm font-medium text-destructive uppercase tracking-wider">Danger Zone</h4>
 
                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
+                                <AlertDialogTrigger render={
                                     <Button
                                         variant="destructive"
                                         className="w-full"
                                         onClick={checkTransactions}
-                                    >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete Group
-                                    </Button>
+                                    />
+                                }>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete Group
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
