@@ -1,16 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-import { Paise } from '@/types'
+import { Goal } from '@/types'
 
-export interface Goal {
-    id: string
-    name: string
-    /** Stored as integer paise (100 paise = ₹1). Use currency.ts helpers for arithmetic. */
-    target_amount: Paise
-    /** Stored as integer paise (100 paise = ₹1). Use currency.ts helpers for arithmetic. */
-    current_amount: Paise
-    deadline: string | null
-}
+export type { Goal }
 
 export function useGoals() {
     const supabase = createClient()

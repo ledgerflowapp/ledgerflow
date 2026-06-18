@@ -35,20 +35,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { startOfDay, startOfWeek, startOfMonth, startOfYear, isAfter } from 'date-fns'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
+import { TransactionWithJoins } from '@/types'
+
 type TimeFilter = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'YEAR'
 type SortOption = 'LATEST' | 'OLDEST' | 'HIGHEST' | 'LOWEST'
-
-interface Transaction {
-    id: string
-    amount: number
-    date: string
-    flow: string
-    note?: string
-    category?: { name: string; icon: string } | null
-    account?: { name: string } | null
-    name: string
-    mode: 'BUSINESS' | 'PERSONAL'
-}
 
 export default function PersonDetailsPage() {
     const params = useParams()
@@ -61,9 +51,9 @@ export default function PersonDetailsPage() {
 
     const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL')
     const [sortBy, setSortBy] = useState<SortOption>('LATEST')
-    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+    const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithJoins | null>(null)
     const [detailsOpen, setDetailsOpen] = useState(false)
-    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+    const [editingTransaction, setEditingTransaction] = useState<TransactionWithJoins | null>(null)
     const [editOpen, setEditOpen] = useState(false)
     const [personEditOpen, setPersonEditOpen] = useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)

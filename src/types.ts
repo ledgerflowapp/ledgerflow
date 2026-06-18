@@ -1,5 +1,5 @@
 /** Represents a monetary value stored as integer paise (100 paise = ₹1). Never do raw arithmetic on this — use src/lib/currency.ts helpers. */
-export type Paise = number & { readonly __brand: 'Paise' }
+export type Paise = number
 
 export interface Contact {
     id: string
@@ -8,7 +8,7 @@ export interface Contact {
     type: 'CUSTOMER' | 'SUPPLIER' | 'OTHER'
     /** Stored as integer paise (100 paise = ₹1). Use currency.ts helpers for arithmetic. */
     net_balance: Paise
-    last_transaction_at: string
+    last_transaction_at: string | null
     business_id: string | null
     image_url: string | null
     transaction_count: number
@@ -21,7 +21,7 @@ export interface Group {
     name: string
     created_by: string
     avatar_url: string | null
-    type: string // 'GENERAL'
+    type: 'GENERAL' | 'TRIP' | 'HOME' | 'COUPLE' | 'OTHER'
     invite_code: string
     created_at: string
 }
@@ -54,18 +54,23 @@ export interface TransactionSplit {
     member_name_snapshot?: string
 }
 
+export type NotificationData =
+    | { type: 'FRIEND_REQ'; initiator_id: string }
+    | { type: 'GROUP_INVITE'; group_id: string; group_name: string }
+    | { type: 'EXPENSE_ADDED'; transaction_id: string; amount: number; [key: string]: any }
+
 export interface Notification {
     id: string
     user_id: string
     type: 'FRIEND_REQ' | 'GROUP_INVITE' | 'EXPENSE_ADDED'
     title: string | null
     message: string | null
-    data: any
+    data: NotificationData
     is_read: boolean
     created_at: string
 }
 
-export interface Transaction {
+export interface TransactionRow {
     id: string
     /** Stored as integer paise (100 paise = ₹1). Use currency.ts helpers for arithmetic. */
     amount: Paise
@@ -79,6 +84,9 @@ export interface Transaction {
     payer_id?: string | null
     payer_group_member_id?: string | null
     split_type?: 'EQUALLY' | 'BY_AMOUNT' | 'BY_PERCENTAGE'
+}
+
+export interface TransactionWithJoins extends TransactionRow {
     splits?: TransactionSplit[]
     contacts?: {
         name: string
@@ -98,5 +106,58 @@ export interface Transaction {
     group?: {
         id: string
         name: string
+    } | null
+}
+
+/**
+ * @deprecated Use `TransactionRow` or `TransactionWithJoins` instead.
+ * Kept temporarily as an alias for backwards compatibility.
+ */
+export type Transaction = TransactionWithJoins
+
+export interface Profile {
+    id: string
+    full_name: string | null
+    username: string | null
+    business_name: string | null
+    phone: string | null
+    email: string | null
+    avatar_url: string | null
+    currency_symbol: string
+    discoverable_by_phone: boolean
+    discoverable_by_username: boolean
+    friend_invite_token?: string
+}
+
+export interface Goal {
+    id: string
+    name: string
+    /** Stored as integer paise (100 paise = ₹1). Use currency.ts helpers for arithmetic. */
+    target_amount: Paise
+    /** Stored as integer paise (100 paise = ₹1). Use currency.ts helpers for arithmetic. */
+    current_amount: Paise
+    deadline: string | null
+}
+
+export interface RecurringTransaction {
+    id: string
+    amount: number
+    name: string
+    note?: string
+    frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+    start_date: string
+    next_run_date: string
+    last_run_date: string | null
+    active: boolean
+    category_id: string | null
+    account_id: string | null
+    flow: 'IN' | 'OUT'
+    category: {
+        name: string
+        icon: string
+    } | null
+    account: {
+        name: string
+        type: string
     } | null
 }

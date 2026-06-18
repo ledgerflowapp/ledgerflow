@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useTransactions } from '@/hooks/useTransactions'
-import { Transaction } from '@/types'
+import { TransactionWithJoins } from '@/types'
 
 interface GroupTransactionListProps {
     groupId: string
@@ -16,7 +16,7 @@ interface GroupTransactionListProps {
 }
 
 export function GroupTransactionList({ groupId, currentUserId }: GroupTransactionListProps) {
-    const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+    const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithJoins | null>(null)
     const [detailsOpen, setDetailsOpen] = useState(false)
 
     // Use our updated hook with groupId filter
@@ -27,7 +27,7 @@ export function GroupTransactionList({ groupId, currentUserId }: GroupTransactio
         return data.pages.flatMap(page => page)
     }, [data])
 
-    const getPayerDisplay = (transaction: Transaction) => {
+    const getPayerDisplay = (transaction: TransactionWithJoins) => {
         // If I paid
         if (transaction.payer_id === currentUserId) {
             return {
@@ -37,18 +37,10 @@ export function GroupTransactionList({ groupId, currentUserId }: GroupTransactio
             }
         }
 
-        // If someone else paid
-        // The transaction object from useTransactions includes `payer` relation
-        // defined in the hook: payer:profiles!payer_id(full_name, avatar_url)
-        // BUT strict Typescript might need us to check type or use 'any' if generic Transaction type doesn't have it fully typed yet
-        // The `Transaction` type in `types.ts` has `payer_id`. It doesn't explicitly have `payer` object in the interface shown earlier.
-        // However, the hook uses `.select('..., payer:profiles!payer_id(...)')`
-        // So at runtime it is there. I will treat it safely.
-
-        const payer = (transaction as any).payer
+        // If someone else paid — payer is now properly typed via TransactionWithJoins
         return {
-            name: payer?.full_name || 'Member',
-            avatar: payer?.avatar_url,
+            name: transaction.payer?.full_name || 'Member',
+            avatar: transaction.payer?.avatar_url,
             isMe: false
         }
     }

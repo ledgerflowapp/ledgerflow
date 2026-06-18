@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-import { Transaction } from '@/types'
+import { TransactionWithJoins } from '@/types'
 
 const PAGE_SIZE = 20
 
@@ -45,7 +45,7 @@ export function useTransactions(filters?: TransactionFilters | string, mode: 'BU
             const { data, error } = await query
 
             if (error) throw error
-            return data as Transaction[]
+            return data as TransactionWithJoins[]
         },
         initialPageParam: 0,
         getNextPageParam: (lastPage, allPages) => {

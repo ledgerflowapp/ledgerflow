@@ -1,20 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-
-export interface Transaction {
-    id: string
-    amount: number
-    description?: string
-    name: string
-    note?: string
-    date: string
-    flow: 'IN' | 'OUT'
-    mode: 'BUSINESS' | 'PERSONAL'
-    contact_id?: string
-    category_id?: string
-    account_id?: string
-    due_date?: string
-}
+import { TransactionWithJoins } from '@/types'
 
 export function useContactTransactions(contactId: string) {
     const supabase = createClient()
@@ -35,7 +21,7 @@ export function useContactTransactions(contactId: string) {
                 ...t,
                 contact_id: t.local_contact_id,
                 flow: t.local_flow
-            })) as Transaction[]
+            })) as TransactionWithJoins[]
         },
         enabled: !!contactId,
     })

@@ -148,8 +148,8 @@ export function useAddTransaction() {
                         })
                         .sort(
                             (a, b) =>
-                                new Date(b.last_transaction_at).getTime() -
-                                new Date(a.last_transaction_at).getTime()
+                                new Date(b.last_transaction_at ?? 0).getTime() -
+                                new Date(a.last_transaction_at ?? 0).getTime()
                         )
                 })
             }

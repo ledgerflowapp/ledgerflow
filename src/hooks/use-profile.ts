@@ -2,20 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useEffect } from 'react'
+import { Profile } from '@/types'
 
-export type Profile = {
-    id: string
-    full_name: string | null
-    username: string | null
-    business_name: string | null
-    phone: string | null
-    email: string | null
-    avatar_url: string | null
-    currency_symbol: string
-    discoverable_by_phone: boolean
-    discoverable_by_username: boolean
-    friend_invite_token?: string
-}
+export type { Profile }
 
 export function useProfile() {
     const supabase = createClient()

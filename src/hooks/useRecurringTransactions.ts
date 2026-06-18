@@ -1,28 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
+import { RecurringTransaction } from '@/types'
 
-export interface RecurringTransaction {
-    id: string
-    amount: number
-    name: string
-    note?: string
-    frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
-    start_date: string
-    next_run_date: string
-    last_run_date: string | null
-    active: boolean
-    category_id: string | null
-    account_id: string | null
-    flow: 'IN' | 'OUT'
-    category: {
-        name: string
-        icon: string
-    } | null
-    account: {
-        name: string
-        type: string
-    } | null
-}
+export type { RecurringTransaction }
 
 export function useRecurringTransactions() {
     const supabase = createClient()
