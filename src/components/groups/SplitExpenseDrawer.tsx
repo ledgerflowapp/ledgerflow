@@ -162,10 +162,8 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                {children}
-            </DrawerTrigger>
-            <DrawerContent className="h-[90vh] flex flex-col">
+            <DrawerTrigger render={children as React.ReactElement} />
+            <DrawerContent className="h-[90dvh] flex flex-col">
                 {/* Header / Nav */}
                 <div className="mx-auto w-full max-w-sm mt-4 px-4 flex items-center justify-between">
                     {step === 2 ? (
@@ -209,7 +207,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
 
                             <div className="space-y-2">
                                 <Label>Paid from</Label>
-                                <Select value={accountId} onValueChange={(val) => val && setAccountId(val)}>
+                                <Select items={accounts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} value={accountId} onValueChange={(val) => val && setAccountId(val)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select account" />
                                     </SelectTrigger>
@@ -356,9 +354,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
                             {isPending ? 'Saving...' : 'Send Request'}
                         </Button>
                     )}
-                    <DrawerClose asChild>
-                        <Button variant="outline" className="w-full">Cancel</Button>
-                    </DrawerClose>
+                    <DrawerClose render={<Button variant="outline" className="w-full" />}>Cancel</DrawerClose>
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>

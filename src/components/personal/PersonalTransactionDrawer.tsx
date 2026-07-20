@@ -128,15 +128,13 @@ export function PersonalTransactionDrawer({
     return (
         <Drawer open={open} onOpenChange={setOpen}>
             {!hideTrigger && (
-                <DrawerTrigger asChild>
-                    <Button
+                <DrawerTrigger render={<Button
                         size="icon"
                         className="fixed bottom-20 md:bottom-6 right-6 shadow-lg z-40 rounded-full h-14 w-14"
-                    >
+                     />}>
                         <Plus className="h-6 w-6" />
                         <span className="sr-only">Add</span>
-                    </Button>
-                </DrawerTrigger>
+                    </DrawerTrigger>
             )}
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
@@ -192,7 +190,7 @@ export function PersonalTransactionDrawer({
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Person (Optional)</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value || ""}>
+                                            <Select items={contacts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} onValueChange={field.onChange} defaultValue={field.value} value={field.value || ""}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select person" />

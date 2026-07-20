@@ -139,8 +139,8 @@ export function CreateGroupDrawer({ children }: { children: React.ReactNode }) {
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>{children}</DrawerTrigger>
-            <DrawerContent className="h-[90vh]">
+            <DrawerTrigger render={children as React.ReactElement} />
+            <DrawerContent className="h-[90dvh]">
                 <div className="mx-auto w-full max-w-sm h-full flex flex-col">
                     <DrawerHeader>
                         <DrawerTitle>Create New Group</DrawerTitle>
@@ -170,7 +170,7 @@ export function CreateGroupDrawer({ children }: { children: React.ReactNode }) {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Type</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select items={[ {value: 'GENERAL', label: 'General'}, {value: 'TRIP', label: 'Trip'}, {value: 'HOME', label: 'Home'}, {value: 'COUPLE', label: 'Couple'}, {value: 'OTHER', label: 'Other'} ]} onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select a group type" />
@@ -266,9 +266,7 @@ export function CreateGroupDrawer({ children }: { children: React.ReactNode }) {
                                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Create Group
                                     </Button>
-                                    <DrawerClose asChild>
-                                        <Button variant="outline">Cancel</Button>
-                                    </DrawerClose>
+                                    <DrawerClose render={<Button variant="outline" />}>Cancel</DrawerClose>
                                 </DrawerFooter>
                             </form>
                         </Form>

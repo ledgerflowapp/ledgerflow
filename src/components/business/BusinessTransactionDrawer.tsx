@@ -123,16 +123,14 @@ export function BusinessTransactionDrawer({
     return (
         <Drawer open={open} onOpenChange={setOpen}>
             {!hideTrigger && (
-                <DrawerTrigger asChild>
-                    <Button
+                <DrawerTrigger render={<Button
                         size="default"
                         className="fixed bottom-20 md:bottom-6 right-6 shadow-lg z-40 rounded-full h-14 px-6"
-                    >
+                     />}>
                         <Plus className="h-6 w-6 mr-2" />
                         <span className="hidden md:inline">Add Transaction</span>
                         <span className="md:hidden">Add</span>
-                    </Button>
-                </DrawerTrigger>
+                    </DrawerTrigger>
             )}
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
@@ -188,7 +186,7 @@ export function BusinessTransactionDrawer({
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Contact</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value || ""}>
+                                            <Select items={contacts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} onValueChange={field.onChange} defaultValue={field.value} value={field.value || ""}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select contact" />

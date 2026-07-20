@@ -87,7 +87,7 @@ export function AddBusinessContactDrawer({ children, open, onOpenChange, initial
 
     return (
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
-            {children && <DrawerTrigger asChild>{children}</DrawerTrigger>}
+            {children && <DrawerTrigger render={children as React.ReactElement} />}
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader>
@@ -146,7 +146,7 @@ export function AddBusinessContactDrawer({ children, open, onOpenChange, initial
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Type</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select items={[ {value: 'CUSTOMER', label: 'Customer'}, {value: 'SUPPLIER', label: 'Supplier'}, {value: 'OTHER', label: 'Other'} ]} onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select type" />

@@ -147,7 +147,7 @@ export default function JoinGroupPage() {
     const showGhosts = validGhosts.length > 0
 
     return (
-        <div className="flex min-h-[80vh] items-center justify-center p-4 md:p-8">
+        <div className="flex min-h-[80dvh] items-center justify-center p-4 md:p-8">
             <Card className="w-full max-w-md shadow-xl border-border/50 bg-card/50 backdrop-blur-sm">
                 <CardHeader className="text-center space-y-4 pb-8">
                     <div className="relative mx-auto h-24 w-24">

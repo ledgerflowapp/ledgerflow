@@ -156,8 +156,8 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>{children}</DrawerTrigger>
-            <DrawerContent className="h-[90vh]">
+            <DrawerTrigger render={children as React.ReactElement} />
+            <DrawerContent className="h-[90dvh]">
                 <div className="mx-auto w-full max-w-sm h-full flex flex-col">
                     <DrawerHeader>
                         <DrawerTitle>Group Settings</DrawerTitle>

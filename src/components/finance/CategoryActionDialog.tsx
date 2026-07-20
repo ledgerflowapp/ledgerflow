@@ -145,7 +145,7 @@ export function CategoryActionDialog({ category, action, onClose }: CategoryActi
 
                         <div className="space-y-2">
                             <Label>What should happen to these transactions?</Label>
-                            <Select value={targetCategoryId} onValueChange={(val) => val && setTargetCategoryId(val)}>
+                            <Select items={[ {value: 'uncategorized', label: 'Remove Category (Uncategorized)'} ]} value={targetCategoryId} onValueChange={(val) => val && setTargetCategoryId(val)}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>

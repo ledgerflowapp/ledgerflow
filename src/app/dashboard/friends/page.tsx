@@ -74,7 +74,7 @@ export default function FriendsPage() {
                     <TabsContent value="friends" className="h-full m-0 space-y-4">
                         {/* Filter Controls for People - only show in People tab */}
                         <div className="flex items-center justify-end gap-2 px-1">
-                            <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v as TimeFilter)}>
+                            <Select items={[ {value: 'ALL', label: 'All Time'}, {value: 'TODAY', label: 'Today'}, {value: 'WEEK', label: 'This Week'}, {value: 'MONTH', label: 'This Month'}, {value: 'YEAR', label: 'This Year'} ]} value={timeFilter} onValueChange={(v) => setTimeFilter(v as TimeFilter)}>
                                 <SelectTrigger className="w-[110px] h-8 text-xs">
                                     <SelectValue placeholder="Time" />
                                 </SelectTrigger>
@@ -87,7 +87,7 @@ export default function FriendsPage() {
                                 </SelectContent>
                             </Select>
 
-                            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                            <Select items={[ {value: 'LATEST', label: 'Latest'}, {value: 'MOST_ACTIVE', label: 'Most Active'} ]} value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
                                 <SelectTrigger className="w-[120px] h-8 text-xs">
                                     <SelectValue placeholder="Sort" />
                                 </SelectTrigger>

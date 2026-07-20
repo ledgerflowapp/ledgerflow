@@ -98,9 +98,7 @@ export function BusinessContactDetailsDrawer({ contact, open, onOpenChange }: Bu
                         </div>
                     </div>
                     <DrawerFooter>
-                        <DrawerClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </DrawerClose>
+                        <DrawerClose render={<Button variant="outline" />}>Close</DrawerClose>
                     </DrawerFooter>
                 </div>
             </DrawerContent>

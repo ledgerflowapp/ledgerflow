@@ -34,9 +34,7 @@ export function ContributeGoalDrawer({ goalId, goalName, children }: ContributeG
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                {children}
-            </DrawerTrigger>
+            <DrawerTrigger render={children as React.ReactElement} />
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader>

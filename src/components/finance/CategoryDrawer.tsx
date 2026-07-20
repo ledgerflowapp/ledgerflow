@@ -103,9 +103,7 @@ export function CategoryDrawer({
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                {children}
-            </DrawerTrigger>
+            <DrawerTrigger render={children as React.ReactElement} />
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader>
@@ -149,7 +147,7 @@ export function CategoryDrawer({
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Type</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <Select items={[ {value: 'EXPENSE', label: 'Expense'}, {value: 'INCOME', label: 'Income'} ]} onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
                                                         <SelectTrigger>
                                                             <SelectValue placeholder="Select type" />

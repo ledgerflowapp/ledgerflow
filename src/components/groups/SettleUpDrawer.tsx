@@ -99,9 +99,7 @@ export function SettleUpDrawer({ children, groupId, members, currentUserId }: Se
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                {children}
-            </DrawerTrigger>
+            <DrawerTrigger render={children as React.ReactElement} />
             <DrawerContent className="flex flex-col">
                 <div className="mx-auto w-full max-w-sm mt-4 px-4">
                     <DrawerTitle className="text-center">Settle Up</DrawerTitle>
@@ -127,7 +125,7 @@ export function SettleUpDrawer({ children, groupId, members, currentUserId }: Se
                     {/* Who paid */}
                     <div className="space-y-2">
                         <Label>Who paid?</Label>
-                        <Select value={payerMemberId} onValueChange={(val) => {
+                        <Select items={members?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} value={payerMemberId} onValueChange={(val) => {
                             if (val) setPayerMemberId(val)
                             // Reset receiver if same as new payer
                             if (receiverMemberId === val) setReceiverMemberId('')
@@ -156,7 +154,7 @@ export function SettleUpDrawer({ children, groupId, members, currentUserId }: Se
                     {/* To whom */}
                     <div className="space-y-2">
                         <Label>To whom?</Label>
-                        <Select value={receiverMemberId} onValueChange={(val) => val && setReceiverMemberId(val)} disabled={!payerMemberId}>
+                        <Select items={filteredReceivers?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} value={receiverMemberId} onValueChange={(val) => val && setReceiverMemberId(val)} disabled={!payerMemberId}>
                             <SelectTrigger>
                                 <SelectValue placeholder={payerMemberId ? "Select receiver" : "Select payer first"} />
                             </SelectTrigger>
@@ -197,9 +195,7 @@ export function SettleUpDrawer({ children, groupId, members, currentUserId }: Se
                     >
                         {isPending ? 'Recording...' : 'Record Settlement'}
                     </Button>
-                    <DrawerClose asChild>
-                        <Button variant="outline" className="w-full">Cancel</Button>
-                    </DrawerClose>
+                    <DrawerClose render={<Button variant="outline" className="w-full" />}>Cancel</DrawerClose>
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>

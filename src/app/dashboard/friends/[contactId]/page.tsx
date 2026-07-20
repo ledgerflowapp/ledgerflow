@@ -113,7 +113,7 @@ export default function PersonDetailsPage() {
 
     if (!contact && contacts) {
         return (
-            <div className="flex h-[50vh] flex-col items-center justify-center">
+            <div className="flex h-[50dvh] flex-col items-center justify-center">
                 <Empty>
                     <EmptyHeader>
                         <EmptyMedia variant="icon">
@@ -192,7 +192,7 @@ export default function PersonDetailsPage() {
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold">Transactions</h2>
                     <div className="flex gap-2">
-                        <Select value={timeFilter} onValueChange={(v) => setTimeFilter(v as TimeFilter)}>
+                        <Select items={[ {value: 'ALL', label: 'All Time'}, {value: 'TODAY', label: 'Today'}, {value: 'WEEK', label: 'This Week'}, {value: 'MONTH', label: 'This Month'}, {value: 'YEAR', label: 'This Year'} ]} value={timeFilter} onValueChange={(v) => setTimeFilter(v as TimeFilter)}>
                             <SelectTrigger className="w-[110px] h-8 text-xs">
                                 <SelectValue placeholder="Filter" />
                             </SelectTrigger>
@@ -204,7 +204,7 @@ export default function PersonDetailsPage() {
                                 <SelectItem value="YEAR">This Year</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                        <Select items={[ {value: 'LATEST', label: 'Latest'}, {value: 'OLDEST', label: 'Oldest'}, {value: 'HIGHEST', label: 'Highest Amount'}, {value: 'LOWEST', label: 'Lowest Amount'} ]} value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
                             <SelectTrigger className="w-[110px] h-8 text-xs">
                                 <SelectValue placeholder="Sort" />
                             </SelectTrigger>

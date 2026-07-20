@@ -43,18 +43,16 @@ export function ManageCategoriesDrawer() {
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+            <DrawerTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
                     <Settings2 className="h-4 w-4" />
-                </Button>
-            </DrawerTrigger>
+                </DrawerTrigger>
             <DrawerContent>
                 <div className="mx-auto w-full max-w-md">
                     <DrawerHeader>
                         <DrawerTitle className="text-center">Manage Categories</DrawerTitle>
                     </DrawerHeader>
 
-                    <div className="p-4 pb-8 overflow-y-auto max-h-[80vh] space-y-6">
+                    <div className="p-4 pb-8 overflow-y-auto max-h-[80dvh] space-y-6">
                         {isAddingMode ? (
                             <div className="space-y-4 animate-in slide-in-from-right">
                                 <div className="flex items-center justify-between">

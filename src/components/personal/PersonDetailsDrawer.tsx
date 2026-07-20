@@ -163,9 +163,7 @@ export function PersonDetailsDrawer({ person, open, onOpenChange }: PersonDetail
                         </div>
                     </div>
                     <DrawerFooter>
-                        <DrawerClose asChild>
-                            <Button variant="outline">Close</Button>
-                        </DrawerClose>
+                        <DrawerClose render={<Button variant="outline" />}>Close</DrawerClose>
                     </DrawerFooter>
                 </div>
             </DrawerContent>

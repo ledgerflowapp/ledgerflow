@@ -129,7 +129,7 @@ export function AddPersonDrawer({ children, open, onOpenChange, initialData }: A
 
     return (
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
-            {children && <DrawerTrigger asChild>{children}</DrawerTrigger>}
+            {children && <DrawerTrigger render={children as React.ReactElement} />}
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader>

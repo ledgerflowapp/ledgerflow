@@ -103,14 +103,14 @@ export function RecurringTransactionDrawer({
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                {children || (
-                    <Button size="sm" variant="outline">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Subscription
-                    </Button>
-                )}
-            </DrawerTrigger>
+            {children ? (
+                <DrawerTrigger render={children as React.ReactElement} />
+            ) : (
+                <DrawerTrigger render={<Button size="sm" variant="outline" />}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Subscription
+                </DrawerTrigger>
+            )}
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader>
@@ -152,7 +152,7 @@ export function RecurringTransactionDrawer({
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Frequency</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select items={[ {value: 'DAILY', label: 'Daily'}, {value: 'WEEKLY', label: 'Weekly'}, {value: 'MONTHLY', label: 'Monthly'}, {value: 'YEARLY', label: 'Yearly'} ]} onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select frequency" />

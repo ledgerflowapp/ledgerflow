@@ -42,14 +42,14 @@ export function AddAccountDrawer({ children }: { children?: React.ReactNode }) {
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                {children || (
-                    <Button size="sm" variant="outline" className="w-full">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Account
-                    </Button>
-                )}
-            </DrawerTrigger>
+            {children ? (
+                <DrawerTrigger render={children as React.ReactElement} />
+            ) : (
+                <DrawerTrigger render={<Button size="sm" variant="outline" className="w-full" />}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Account
+                </DrawerTrigger>
+            )}
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader>
@@ -77,7 +77,7 @@ export function AddAccountDrawer({ children }: { children?: React.ReactNode }) {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Type</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select items={[ {value: 'CASH', label: 'Cash'}, {value: 'BANK', label: 'Bank'}, {value: 'WALLET', label: 'Wallet'}, {value: 'OTHER', label: 'Other'} ]} onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select account type" />

@@ -41,14 +41,14 @@ export function AddGoalDrawer({ children }: { children?: React.ReactNode }) {
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-                {children || (
-                    <Button size="sm" variant="outline" className="w-full">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Goal
-                    </Button>
-                )}
-            </DrawerTrigger>
+            {children ? (
+                <DrawerTrigger render={children as React.ReactElement} />
+            ) : (
+                <DrawerTrigger render={<Button size="sm" variant="outline" className="w-full" />}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Goal
+                </DrawerTrigger>
+            )}
             <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
                     <DrawerHeader>
