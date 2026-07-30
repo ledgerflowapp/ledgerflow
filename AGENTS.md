@@ -90,3 +90,14 @@ When uncertain about APIs or component structures, fetch these canonical docs:
 - [shadcn/ui v4 Docs](https://ui.shadcn.com/docs)
 - [Base UI React Components](https://base-ui.com/react/components/)
 - [`docs/radix-to-base-ui-api-diff.md`](./docs/radix-to-base-ui-api-diff.md) (Local, project-specific API diff)
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as local markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context documentation layout (`CONTEXT.md` and `docs/adr/`). See `docs/agents/domain.md`.
+
