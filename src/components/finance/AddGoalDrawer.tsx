@@ -49,12 +49,12 @@ export function AddGoalDrawer({ children }: { children?: React.ReactNode }) {
                     Add Goal
                 </DrawerTrigger>
             )}
-            <DrawerContent>
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader>
+            <DrawerContent className="max-h-[90dvh]">
+                <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
+                    <DrawerHeader className="shrink-0">
                         <DrawerTitle>New Savings Goal</DrawerTitle>
                     </DrawerHeader>
-                    <div className="p-4 pb-8">
+                    <div className="p-4 pb-8 overflow-y-auto flex-1 min-h-0">
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                                 <FormField

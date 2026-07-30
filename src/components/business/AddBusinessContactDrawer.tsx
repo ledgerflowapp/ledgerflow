@@ -88,12 +88,12 @@ export function AddBusinessContactDrawer({ children, open, onOpenChange, initial
     return (
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
             {children && <DrawerTrigger render={children as React.ReactElement} />}
-            <DrawerContent>
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader>
+            <DrawerContent className="max-h-[90dvh]">
+                <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
+                    <DrawerHeader className="shrink-0">
                         <DrawerTitle>{initialData ? 'Edit Contact' : 'Add New Contact'}</DrawerTitle>
                     </DrawerHeader>
-                    <div className="p-4 pb-8">
+                    <div className="p-4 pb-8 overflow-y-auto flex-1 min-h-0">
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                                 <FormField

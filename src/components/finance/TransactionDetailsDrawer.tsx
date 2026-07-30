@@ -79,12 +79,12 @@ export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEd
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange}>
-            <DrawerContent>
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader>
+            <DrawerContent className="max-h-[90dvh]">
+                <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
+                    <DrawerHeader className="shrink-0">
                         <DrawerTitle>Transaction Details</DrawerTitle>
                     </DrawerHeader>
-                    <div className="p-4 space-y-6">
+                    <div className="p-4 pb-8 space-y-6 overflow-y-auto flex-1 min-h-0">
                         <div className="text-center space-y-2">
                             <div className="text-4xl font-bold">
                                 {transaction.flow === 'IN' ? '+' : '-'}₹{paiseToRupees(transaction.amount).toNumber().toLocaleString()}

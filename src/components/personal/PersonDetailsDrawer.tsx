@@ -63,13 +63,13 @@ export function PersonDetailsDrawer({ person, open, onOpenChange }: PersonDetail
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange}>
-            <DrawerContent>
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader>
+            <DrawerContent className="max-h-[90dvh]">
+                <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
+                    <DrawerHeader className="shrink-0">
                         <DrawerTitle className="text-center text-xl">{person.name}</DrawerTitle>
                         <DrawerDescription className="text-center">Person Details</DrawerDescription>
                     </DrawerHeader>
-                    <div className="p-4 space-y-6">
+                    <div className="p-4 pb-8 space-y-6 overflow-y-auto flex-1 min-h-0">
                         <div className="flex flex-col items-center justify-center gap-2">
                             <Avatar className="h-20 w-20 border-2 border-muted">
                                 <AvatarImage src={person.image_url || ''} alt={person.name} className="object-cover" />

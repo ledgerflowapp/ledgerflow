@@ -151,12 +151,12 @@ export function PersonalTransactionDrawer({
                         <span className="sr-only">Add</span>
                     </DrawerTrigger>
             )}
-            <DrawerContent>
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader>
+            <DrawerContent className="max-h-[90dvh]">
+                <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
+                    <DrawerHeader className="shrink-0">
                         <DrawerTitle>Add Expense / Income</DrawerTitle>
                     </DrawerHeader>
-                    <div className="p-4 pb-8">
+                    <div className="p-4 pb-8 overflow-y-auto flex-1 min-h-0">
                         <Tabs defaultValue="OUT" className="w-full mb-4" onValueChange={(v) => {
                             setFlow(v as 'IN' | 'OUT')
                             form.setValue('flow', v as 'IN' | 'OUT')

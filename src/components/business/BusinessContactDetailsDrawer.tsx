@@ -46,13 +46,13 @@ export function BusinessContactDetailsDrawer({ contact, open, onOpenChange }: Bu
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange}>
-            <DrawerContent>
-                <div className="mx-auto w-full max-w-sm">
-                    <DrawerHeader>
+            <DrawerContent className="max-h-[90dvh]">
+                <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
+                    <DrawerHeader className="shrink-0">
                         <DrawerTitle className="text-center text-xl">{contact.name}</DrawerTitle>
                         <DrawerDescription className="text-center">Contact Details</DrawerDescription>
                     </DrawerHeader>
-                    <div className="p-4 space-y-6">
+                    <div className="p-4 pb-8 space-y-6 overflow-y-auto flex-1 min-h-0">
                         <div className="flex flex-col items-center justify-center gap-2">
                             <Avatar className="h-20 w-20 border-2 border-muted">
                                 <AvatarImage src={contact.image_url || ''} alt={contact.name} className="object-cover" />
