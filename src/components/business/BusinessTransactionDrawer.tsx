@@ -35,12 +35,14 @@ export function BusinessTransactionDrawer({
     open: controlledOpen,
     onOpenChange: setControlledOpen,
     initialData,
-    hideTrigger
+    hideTrigger,
+    hideContactSelect,
 }: {
     open?: boolean
     onOpenChange?: (open: boolean) => void
     initialData?: any // eslint-disable-line @typescript-eslint/no-explicit-any
     hideTrigger?: boolean
+    hideContactSelect?: boolean
 } = {}) {
     const { data: contacts } = useBusinessContacts()
     const { mutate: addTransaction, isPending: isAdding } = useAddTransaction()
@@ -120,6 +122,9 @@ export function BusinessTransactionDrawer({
         }
     }
 
+    const currentContactId = form.watch('contact_id') || initialData?.contact_id
+    const selectedContact = contacts?.find(c => c.id === currentContactId)
+
     return (
         <Drawer open={open} onOpenChange={setOpen}>
             {!hideTrigger && (
@@ -180,30 +185,37 @@ export function BusinessTransactionDrawer({
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name="contact_id"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Contact</FormLabel>
-                                            <Select items={contacts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} onValueChange={field.onChange} defaultValue={field.value} value={field.value || ""}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select contact" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {contacts?.map((contact) => (
-                                                        <SelectItem key={contact.id} value={contact.id}>
-                                                            {contact.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                {!hideContactSelect ? (
+                                    <FormField
+                                        control={form.control}
+                                        name="contact_id"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Contact</FormLabel>
+                                                <Select items={contacts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} onValueChange={field.onChange} defaultValue={field.value} value={field.value || ""}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select contact" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {contacts?.map((contact) => (
+                                                            <SelectItem key={contact.id} value={contact.id}>
+                                                                {contact.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                ) : selectedContact ? (
+                                    <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg text-sm border border-border/50">
+                                        <span className="text-muted-foreground">Contact</span>
+                                        <span className="font-semibold text-foreground">{selectedContact.name}</span>
+                                    </div>
+                                ) : null}
 
                                 <FormField
                                     control={form.control}

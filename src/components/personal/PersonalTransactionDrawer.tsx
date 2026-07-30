@@ -16,10 +16,10 @@ import { Input } from '@/components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { cn } from '@/lib/utils'
-import { Loader2, Plus } from 'lucide-react'
+import { Loader2, Plus, AlertCircle } from 'lucide-react'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AddAccountDrawer } from '@/components/finance/AddAccountDrawer'
 
 const personalTransactionSchema = z.object({
     amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
@@ -27,7 +27,7 @@ const personalTransactionSchema = z.object({
     note: z.string().optional(),
     contact_id: z.string().nullable().optional(),
     category_id: z.string().nullable().optional(), // validated manually based on flow
-    account_id: z.string().min(1, 'Account is required'),
+    account_id: z.string({ message: 'Please select an account' }).min(1, 'Please select an account'),
     date: z.coerce.date(),
     flow: z.enum(['IN', 'OUT']),
 })
@@ -36,12 +36,14 @@ export function PersonalTransactionDrawer({
     open: controlledOpen,
     onOpenChange: setControlledOpen,
     initialData,
-    hideTrigger
+    hideTrigger,
+    hideContactSelect,
 }: {
     open?: boolean
     onOpenChange?: (open: boolean) => void
     initialData?: any // eslint-disable-line @typescript-eslint/no-explicit-any
     hideTrigger?: boolean
+    hideContactSelect?: boolean
 } = {}) {
     const { data: contacts } = usePersonalPeople()
     const { data: budgets } = useBudgets()
@@ -66,6 +68,16 @@ export function PersonalTransactionDrawer({
             flow: 'OUT',
         } as any,
     })
+
+    // Auto-select account when accounts are available and no account is set
+    useEffect(() => {
+        if (accounts && accounts.length > 0 && !form.getValues('account_id')) {
+            const defaultAcc = accounts.find(a => a.is_default) || accounts[0]
+            if (defaultAcc) {
+                form.setValue('account_id', defaultAcc.id)
+            }
+        }
+    }, [accounts, form])
 
     // Effect to populate form when initialData changes
     useEffect(() => {
@@ -124,6 +136,9 @@ export function PersonalTransactionDrawer({
             addTransaction(transactionData, options)
         }
     }
+
+    const currentContactId = form.watch('contact_id') || initialData?.contact_id
+    const selectedContact = contacts?.find(c => c.id === currentContactId)
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
@@ -184,30 +199,37 @@ export function PersonalTransactionDrawer({
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name="contact_id"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Person (Optional)</FormLabel>
-                                            <Select items={contacts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} onValueChange={field.onChange} defaultValue={field.value} value={field.value || ""}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select person" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {contacts?.map((contact) => (
-                                                        <SelectItem key={contact.id} value={contact.id}>
-                                                            {contact.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                {!hideContactSelect ? (
+                                    <FormField
+                                        control={form.control}
+                                        name="contact_id"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Person (Optional)</FormLabel>
+                                                <Select items={contacts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} onValueChange={field.onChange} defaultValue={field.value} value={field.value || ""}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select person" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {contacts?.map((contact) => (
+                                                            <SelectItem key={contact.id} value={contact.id}>
+                                                                {contact.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                ) : selectedContact ? (
+                                    <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg text-sm border border-border/50">
+                                        <span className="text-muted-foreground">Person</span>
+                                        <span className="font-semibold text-foreground">{selectedContact.name}</span>
+                                    </div>
+                                ) : null}
 
                                 {flow === 'OUT' && (
                                     <FormField
@@ -240,6 +262,7 @@ export function PersonalTransactionDrawer({
                                         )}
                                     />
                                 )}
+
                                 <FormField
                                     control={form.control}
                                     name="account_id"
@@ -247,22 +270,40 @@ export function PersonalTransactionDrawer({
                                         <FormItem>
                                             <FormLabel>Account</FormLabel>
                                             <FormControl>
-                                                <ToggleGroup
-                                                    value={field.value ? [field.value] : []}
-                                                    onValueChange={(val) => field.onChange(val[0] || null)}
-                                                    className="justify-start flex-wrap gap-2"
-                                                >
-                                                    {accounts?.map((acc) => (
-                                                        <ToggleGroupItem
-                                                            key={acc.id}
-                                                            value={acc.id}
-                                                            aria-label={acc.name}
-                                                            className="h-9 px-3 border border-input data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                                                        >
-                                                            {acc.name} (₹{acc.balance})
-                                                        </ToggleGroupItem>
-                                                    ))}
-                                                </ToggleGroup>
+                                                {accounts?.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center p-4 border border-dashed rounded-lg bg-muted/20 text-center space-y-2">
+                                                        <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                                            <AlertCircle className="h-4 w-4" />
+                                                            No accounts found
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Create an account (e.g., Cash or Bank) to record your transactions.
+                                                        </p>
+                                                        <AddAccountDrawer>
+                                                            <Button size="sm" variant="outline" type="button" className="mt-1">
+                                                                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                                                                Add Account
+                                                            </Button>
+                                                        </AddAccountDrawer>
+                                                    </div>
+                                                ) : (
+                                                    <ToggleGroup
+                                                        value={field.value ? [field.value] : []}
+                                                        onValueChange={(val) => field.onChange(val[0] || null)}
+                                                        className="justify-start flex-wrap gap-2"
+                                                    >
+                                                        {accounts?.map((acc) => (
+                                                            <ToggleGroupItem
+                                                                key={acc.id}
+                                                                value={acc.id}
+                                                                aria-label={acc.name}
+                                                                className="h-9 px-3 border border-input data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                                            >
+                                                                {acc.name} (₹{acc.balance})
+                                                            </ToggleGroupItem>
+                                                        ))}
+                                                    </ToggleGroup>
+                                                )}
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

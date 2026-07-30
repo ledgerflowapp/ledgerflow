@@ -9,10 +9,11 @@ import { GroupMember } from '@/types'
 import { useSplitCalculator, SplitType } from '@/hooks/finance/useSplitCalculator'
 import { useAddTransaction } from '@/hooks/useAddTransaction'
 import { toast } from 'sonner'
-import { Check, ChevronRight, ArrowLeft } from 'lucide-react'
+import { Check, ChevronRight, ArrowLeft, Plus } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 import { useAccounts } from '@/hooks/useAccounts'
+import { AddAccountDrawer } from '@/components/finance/AddAccountDrawer'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatCurrency, rupeesToPaise } from '@/lib/currency'
 
@@ -207,18 +208,30 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
 
                             <div className="space-y-2">
                                 <Label>Paid from</Label>
-                                <Select items={accounts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} value={accountId} onValueChange={(val) => val && setAccountId(val)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select account" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {accounts?.map(acc => (
-                                            <SelectItem key={acc.id} value={acc.id}>
-                                                {acc.name} ({acc.type}) - ₹{acc.balance}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                {accounts?.length === 0 ? (
+                                    <div className="p-3 border border-dashed rounded-lg bg-muted/20 text-center space-y-2">
+                                        <p className="text-xs text-muted-foreground">No account found to pay from.</p>
+                                        <AddAccountDrawer>
+                                            <Button size="sm" variant="outline" type="button">
+                                                <Plus className="mr-1 h-3.5 w-3.5" />
+                                                Add Account
+                                            </Button>
+                                        </AddAccountDrawer>
+                                    </div>
+                                ) : (
+                                    <Select items={accounts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} value={accountId} onValueChange={(val) => val && setAccountId(val)}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select account" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {accounts?.map(acc => (
+                                                <SelectItem key={acc.id} value={acc.id}>
+                                                    {acc.name} ({acc.type}) - ₹{acc.balance}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
                             </div>
                         </div>
                     )}

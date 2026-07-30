@@ -183,7 +183,7 @@ export default function PersonDetailsPage() {
                             "text-4xl font-bold",
                             contact.net_balance > 0 ? "text-green-600" : contact.net_balance < 0 ? "text-red-600" : "text-muted-foreground"
                         )}>
-                            ₹{paiseToRupees(paiseToRupees(Math.abs(contact.net_balance)).toNumber()).toNumber().toLocaleString()}
+                            ₹{paiseToRupees(Math.abs(contact.net_balance)).toNumber().toLocaleString()}
                         </div>
                     </div>
                 </CardContent>
@@ -269,6 +269,7 @@ export default function PersonDetailsPage() {
 
             <PersonalTransactionDrawer
                 initialData={{ contact_id: contactId }}
+                hideContactSelect={true}
             />
 
             <TransactionDetailsDrawer
