@@ -414,48 +414,108 @@ returns trigger as $$
 declare
   v_old_delta numeric;
   v_new_delta numeric;
+  v_old_reciprocal_id uuid;
+  v_new_reciprocal_id uuid;
 begin
   if (tg_op = 'INSERT') then
-    -- Only act on BUSINESS mode transactions linked to a contact
-    if new.mode = 'BUSINESS' and new.contact_id is not null then
+    if new.contact_id is not null then
+      v_new_delta := case when new.flow = 'OUT' then new.amount else -new.amount end;
+
       update public.contacts
       set
-        net_balance = net_balance + (case when new.flow = 'OUT' then new.amount else -new.amount end),
+        net_balance = net_balance + v_new_delta,
+        transaction_count = coalesce(transaction_count, 0) + 1,
         last_transaction_at = new.date
-      where id = new.contact_id and user_id = new.user_id;
+      where id = new.contact_id;
+
+      select id into v_new_reciprocal_id
+      from public.contacts
+      where user_id = (select linked_user_id from public.contacts where id = new.contact_id)
+        and linked_user_id = new.user_id
+      limit 1;
+
+      if v_new_reciprocal_id is not null then
+        update public.contacts
+        set
+          net_balance = net_balance - v_new_delta,
+          transaction_count = coalesce(transaction_count, 0) + 1,
+          last_transaction_at = new.date
+        where id = v_new_reciprocal_id;
+      end if;
     end if;
     return new;
   end if;
 
   if (tg_op = 'DELETE') then
-    if old.mode = 'BUSINESS' and old.contact_id is not null then
+    if old.contact_id is not null then
+      v_old_delta := case when old.flow = 'OUT' then old.amount else -old.amount end;
+
       update public.contacts
-      set net_balance = net_balance - (case when old.flow = 'OUT' then old.amount else -old.amount end)
-      where id = old.contact_id and user_id = old.user_id;
+      set
+        net_balance = net_balance - v_old_delta,
+        transaction_count = greatest(0, coalesce(transaction_count, 1) - 1)
+      where id = old.contact_id;
+
+      select id into v_old_reciprocal_id
+      from public.contacts
+      where user_id = (select linked_user_id from public.contacts where id = old.contact_id)
+        and linked_user_id = old.user_id
+      limit 1;
+
+      if v_old_reciprocal_id is not null then
+        update public.contacts
+        set
+          net_balance = net_balance + v_old_delta,
+          transaction_count = greatest(0, coalesce(transaction_count, 1) - 1)
+        where id = v_old_reciprocal_id;
+      end if;
     end if;
     return old;
   end if;
 
   if (tg_op = 'UPDATE') then
-    -- Reverse the OLD transaction's effect, then apply the NEW transaction's effect.
-    -- This is correct even if amount, flow, or contact_id changed.
-
-    -- Reverse OLD effect
-    if old.mode = 'BUSINESS' and old.contact_id is not null then
+    if old.contact_id is not null then
       v_old_delta := case when old.flow = 'OUT' then old.amount else -old.amount end;
+
       update public.contacts
       set net_balance = net_balance - v_old_delta
-      where id = old.contact_id and user_id = old.user_id;
+      where id = old.contact_id;
+
+      select id into v_old_reciprocal_id
+      from public.contacts
+      where user_id = (select linked_user_id from public.contacts where id = old.contact_id)
+        and linked_user_id = old.user_id
+      limit 1;
+
+      if v_old_reciprocal_id is not null then
+        update public.contacts
+        set net_balance = net_balance + v_old_delta
+        where id = v_old_reciprocal_id;
+      end if;
     end if;
 
-    -- Apply NEW effect
-    if new.mode = 'BUSINESS' and new.contact_id is not null then
+    if new.contact_id is not null then
       v_new_delta := case when new.flow = 'OUT' then new.amount else -new.amount end;
+
       update public.contacts
       set
         net_balance = net_balance + v_new_delta,
         last_transaction_at = new.date
-      where id = new.contact_id and user_id = new.user_id;
+      where id = new.contact_id;
+
+      select id into v_new_reciprocal_id
+      from public.contacts
+      where user_id = (select linked_user_id from public.contacts where id = new.contact_id)
+        and linked_user_id = new.user_id
+      limit 1;
+
+      if v_new_reciprocal_id is not null then
+        update public.contacts
+        set
+          net_balance = net_balance - v_new_delta,
+          last_transaction_at = new.date
+        where id = v_new_reciprocal_id;
+      end if;
     end if;
 
     return new;
@@ -828,7 +888,9 @@ create policy "Users can update own businesses" on public.businesses for update 
 create policy "Users can delete own businesses" on public.businesses for delete using (auth.uid() = user_id);
 
 -- Contacts
-create policy "Users can view own contacts" on public.contacts for select using (auth.uid() = user_id);
+create policy "Users can view own or linked contacts" on public.contacts for select using (
+  auth.uid() = user_id or auth.uid() = linked_user_id
+);
 create policy "Users can insert own contacts" on public.contacts for insert with check (auth.uid() = user_id);
 create policy "Users can update own contacts" on public.contacts for update using (auth.uid() = user_id);
 create policy "Users can delete own contacts" on public.contacts for delete using (auth.uid() = user_id);

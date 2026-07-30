@@ -29,6 +29,10 @@ interface PersonalTransaction {
         name: string
         type: string
     } | null
+    contact: {
+        id: string
+        name: string
+    } | null
     mode: 'PERSONAL' | 'BUSINESS'
     group?: {
         id: string
@@ -61,9 +65,11 @@ export function PersonalTransactionList() {
                     date,
                     category_id,
                     account_id,
+                    contact_id,
                     mode,
                     category:categories(name, icon),
                     account:accounts(name, type),
+                    contact:contacts(id, name),
                     group:groups(id, name)
                 `)
                 .eq('mode', 'PERSONAL')
@@ -199,6 +205,18 @@ export function PersonalTransactionList() {
                                                 {t.category && (
                                                     <Badge variant="secondary" className="text-[10px] px-1 py-0 h-5">
                                                         {t.category.name}
+                                                    </Badge>
+                                                )}
+                                                {t.contact && (
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="text-[10px] px-1 py-0 h-5 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 hover:bg-purple-200 cursor-pointer flex items-center gap-1"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            router.push(`/dashboard/friends/${t.contact!.id}`)
+                                                        }}
+                                                    >
+                                                        👤 {t.contact.name}
                                                     </Badge>
                                                 )}
                                                 {t.group && (

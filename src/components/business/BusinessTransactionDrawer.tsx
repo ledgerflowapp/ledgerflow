@@ -67,29 +67,32 @@ export function BusinessTransactionDrawer({
         } as any,
     })
 
-    // Effect to populate form when initialData changes
+    // Effect to populate form when initialData changes or drawer opens
     useEffect(() => {
-        if (initialData) {
+        if (open) {
             form.reset({
-                amount: initialData.amount ?? ('' as unknown as number),
-                name: initialData.name || '',
-                note: initialData.note || '',
-                date: initialData.date ? new Date(initialData.date) : new Date(),
-                flow: initialData.flow || 'OUT',
-                contact_id: initialData.contact_id || '',
-                due_date: initialData.due_date ? new Date(initialData.due_date) : undefined,
-                category_id: initialData.category_id,
-                account_id: initialData.account_id,
+                amount: initialData?.amount ?? ('' as unknown as number),
+                name: initialData?.name || '',
+                note: initialData?.note || '',
+                date: initialData?.date ? new Date(initialData.date) : new Date(),
+                flow: initialData?.flow || 'OUT',
+                contact_id: initialData?.contact_id || '',
+                due_date: initialData?.due_date ? new Date(initialData.due_date) : undefined,
+                category_id: initialData?.category_id,
+                account_id: initialData?.account_id,
             })
-            if (initialData.flow) {
-                setTimeout(() => setFlow(initialData.flow), 0)
+            if (initialData?.flow) {
+                setFlow(initialData.flow)
+            } else {
+                setFlow('OUT')
             }
         }
-    }, [initialData, form])
+    }, [open, initialData?.id, initialData?.contact_id, form])
 
     function onSubmit(values: z.infer<typeof businessTransactionSchema>) {
         const transactionData = {
             ...values,
+            contact_id: values.contact_id || initialData?.contact_id || '',
             mode: 'BUSINESS' as const,
             flow: flow,
         }
@@ -124,6 +127,7 @@ export function BusinessTransactionDrawer({
 
     const currentContactId = form.watch('contact_id') || initialData?.contact_id
     const selectedContact = contacts?.find(c => c.id === currentContactId)
+    const contactDisplayName = selectedContact?.name || initialData?.contact_name || initialData?.contact?.name
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
@@ -210,10 +214,10 @@ export function BusinessTransactionDrawer({
                                             </FormItem>
                                         )}
                                     />
-                                ) : selectedContact ? (
+                                ) : (contactDisplayName || currentContactId) ? (
                                     <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg text-sm border border-border/50">
                                         <span className="text-muted-foreground">Contact</span>
-                                        <span className="font-semibold text-foreground">{selectedContact.name}</span>
+                                        <span className="font-semibold text-foreground">{contactDisplayName || 'Selected Contact'}</span>
                                     </div>
                                 ) : null}
 
