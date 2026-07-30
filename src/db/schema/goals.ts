@@ -29,3 +29,6 @@ export const goalContributions = pgTable("goal_contributions", {
   note: text("note"),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow(),
 });
+
+export const goal_contributions = goalContributions;
+

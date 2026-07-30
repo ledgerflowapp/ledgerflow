@@ -37,3 +37,7 @@ export const friendLedgers = pgTable("friend_ledgers", {
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow(),
 });
+
+export const personal_ledgers = personalLedgers;
+export const friend_ledgers = friendLedgers;
+

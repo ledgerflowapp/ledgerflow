@@ -131,3 +131,8 @@ export const currencyConversions = pgTable("currency_conversions", {
   rate: numeric("rate").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow(),
 });
+
+export const recurring_transactions = recurringTransactions;
+export const currency_conversions = currencyConversions;
+export const transaction_splits = transactionSplits;
+
