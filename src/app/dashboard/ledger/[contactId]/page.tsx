@@ -36,6 +36,7 @@ import { startOfDay, startOfWeek, startOfMonth, startOfYear, isAfter } from 'dat
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 import { TransactionWithJoins } from '@/types'
+import { paiseToRupees } from "@/lib/currency";
 
 type TimeFilter = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'YEAR'
 type SortOption = 'LATEST' | 'OLDEST' | 'HIGHEST' | 'LOWEST'
@@ -177,7 +178,7 @@ export default function LedgerPage() {
                             "text-4xl font-bold",
                             contact.net_balance > 0 ? "text-green-600" : contact.net_balance < 0 ? "text-red-600" : "text-muted-foreground"
                         )}>
-                            ₹{Math.abs(contact.net_balance).toLocaleString()}
+                            ₹{paiseToRupees(paiseToRupees(Math.abs(contact.net_balance)).toNumber()).toNumber().toLocaleString()}
                         </div>
                     </div>
                 </CardContent>
@@ -252,7 +253,7 @@ export default function LedgerPage() {
                                         "font-bold",
                                         t.flow === 'IN' ? "text-green-600" : "text-red-600"
                                     )}>
-                                        {t.flow === 'IN' ? '+' : '-'}₹{t.amount.toLocaleString()}
+                                        {t.flow === 'IN' ? '+' : '-'}₹{paiseToRupees(t.amount).toNumber().toLocaleString()}
                                     </div>
                                 </CardContent>
                             </Card>

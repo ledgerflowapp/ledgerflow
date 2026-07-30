@@ -9,6 +9,7 @@ import { Loader2, Plus, Repeat, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { paiseToRupees } from "@/lib/currency";
 
 export function RecurringTransactionsList() {
     const { data: transactions, isLoading } = useRecurringTransactions()
@@ -69,7 +70,7 @@ export function RecurringTransactionsList() {
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <span className={`font-medium ${t.flow === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
-                                        {t.flow === 'IN' ? '+' : '-'}₹{t.amount.toLocaleString()}
+                                        {t.flow === 'IN' ? '+' : '-'}₹{paiseToRupees(t.amount).toNumber().toLocaleString()}
                                     </span>
                                     <Button
                                         variant="ghost"

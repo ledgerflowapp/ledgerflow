@@ -9,6 +9,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useTransactions } from '@/hooks/useTransactions'
 import { TransactionWithJoins } from '@/types'
+import { paiseToRupees } from "@/lib/currency";
 
 interface GroupTransactionListProps {
     groupId: string
@@ -115,7 +116,7 @@ export function GroupTransactionList({ groupId, currentUserId }: GroupTransactio
                                         </div>
                                         <div className="text-right">
                                             <span className="font-medium">
-                                                ₹{t.amount.toLocaleString()}
+                                                ₹{paiseToRupees(t.amount).toNumber().toLocaleString()}
                                             </span>
                                             {/* We could show "You borrowed" or "You lent" info here if we calculate user's split */}
                                         </div>

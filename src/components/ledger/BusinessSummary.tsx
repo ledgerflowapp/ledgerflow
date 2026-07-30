@@ -3,6 +3,7 @@
 import { useBusinessContacts } from '@/hooks/business/useBusinessContacts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import { paiseToRupees } from "@/lib/currency";
 
 export function BusinessSummary() {
     const { data: contacts, isLoading } = useBusinessContacts()
@@ -28,7 +29,7 @@ export function BusinessSummary() {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold text-green-600">
-                        ₹{youWillGet.toLocaleString()}
+                        ₹{paiseToRupees(youWillGet).toNumber().toLocaleString()}
                     </div>
                 </CardContent>
             </Card>
@@ -41,7 +42,7 @@ export function BusinessSummary() {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold text-red-600">
-                        ₹{youWillGive.toLocaleString()}
+                        ₹{paiseToRupees(youWillGive).toNumber().toLocaleString()}
                     </div>
                 </CardContent>
             </Card>

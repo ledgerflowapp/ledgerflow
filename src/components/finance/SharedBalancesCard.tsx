@@ -8,6 +8,7 @@ import { usePersonalPeople } from '@/hooks/personal/usePersonalPeople'
 import { Users, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
+import { paiseToRupees } from "@/lib/currency";
 
 export function SharedBalancesCard() {
     const router = useRouter()
@@ -72,7 +73,7 @@ export function SharedBalancesCard() {
                                     Get back
                                 </span>
                                 <span className="text-2xl font-bold text-green-700 dark:text-green-500">
-                                    ₹{totalOwed.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                    ₹{paiseToRupees(totalOwed).toNumber().toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                 </span>
                             </div>
                             <div className="flex flex-col space-y-1 p-4 bg-red-500/10 rounded-xl border border-red-500/20">
@@ -81,7 +82,7 @@ export function SharedBalancesCard() {
                                     You owe
                                 </span>
                                 <span className="text-2xl font-bold text-red-700 dark:text-red-500">
-                                    ₹{totalOwe.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                    ₹{paiseToRupees(totalOwe).toNumber().toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                 </span>
                             </div>
                         </div>
@@ -116,7 +117,7 @@ export function SharedBalancesCard() {
                                                 {contact.net_balance !== 0 ? (
                                                     <span className={`text-sm font-medium ${contact.net_balance > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                                         {contact.net_balance > 0 ? 'Owes you ' : 'You owe '}
-                                                        ₹{Math.abs(contact.net_balance).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                                        ₹{paiseToRupees(paiseToRupees(Math.abs(contact.net_balance)).toNumber()).toNumber().toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                                     </span>
                                                 ) : (
                                                     <span className="text-sm font-medium text-muted-foreground">Settled up</span>

@@ -12,6 +12,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { PersonalTransactionDrawer } from '@/components/personal/PersonalTransactionDrawer'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { startOfDay, startOfWeek, startOfMonth, startOfYear, isAfter } from 'date-fns'
+import { paiseToRupees } from "@/lib/currency";
 
 interface PersonalTransaction {
     id: string
@@ -219,7 +220,7 @@ export function PersonalTransactionList() {
                                         </div>
                                     </div>
                                     <span className={`font-medium ${t.flow === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
-                                        {t.flow === 'IN' ? '+' : '-'}₹{t.amount.toLocaleString()}
+                                        {t.flow === 'IN' ? '+' : '-'}₹{paiseToRupees(t.amount).toNumber().toLocaleString()}
                                     </span>
                                 </div>
                             ))}

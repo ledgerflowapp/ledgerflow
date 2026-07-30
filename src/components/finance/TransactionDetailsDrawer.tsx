@@ -13,6 +13,7 @@ import { useProfile } from '@/hooks/use-profile'
 
 import { BusinessTransactionDrawer } from '@/components/business/BusinessTransactionDrawer'
 import { PersonalTransactionDrawer } from '@/components/personal/PersonalTransactionDrawer'
+import { paiseToRupees } from "@/lib/currency";
 
 interface TransactionDetailsDrawerProps {
     transaction: {
@@ -86,7 +87,7 @@ export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEd
                     <div className="p-4 space-y-6">
                         <div className="text-center space-y-2">
                             <div className="text-4xl font-bold">
-                                {transaction.flow === 'IN' ? '+' : '-'}₹{transaction.amount.toLocaleString()}
+                                {transaction.flow === 'IN' ? '+' : '-'}₹{paiseToRupees(transaction.amount).toNumber().toLocaleString()}
                             </div>
                             <div className="text-muted-foreground">
                                 {formatTransactionDate(transaction.date)}

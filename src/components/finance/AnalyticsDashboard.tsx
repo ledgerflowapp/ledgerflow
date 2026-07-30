@@ -4,6 +4,7 @@ import { useMonthlyCategorySpend } from '@/hooks/useAnalytics'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { Loader2 } from 'lucide-react'
+import { paiseToRupees } from "@/lib/currency";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
@@ -74,7 +75,7 @@ export function AnalyticsDashboard() {
                             </Pie>
                             <Tooltip
                                 formatter={(value: any) =>
-                                    value !== undefined ? `₹${Number(value).toLocaleString()}` : '₹0'
+                                    value !== undefined ? `₹${paiseToRupees(Number(value)).toNumber().toLocaleString()}` : '₹0'
                                 }
                             />
                             <Legend />

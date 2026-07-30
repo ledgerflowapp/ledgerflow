@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AddAccountDrawer } from './AddAccountDrawer'
 import { Button } from '@/components/ui/button'
 import { Plus, Wallet, Landmark, Banknote, CreditCard } from 'lucide-react'
+import { paiseToRupees } from "@/lib/currency";
 
 const ICONS = {
     CASH: Banknote,
@@ -46,7 +47,7 @@ export function AccountsList() {
                                     </div>
                                 </div>
                                 <div className="font-medium">
-                                    ₹{account.balance.toLocaleString()}
+                                    ₹{paiseToRupees(account.balance).toNumber().toLocaleString()}
                                 </div>
                             </div>
                         )

@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
+import { paiseToRupees } from "@/lib/currency";
 
 interface PeopleListProps {
     contacts?: Contact[]
@@ -183,7 +184,7 @@ export function PeopleList({
                                     >
                                         {contact.net_balance === 0
                                             ? 'Settled'
-                                            : `₹${Math.abs(contact.net_balance).toLocaleString()}`}
+                                            : `₹${paiseToRupees(Math.abs(contact.net_balance)).toNumber().toLocaleString()}`}
                                     </div>
                                     <div className="text-xs text-muted-foreground">
                                         {contact.net_balance > 0

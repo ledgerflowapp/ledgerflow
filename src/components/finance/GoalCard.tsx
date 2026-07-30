@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { ContributeGoalDrawer } from './ContributeGoalDrawer'
+import { paiseToRupees } from "@/lib/currency";
 
 interface GoalCardProps {
     id: string
@@ -30,9 +31,9 @@ export function GoalCard({ id, name, current, target, deadline }: GoalCardProps)
                 </ContributeGoalDrawer>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">₹{current.toLocaleString()}</div>
+                <div className="text-2xl font-bold">₹{paiseToRupees(current).toNumber().toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">
-                    of ₹{target.toLocaleString()}
+                    of ₹{paiseToRupees(target).toNumber().toLocaleString()}
                 </p>
                 <Progress value={percentage} className="mt-4 h-2" />
                 <div className="mt-2 flex justify-between text-xs text-muted-foreground">
