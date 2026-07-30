@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1785407275311,
+      "tag": "0000_abnormal_ricochet",
+      "breakpoints": true
+    }
+  ]
+}
