@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { updateTransactionAction } from '@/lib/actions/transactions'
 import { rupeesToPaise } from '@/lib/currency'
 import { toast } from 'sonner'
 
@@ -18,37 +18,26 @@ interface UpdateTransactionParams {
 }
 
 export function useUpdateTransaction() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async (updatedTransaction: UpdateTransactionParams) => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
-
             // Convert amount from rupees (user input) to integer paise for DB storage
             const amountInPaise = rupeesToPaise(updatedTransaction.amount)
 
-            const { data, error } = await supabase
-                .from('transactions')
-                .update({
-                    amount: amountInPaise,
-                    flow: updatedTransaction.flow,
-                    mode: updatedTransaction.mode,
-                    contact_id: updatedTransaction.contact_id,
-                    category_id: updatedTransaction.category_id,
-                    account_id: updatedTransaction.account_id,
-                    date: updatedTransaction.date.toISOString(),
-                    due_date: updatedTransaction.due_date?.toISOString(),
-                    name: updatedTransaction.name,
-                    note: updatedTransaction.note,
-                })
-                .eq('id', updatedTransaction.id)
-                .select()
-                .single()
-
-            if (error) throw error
-            return data
+            return await updateTransactionAction({
+                id: updatedTransaction.id,
+                amount: amountInPaise,
+                flow: updatedTransaction.flow,
+                mode: updatedTransaction.mode,
+                contactId: updatedTransaction.contact_id || null,
+                categoryId: updatedTransaction.category_id || null,
+                accountId: updatedTransaction.account_id || null,
+                date: updatedTransaction.date,
+                dueDate: updatedTransaction.due_date || null,
+                name: updatedTransaction.name,
+                note: updatedTransaction.note || null,
+            })
         },
         onSuccess: () => {
             toast.success('Transaction updated')

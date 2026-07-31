@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { getPersonalTransactionsAction } from '@/lib/actions/transactions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Receipt } from 'lucide-react'
 import { formatTransactionDate } from '@/lib/date-utils'
@@ -44,7 +44,6 @@ type TimeFilter = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'YEAR'
 type SortOption = 'LATEST' | 'OLDEST' | 'HIGHEST' | 'LOWEST'
 
 export function PersonalTransactionList() {
-    const supabase = createClient()
     const [selectedTransaction, setSelectedTransaction] = useState<PersonalTransaction | null>(null)
     const [detailsOpen, setDetailsOpen] = useState(false)
     const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL')
@@ -54,29 +53,7 @@ export function PersonalTransactionList() {
     const { data: transactions, isLoading } = useQuery({
         queryKey: ['personal-transactions'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('transactions')
-                .select(`
-                    id,
-                    amount,
-                    flow,
-                    name,
-                    note,
-                    date,
-                    category_id,
-                    account_id,
-                    contact_id,
-                    mode,
-                    category:categories(name, icon),
-                    account:accounts(name, type),
-                    contact:contacts(id, name),
-                    group:groups(id, name)
-                `)
-                .eq('mode', 'PERSONAL')
-                .order('date', { ascending: false })
-                .limit(100)
-
-            if (error) throw error
+            const data = await getPersonalTransactionsAction()
             return data as unknown as PersonalTransaction[]
         },
     })

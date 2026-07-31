@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2, Edit } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { deleteTransactionAction } from '@/lib/actions/transactions'
 import { useQueryClient } from '@tanstack/react-query'
 import { useProfile } from '@/hooks/use-profile'
 
@@ -38,7 +38,6 @@ interface TransactionDetailsDrawerProps {
 
 export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEdit }: TransactionDetailsDrawerProps) {
     const [isDeleting, setIsDeleting] = useState(false)
-    const supabase = createClient()
     const queryClient = useQueryClient()
     const [editOpen, setEditOpen] = useState(false)
     const { profile } = useProfile()
@@ -56,12 +55,7 @@ export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEd
     const handleDelete = async () => {
         try {
             setIsDeleting(true)
-            const { error } = await supabase
-                .from('transactions')
-                .delete()
-                .eq('id', transaction.id)
-
-            if (error) throw error
+            await deleteTransactionAction(transaction.id)
 
             toast.success('Transaction deleted')
             queryClient.invalidateQueries({ queryKey: ['transactions'] })

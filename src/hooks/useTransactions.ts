@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { getTransactionsAction } from '@/lib/actions/transactions'
 import { TransactionWithJoins } from '@/types'
 
 const PAGE_SIZE = 20
@@ -11,8 +11,6 @@ export type TransactionFilters = {
 }
 
 export function useTransactions(filters?: TransactionFilters | string, mode: 'BUSINESS' | 'PERSONAL' = 'BUSINESS') {
-    const supabase = createClient()
-
     // Handle legacy signature support: useTransactions(contactId, mode)
     const normalizedFilters: TransactionFilters = typeof filters === 'string'
         ? { contactId: filters, mode }
@@ -21,31 +19,14 @@ export function useTransactions(filters?: TransactionFilters | string, mode: 'BU
     return useInfiniteQuery({
         queryKey: ['transactions', normalizedFilters],
         queryFn: async ({ pageParam = 0 }) => {
-            let query = supabase
-                .from('transactions')
-                .select(`
-                    *,
-                    payer_group_member_id,
-                    contacts(name, phone),
-                    payer:profiles!payer_id(full_name, avatar_url),
-                    group:groups(id, name),
-                    splits:transaction_splits(user_id, amount, group_member_id, member_name_snapshot)
-                `)
-                .order('date', { ascending: false })
-                .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1)
-
-            if (normalizedFilters.contactId) {
-                query = query.eq('contact_id', normalizedFilters.contactId)
-            } else if (normalizedFilters.groupId) {
-                query = query.eq('group_id', normalizedFilters.groupId)
-            } else {
-                query = query.eq('mode', normalizedFilters.mode!)
-            }
-
-            const { data, error } = await query
-
-            if (error) throw error
-            return data as TransactionWithJoins[]
+            const data = await getTransactionsAction({
+                contactId: normalizedFilters.contactId,
+                groupId: normalizedFilters.groupId,
+                mode: normalizedFilters.mode,
+                limit: PAGE_SIZE,
+                offset: pageParam * PAGE_SIZE,
+            })
+            return data as unknown as TransactionWithJoins[]
         },
         initialPageParam: 0,
         getNextPageParam: (lastPage, allPages) => {

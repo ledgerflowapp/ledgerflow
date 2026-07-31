@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { createTransactionAction } from '@/lib/actions/transactions'
 import { useAppStore } from '@/store/useAppStore'
 import { Contact, Paise } from '@/types'
 import { rupeesToPaise, addPaise } from '@/lib/currency'
@@ -34,15 +34,11 @@ interface AddTransactionParams {
 }
 
 export function useAddTransaction() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
     const { currentBusinessId } = useAppStore()
 
     return useMutation({
         mutationFn: async (newTransaction: AddTransactionParams) => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
-
             if (newTransaction.mode === 'BUSINESS' && !currentBusinessId) {
                 throw new Error('No business selected')
             }
@@ -53,38 +49,33 @@ export function useAddTransaction() {
             // Prepare splits with amounts converted to paise
             const splitsPayload = newTransaction.splits && newTransaction.splits.length > 0
                 ? newTransaction.splits.map(split => ({
-                    user_id: split.user_id || null,
-                    group_member_id: split.group_member_id || null,
+                    userId: split.user_id || null,
+                    groupMemberId: split.group_member_id || null,
                     amount: split.amount != null ? rupeesToPaise(split.amount) : 0,
                     percentage: split.percentage ?? null,
-                    is_settled: split.is_settled || false,
-                    member_name_snapshot: split.member_name_snapshot || null,
+                    isSettled: split.is_settled || false,
+                    memberNameSnapshot: split.member_name_snapshot || null,
                 }))
                 : null
 
-            // Single atomic RPC call — transaction + splits are inserted in one DB transaction
-            const { data, error } = await supabase.rpc('add_transaction_with_splits', {
-                p_user_id: user.id,
-                p_business_id: newTransaction.mode === 'BUSINESS' ? currentBusinessId : null,
-                p_amount: amountInPaise,
-                p_flow: newTransaction.flow,
-                p_mode: newTransaction.mode,
-                p_name: newTransaction.name,
-                p_note: newTransaction.note || null,
-                p_date: newTransaction.date.toISOString(),
-                p_due_date: newTransaction.due_date?.toISOString() || null,
-                p_contact_id: newTransaction.contact_id || null,
-                p_category_id: newTransaction.category_id || null,
-                p_account_id: newTransaction.account_id || null,
-                p_group_id: newTransaction.group_id || null,
-                p_payer_id: newTransaction.payer_id || user.id,
-                p_payer_group_member_id: newTransaction.payer_group_member_id || null,
-                p_split_type: newTransaction.split_type || 'EQUALLY',
-                p_splits: splitsPayload,
+            return await createTransactionAction({
+                amount: amountInPaise,
+                flow: newTransaction.flow,
+                mode: newTransaction.mode,
+                name: newTransaction.name,
+                note: newTransaction.note || null,
+                date: newTransaction.date,
+                dueDate: newTransaction.due_date || null,
+                contactId: newTransaction.contact_id || null,
+                categoryId: newTransaction.category_id || null,
+                accountId: newTransaction.account_id || null,
+                businessId: newTransaction.mode === 'BUSINESS' ? currentBusinessId : null,
+                groupId: newTransaction.group_id || null,
+                payerId: newTransaction.payer_id || null,
+                payerGroupMemberId: newTransaction.payer_group_member_id || null,
+                splitType: newTransaction.split_type || 'EQUALLY',
+                splits: splitsPayload,
             })
-
-            if (error) throw error
-            return data
         },
         onMutate: async (newTransaction) => {
             // Cancel any outgoing refetches to avoid race conditions with our optimistic update
