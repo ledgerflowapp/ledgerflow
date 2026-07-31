@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Loader2, Settings, Trash2, X, Link2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { updateGroupAction, deleteGroupAction, removeGroupMemberAction, getGroupTransactionCountAction } from '@/lib/actions/groups'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
@@ -63,7 +63,6 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
     const [isDeleting, setIsDeleting] = useState(false)
     const [transactionCount, setTransactionCount] = useState<number | null>(null)
 
-    const supabase = createClient()
     const queryClient = useQueryClient()
     const router = useRouter()
 
@@ -82,12 +81,7 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
     const onUpdate = async (values: z.infer<typeof formSchema>) => {
         setIsSubmitting(true)
         try {
-            const { error } = await supabase
-                .from('groups')
-                .update({ name: values.name })
-                .eq('id', group.id)
-
-            if (error) throw error
+            await updateGroupAction({ id: group.id, name: values.name })
 
             toast.success('Group updated')
             queryClient.invalidateQueries({ queryKey: ['group', group.id] })
@@ -103,28 +97,19 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
 
     // Fetch transaction count when opening delete dialog
     const checkTransactions = async () => {
-        const { count, error } = await supabase
-            .from('transactions')
-            .select('*', { count: 'exact', head: true })
-            .eq('group_id', group.id)
-
-        if (error) {
+        try {
+            const res = await getGroupTransactionCountAction(group.id)
+            setTransactionCount(res.count)
+        } catch (error) {
             console.error('Failed to check transactions:', error)
             toast.error('Could not check group transactions')
-        } else {
-            setTransactionCount(count)
         }
     }
 
     const onDeleteGroup = async () => {
         setIsDeleting(true)
         try {
-            const { error } = await supabase
-                .from('groups')
-                .delete()
-                .eq('id', group.id)
-
-            if (error) throw error
+            await deleteGroupAction({ id: group.id })
 
             toast.success('Group deleted')
             queryClient.invalidateQueries({ queryKey: ['groups'] })
@@ -139,12 +124,7 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
 
     const onRemoveMember = async (memberId: string) => {
         try {
-            const { error } = await supabase
-                .from('group_members')
-                .delete()
-                .eq('id', memberId)
-
-            if (error) throw error
+            await removeGroupMemberAction({ groupId: group.id, memberId })
 
             toast.success('Member removed')
             queryClient.invalidateQueries({ queryKey: ['group', group.id] })

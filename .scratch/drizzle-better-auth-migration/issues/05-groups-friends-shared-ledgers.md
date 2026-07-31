@@ -6,7 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] Group member join, merge, and expense balance RPCs ported to `src/lib/actions/groups.ts` using Drizzle transactions.
-- [ ] Friend invite, contact invite, and friend removal RPCs ported to `src/lib/actions/friends.ts`.
-- [ ] Group UI components and friend management hooks refactored to use Server Actions and React Query cache invalidation.
-- [ ] Contact merging and group balance updates verified working end-to-end.
+- [x] Group member join, merge, and expense balance RPCs ported to `src/lib/actions/groups.ts` using Drizzle transactions.
+- [x] Friend invite, contact invite, and friend removal RPCs ported to `src/lib/actions/friends.ts`.
+- [x] Group UI components and friend management hooks refactored to use Server Actions and React Query cache invalidation.
+- [x] Contact merging and group balance updates verified working end-to-end.

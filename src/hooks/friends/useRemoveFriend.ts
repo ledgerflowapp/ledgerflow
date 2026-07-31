@@ -1,15 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { removeFriendAction } from '@/lib/actions/friends'
 import { toast } from 'sonner'
 
 export function useRemoveFriend() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async (friendId: string) => {
-            const { error } = await supabase.rpc('remove_friend', { friend_id: friendId })
-            if (error) throw error
+            return await removeFriendAction(friendId)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['friendships'] })
@@ -17,7 +15,7 @@ export function useRemoveFriend() {
             queryClient.invalidateQueries({ queryKey: ['personal-people'] })
             toast.success('Friend disconnected successfully')
         },
-        onError: (error) => {
+        onError: (error: any) => {
             toast.error(`Failed to unfriend: ${error.message}`)
         },
     })

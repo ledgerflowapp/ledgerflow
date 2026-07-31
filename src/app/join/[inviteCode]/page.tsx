@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { getGroupByInviteAction, joinGroupAction } from '@/lib/actions/groups'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -35,20 +35,12 @@ export default function JoinGroupPage() {
     const [selectedGhost, setSelectedGhost] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
 
-    const supabase = createClient()
-
     useEffect(() => {
         async function fetchGroup() {
             if (!inviteCode) return
 
             try {
-                const { data, error } = await supabase.rpc('get_group_by_invite', {
-                    invite_code_input: inviteCode,
-                })
-
-                if (error) {
-                    throw error
-                }
+                const data = await getGroupByInviteAction(inviteCode)
 
                 if (!data || data.length === 0) {
                     setError('Invalid or expired link')
@@ -65,19 +57,12 @@ export default function JoinGroupPage() {
         }
 
         fetchGroup()
-    }, [inviteCode, supabase])
+    }, [inviteCode])
 
     const handleJoin = async (claimGhostId: string | null = null) => {
         setIsJoining(true)
         try {
-            const { data, error } = await supabase.rpc('join_group', {
-                invite_code_input: inviteCode,
-                claim_ghost_member_id: claimGhostId,
-            })
-
-            if (error) {
-                throw error
-            }
+            const data = await joinGroupAction(inviteCode, claimGhostId)
 
             if (data?.success) {
                 if (data.message === 'Already a member') {

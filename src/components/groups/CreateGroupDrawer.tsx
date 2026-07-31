@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Loader2, Plus, X, UserPlus, Users } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { createGroupAction } from '@/lib/actions/groups'
 import { useQueryClient } from '@tanstack/react-query'
 import { useFriendships } from '@/hooks/friends/useFriendships'
 
@@ -60,7 +60,6 @@ export function CreateGroupDrawer({ children }: { children: React.ReactNode }) {
     const [ghostName, setGhostName] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const supabase = createClient()
     const queryClient = useQueryClient()
     const { data: friends } = useFriendships()
 
@@ -91,38 +90,16 @@ export function CreateGroupDrawer({ children }: { children: React.ReactNode }) {
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsSubmitting(true)
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
-
-            // 1. Create Group
-            const { data: group, error: groupError } = await supabase
-                .from('groups')
-                .insert({
-                    name: values.name,
-                    type: values.type,
-                    created_by: user.id,
-                })
-                .select()
-                .single()
-
-            if (groupError) throw groupError
-
-            // 2. Add Members
-            // Always add creator
-            const membersToAdd = [
-                { group_id: group.id, user_id: user.id },
-                ...members.map(m => ({
-                    group_id: group.id,
-                    user_id: m.type === 'REAL' ? m.id : null,
-                    ghost_name: m.type === 'GHOST' ? m.name : null,
-                }))
-            ]
-
-            const { error: membersError } = await supabase
-                .from('group_members')
-                .insert(membersToAdd)
-
-            if (membersError) throw membersError
+            await createGroupAction({
+                name: values.name,
+                type: values.type,
+                members: members.map(m => ({
+                    id: m.type === 'REAL' ? m.id : undefined,
+                    name: m.name,
+                    type: m.type,
+                    avatar_url: m.avatar_url,
+                })),
+            })
 
             toast.success('Group created successfully')
             queryClient.invalidateQueries({ queryKey: ['groups'] })

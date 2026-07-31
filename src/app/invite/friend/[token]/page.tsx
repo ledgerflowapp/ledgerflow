@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { acceptFriendInviteAction } from '@/lib/actions/friends'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
 
 interface PageProps {
@@ -15,7 +15,6 @@ export default function FriendInvitePage(props: PageProps) {
     const params = use(props.params)
     const { token } = params
     const router = useRouter()
-    const supabase = createClient()
 
     const [status, setStatus] = useState<'LOADING' | 'SUCCESS' | 'ERROR'>('LOADING')
     const [message, setMessage] = useState('Connecting you...')
@@ -23,21 +22,7 @@ export default function FriendInvitePage(props: PageProps) {
     useEffect(() => {
         const acceptInvite = async () => {
             try {
-                // Ensure user is authenticated first
-                const { data: { session } } = await supabase.auth.getSession()
-
-                if (!session) {
-                    // Redirect to login if not authenticated, passing the return URL
-                    router.push(`/auth?returnUrl=/invite/friend/${token}`)
-                    return
-                }
-
-                // Call the RPC to accept the invite
-                const { data, error } = await supabase.rpc('accept_friend_invite', {
-                    invite_token: token
-                })
-
-                if (error) throw error
+                const data = await acceptFriendInviteAction(token)
 
                 setStatus('SUCCESS')
                 setMessage(`Success! You are now friends with ${data.target_name}. Redirecting...`)
@@ -49,13 +34,17 @@ export default function FriendInvitePage(props: PageProps) {
 
             } catch (err: any) {
                 console.error('Error accepting friend invite:', err)
+                if (err.message === 'Unauthorized') {
+                    router.push(`/auth?returnUrl=/invite/friend/${token}`)
+                    return
+                }
                 setStatus('ERROR')
                 setMessage(err.message || 'Invalid or expired link.')
             }
         }
 
         acceptInvite()
-    }, [token, supabase, router])
+    }, [token, router])
 
     return (
         <div className="flex min-h-screen items-center justify-center p-4">
