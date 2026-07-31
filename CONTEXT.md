@@ -1,20 +1,26 @@
-# Domain Glossary & Context
+# LedgerFlow Domain Glossary
 
-### User & Session Terms
+## Core Concepts
 
-- **Session User**: The authenticated user identity bound to the current incoming request session headers.
-- **Server Action Auth Guard**: The mandatory authentication check evaluated at the entry point of every Server Action to guarantee that an operation is performed exclusively on behalf of an authenticated Session User.
-- **Ghost Member**: A non-registered user placeholder within a shared group before linking or claiming a profile.
+### Unregistered Contact
+A record in the `contacts` table created by a registered user to track 1:1 transactions, IOUs, or balances with an external person who does not yet have a LedgerFlow account. An unregistered contact has `linkedUserId` set to `null`.
 
-### Recurring Transaction Terms
+### Registered Profile
+An authenticated user in LedgerFlow with an active `user` record and associated `profile`.
 
-- **Due Recurring Rule**: An active recurring transaction definition (`active = true`) whose scheduled `next_run_date` is less than or equal to the current execution timestamp (`NOW()`).
-- **Recurring Transaction Processor**: The idempotent execution mechanism responsible for converting Due Recurring Rules into concrete financial transaction ledger entries and advancing the rule's `next_run_date`.
-- **Schedule Alignment Mode**: A user-selectable strategy for calculating the next execution date when frequency is MONTHLY or YEARLY:
-  - `CALENDAR` (Default): Aligns to the same calendar day (e.g., 31st of every month, clamped to 28/29th in Feb).
-  - `FIXED_INTERVAL`: Uses exact fixed day spans (+30 days for MONTHLY, +365 days for YEARLY).
-- **Incremental Catch-Up Idempotency**: Atomic state progression where each individual catch-up step (generating 1 transaction + advancing `next_run_date`) commits independently. If step 3 of 5 fails, steps 1 and 2 remain safely committed and the processor resumes from step 3 on retry without duplicate entries.
-- **Rule Failure Circuit Breaker**: Resiliency mechanism that tracks consecutive execution failures per rule. Upon reaching a failure threshold (e.g., 3 consecutive failures), the rule is flagged/paused to prevent system degradation and requires explicit user review/resume.
+### Ghost Member
+A member of a `group` who was added before registering for LedgerFlow. Represented in `group_members` with `userId` set to `null` and a `ghostName` string.
 
-
+### Contact Merging
+The process of linking one or more `Unregistered Contact` entries (and/or `Ghost Member` records) to a newly registered or existing `Registered Profile`. Once merged:
+- **Verification Guard:** Auto-matching by phone/email requires `phoneVerified` or `emailVerified` to be `true` on the target user profile to prevent spoofing.
+- **Deterministic Matching:** Matching is strictly performed using unique `inviteToken` or verified `phone`/`email` (fuzzy name-only matching is excluded).
+- **1:1 Contacts Auto-Link:** Every `contacts` entry matching the target user's verified phone/email (or specified by invite token/ID) sets `linkedUserId = targetUserId`.
+- **Group Ghost Member Claiming & Admin Approval:**
+  - If claimed via an explicit invite link token, `group_members` immediately sets `userId = targetUserId` and clears `ghostName`.
+  - If matched via phone/email, a merge request notification is sent to the group admin (`groups.createdBy`) for approval before completing the group member link and split re-assignment.
+- **Transaction Splits Re-linking:** Past transaction splits in `transaction_splits` tied to claimed ghost members are assigned `userId = targetUserId` upon approval/linking.
+- **Friendship Auto-Creation:** Friendships between merging users and the target user profile are automatically established (`ACCEPTED` status) if not already existing.
+- **Invite Link Copy:** Contact invite links explicitly state that accepting connects the recipient as a friend with the inviter.
+- **Audit & Performance:** All matching updates execute via set-based bulk SQL queries within a single Drizzle transaction, and in-app notifications are emitted to contact owners and group admins.
 
