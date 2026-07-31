@@ -215,6 +215,10 @@ export async function rejectInAppRequestAction(friendshipId: string, userIdOverr
   if (fRecords.length === 0) throw new Error("Friend request not found");
   const fRecord = fRecords[0];
 
+  if (fRecord.userId1 !== uid && fRecord.userId2 !== uid) {
+    throw new Error("You are not involved in this friend request");
+  }
+
   const otherUserId = fRecord.userId1 === uid ? fRecord.userId2 : fRecord.userId1;
 
   await db.delete(friendships).where(eq(friendships.id, friendshipId));
@@ -419,26 +423,37 @@ export async function getFriendshipsAction(userIdOverride?: string) {
       )
     );
 
-  const friendsList = [];
-  for (const f of friendshipRows) {
-    const otherUserId = f.userId1 === uid ? f.userId2 : f.userId1;
-    if (!otherUserId) continue;
+  if (friendshipRows.length === 0) return [];
 
-    const prof = await db.select().from(profiles).where(eq(profiles.id, otherUserId)).limit(1);
-    const friendProfile = prof[0];
+  const otherUserIds = friendshipRows
+    .map((f) => (f.userId1 === uid ? f.userId2 : f.userId1))
+    .filter((id): id is string => Boolean(id));
 
-    friendsList.push({
-      friendship_id: f.id,
-      profile: {
-        id: otherUserId,
-        full_name: friendProfile?.fullName || null,
-        avatar_url: friendProfile?.avatarUrl || null,
-        email: friendProfile?.email || undefined,
-      },
-    });
-  }
+  if (otherUserIds.length === 0) return [];
 
-  return friendsList;
+  const friendProfiles = await db
+    .select()
+    .from(profiles)
+    .where(inArray(profiles.id, otherUserIds));
+
+  const profileMap = new Map(friendProfiles.map((p) => [p.id, p]));
+
+  return friendshipRows
+    .map((f) => {
+      const otherUserId = f.userId1 === uid ? f.userId2 : f.userId1;
+      if (!otherUserId) return null;
+      const friendProfile = profileMap.get(otherUserId);
+      return {
+        friendship_id: f.id,
+        profile: {
+          id: otherUserId,
+          full_name: friendProfile?.fullName || null,
+          avatar_url: friendProfile?.avatarUrl || null,
+          email: friendProfile?.email || undefined,
+        },
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
 export async function getFriendRequestsAction(userIdOverride?: string) {
@@ -455,25 +470,36 @@ export async function getFriendRequestsAction(userIdOverride?: string) {
       )
     );
 
-  const requestsList = [];
-  for (const f of friendshipRows) {
-    const otherUserId = f.userId1 === uid ? f.userId2 : f.userId1;
-    if (!otherUserId) continue;
+  if (friendshipRows.length === 0) return [];
 
-    const prof = await db.select().from(profiles).where(eq(profiles.id, otherUserId)).limit(1);
-    const friendProfile = prof[0];
-    const isIncoming = f.initiatorId !== uid;
+  const otherUserIds = friendshipRows
+    .map((f) => (f.userId1 === uid ? f.userId2 : f.userId1))
+    .filter((id): id is string => Boolean(id));
 
-    requestsList.push({
-      id: f.id,
-      type: (isIncoming ? "INCOMING" : "OUTGOING") as "INCOMING" | "OUTGOING",
-      profile: {
-        id: otherUserId,
-        full_name: friendProfile?.fullName || null,
-        avatar_url: friendProfile?.avatarUrl || null,
-      },
-    });
-  }
+  if (otherUserIds.length === 0) return [];
 
-  return requestsList;
+  const friendProfiles = await db
+    .select()
+    .from(profiles)
+    .where(inArray(profiles.id, otherUserIds));
+
+  const profileMap = new Map(friendProfiles.map((p) => [p.id, p]));
+
+  return friendshipRows
+    .map((f) => {
+      const otherUserId = f.userId1 === uid ? f.userId2 : f.userId1;
+      if (!otherUserId) return null;
+      const friendProfile = profileMap.get(otherUserId);
+      const isIncoming = f.initiatorId !== uid;
+      return {
+        id: f.id,
+        type: (isIncoming ? "INCOMING" : "OUTGOING") as "INCOMING" | "OUTGOING",
+        profile: {
+          id: otherUserId,
+          full_name: friendProfile?.fullName || null,
+          avatar_url: friendProfile?.avatarUrl || null,
+        },
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 }

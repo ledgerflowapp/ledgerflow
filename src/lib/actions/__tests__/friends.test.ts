@@ -378,7 +378,6 @@ describe("Friends Server Actions", () => {
 
   describe("getFriendshipsAction and getFriendRequestsAction", () => {
     it("returns list of accepted friendships", async () => {
-      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
           where: vi.fn().mockResolvedValueOnce([
@@ -388,11 +387,9 @@ describe("Friends Server Actions", () => {
       });
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([
-              { id: "user-2", fullName: "Friend Two", avatarUrl: null, email: "friend@example.com" },
-            ]),
-          }),
+          where: vi.fn().mockResolvedValueOnce([
+            { id: "user-2", fullName: "Friend Two", avatarUrl: null, email: "friend@example.com" },
+          ]),
         }),
       });
 
@@ -402,7 +399,6 @@ describe("Friends Server Actions", () => {
     });
 
     it("returns list of pending friend requests", async () => {
-      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
           where: vi.fn().mockResolvedValueOnce([
@@ -412,11 +408,9 @@ describe("Friends Server Actions", () => {
       });
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([
-              { id: "user-2", fullName: "Friend Two", avatarUrl: null },
-            ]),
-          }),
+          where: vi.fn().mockResolvedValueOnce([
+            { id: "user-2", fullName: "Friend Two", avatarUrl: null },
+          ]),
         }),
       });
 

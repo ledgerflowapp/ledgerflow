@@ -367,7 +367,14 @@ describe("Groups Server Actions", () => {
 
   describe("updateGroupAction, deleteGroupAction, removeGroupMemberAction", () => {
     it("updates group name", async () => {
-      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // assertGroupMember check
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "gm1" }]),
+          }),
+        }),
+      });
       mockUpdateSet.mockReturnValueOnce({
         where: vi.fn().mockResolvedValueOnce(undefined),
       });
@@ -377,7 +384,14 @@ describe("Groups Server Actions", () => {
     });
 
     it("deletes group", async () => {
-      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // assertGroupMember check
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "gm1" }]),
+          }),
+        }),
+      });
       mockDeleteWhere.mockResolvedValueOnce(undefined);
 
       const res = await deleteGroupAction({ id: "g1" }, "user-1");
@@ -385,7 +399,14 @@ describe("Groups Server Actions", () => {
     });
 
     it("removes group member", async () => {
-      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // assertGroupMember check
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "gm1" }]),
+          }),
+        }),
+      });
       mockDeleteWhere.mockResolvedValueOnce(undefined);
 
       const res = await removeGroupMemberAction({ groupId: "g1", memberId: "gm1" }, "user-1");
@@ -428,7 +449,14 @@ describe("Groups Server Actions", () => {
 
   describe("getGroupDetailsAction", () => {
     it("returns group details and member list with profiles", async () => {
-      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // assertGroupMember check
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "gm1" }]),
+          }),
+        }),
+      });
 
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
@@ -480,7 +508,14 @@ describe("Groups Server Actions", () => {
 
   describe("getGroupBalancesAction", () => {
     it("calculates member balances accurately from transactions and splits", async () => {
-      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // assertGroupMember check
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "gm1" }]),
+          }),
+        }),
+      });
 
       // member list
       mockDb.select.mockReturnValueOnce({
@@ -526,7 +561,14 @@ describe("Groups Server Actions", () => {
 
   describe("getGroupTransactionCountAction", () => {
     it("returns transaction count for group", async () => {
-      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // assertGroupMember check
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "gm1" }]),
+          }),
+        }),
+      });
 
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({

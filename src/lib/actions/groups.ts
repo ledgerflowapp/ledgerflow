@@ -192,8 +192,20 @@ export async function createGroupAction(
   });
 }
 
+async function assertGroupMember(groupId: string, userId: string) {
+  const member = await db
+    .select({ id: groupMembers.id })
+    .from(groupMembers)
+    .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
+    .limit(1);
+  if (member.length === 0) {
+    throw new Error("You are not a member of this group");
+  }
+}
+
 export async function updateGroupAction(data: { id: string; name: string }, userIdOverride?: string) {
-  await getSessionUser(userIdOverride);
+  const user = await getSessionUser(userIdOverride);
+  await assertGroupMember(data.id, user.id);
 
   await db
     .update(groups)
@@ -204,7 +216,8 @@ export async function updateGroupAction(data: { id: string; name: string }, user
 }
 
 export async function deleteGroupAction(data: { id: string }, userIdOverride?: string) {
-  await getSessionUser(userIdOverride);
+  const user = await getSessionUser(userIdOverride);
+  await assertGroupMember(data.id, user.id);
 
   await db.delete(groups).where(eq(groups.id, data.id));
 
@@ -212,7 +225,8 @@ export async function deleteGroupAction(data: { id: string }, userIdOverride?: s
 }
 
 export async function removeGroupMemberAction(data: { groupId: string; memberId: string }, userIdOverride?: string) {
-  await getSessionUser(userIdOverride);
+  const user = await getSessionUser(userIdOverride);
+  await assertGroupMember(data.groupId, user.id);
 
   await db.delete(groupMembers).where(
     and(
@@ -247,7 +261,8 @@ export async function getGroupsAction(userIdOverride?: string) {
 }
 
 export async function getGroupDetailsAction(groupId: string, userIdOverride?: string) {
-  await getSessionUser(userIdOverride);
+  const user = await getSessionUser(userIdOverride);
+  await assertGroupMember(groupId, user.id);
 
   const groupRows = await db.select().from(groups).where(eq(groups.id, groupId)).limit(1);
   if (groupRows.length === 0) throw new Error("Group not found");
@@ -293,7 +308,8 @@ export async function getGroupDetailsAction(groupId: string, userIdOverride?: st
 }
 
 export async function getGroupBalancesAction(groupId: string, userIdOverride?: string) {
-  await getSessionUser(userIdOverride);
+  const user = await getSessionUser(userIdOverride);
+  await assertGroupMember(groupId, user.id);
 
   const membersList = await db
     .select({ id: groupMembers.id, userId: groupMembers.userId })
@@ -366,7 +382,8 @@ export async function getGroupBalancesAction(groupId: string, userIdOverride?: s
 }
 
 export async function getGroupTransactionCountAction(groupId: string, userIdOverride?: string) {
-  await getSessionUser(userIdOverride);
+  const user = await getSessionUser(userIdOverride);
+  await assertGroupMember(groupId, user.id);
 
   const [result] = await db
     .select({ count: count() })
