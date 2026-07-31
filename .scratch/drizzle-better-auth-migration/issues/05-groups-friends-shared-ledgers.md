@@ -4,7 +4,7 @@
 
 **Blocked by:** 03 — Personal Transactions & Ledger Actions
 
-**Status:** ready-for-agent
+**Status: completed**
 
 - [x] Group member join, merge, and expense balance RPCs ported to `src/lib/actions/groups.ts` using Drizzle transactions.
 - [x] Friend invite, contact invite, and friend removal RPCs ported to `src/lib/actions/friends.ts`.
