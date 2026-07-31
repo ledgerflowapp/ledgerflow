@@ -7,6 +7,18 @@
       "skillPath": "skills/engineering/ask-matt/SKILL.md",
       "computedHash": "0f843160e34a24f5bd12cdc7de7d40951e77fbdc05ce8f891b37ca32eac2c44d"
     },
+    "better-auth-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/best-practices/SKILL.md",
+      "computedHash": "61ba0ef64ed2e7c424401cc848ca33dd6d790a720c44727717dc0c5cba5fc122"
+    },
+    "better-auth-security-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "security/SKILL.md",
+      "computedHash": "7a230edf3a24ce18162cb4379f59b6a19b8d24ca04db530609d0f15cede556dc"
+    },
     "code-review": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -19,6 +31,12 @@
       "skillPath": "skills/engineering/codebase-design/SKILL.md",
       "computedHash": "6d9d51d8caa01633fd00cf87089c5618c982321f942ac69f62565dc001c6b22f"
     },
+    "create-auth": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/create-auth/SKILL.md",
+      "computedHash": "4e261efac2ae9a2321c4495c846ef97cf239818fc8bd2ab7e92ed1f9d25470f7"
+    },
     "diagnosing-bugs": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -30,6 +48,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/domain-modeling/SKILL.md",
       "computedHash": "363cb0f53b0b431e7c00086ad1f823500b7e1b70b5616ee969c979f0934e9e6e"
+    },
+    "email-and-password-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/emailAndPassword/SKILL.md",
+      "computedHash": "747d7f73bd9e2ec5317b8ef88dc70f97df716d00e3d02de4051feebaa48b062d"
     },
     "grill-me": {
       "source": "mattpocock/skills",
@@ -84,6 +108,12 @@
       "sourceType": "github",
       "skillPath": "skills/next-upgrade/SKILL.md",
       "computedHash": "e3aeb1f9e8a68d24df0c1c2e3c8ab97ede09a7251a2c76988318d02254346979"
+    },
+    "organization-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/organization/SKILL.md",
+      "computedHash": "27627eb3a13bd44eff3a5d890f96e7db052b623db90e01684f759abe3e7fe56b"
     },
     "prototype": {
       "source": "mattpocock/skills",
@@ -156,6 +186,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/triage/SKILL.md",
       "computedHash": "7c923b6a677cfe689500721f08307e2a4c46797ff169dc55ef6c34a431a0d533"
+    },
+    "two-factor-authentication-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/twoFactor/SKILL.md",
+      "computedHash": "a6f720042e5a090909e0d519a6a50a7eb8179553cd5315f0bbad852a6d20dac8"
     },
     "wayfinder": {
       "source": "mattpocock/skills",
