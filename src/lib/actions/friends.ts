@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
 import { friendships, contacts, profiles, notifications, user as userTable } from "@/db/schema";
-import { eq, and, or, isNull } from "drizzle-orm";
+import { eq, and, or, isNull, inArray } from "drizzle-orm";
 
 async function getSessionUser(userIdOverride?: string) {
   if (userIdOverride) {
@@ -54,51 +54,53 @@ export async function sendFriendRequestAction(
     throw new Error("Cannot send a friend request to yourself");
   }
 
-  const existing = await db
-    .select()
-    .from(friendships)
-    .where(
-      or(
-        and(eq(friendships.userId1, data.targetUserId), eq(friendships.userId2, uid)),
-        and(eq(friendships.userId1, uid), eq(friendships.userId2, data.targetUserId))
+  return await db.transaction(async (tx) => {
+    const existing = await tx
+      .select()
+      .from(friendships)
+      .where(
+        or(
+          and(eq(friendships.userId1, data.targetUserId), eq(friendships.userId2, uid)),
+          and(eq(friendships.userId1, uid), eq(friendships.userId2, data.targetUserId))
+        )
       )
-    )
-    .limit(1);
+      .limit(1);
 
-  if (existing.length > 0) {
-    if (existing[0].status === "ACCEPTED") {
-      throw new Error("You are already friends with this user");
-    } else {
-      throw new Error("A friend request is already pending");
+    if (existing.length > 0) {
+      if (existing[0].status === "ACCEPTED") {
+        throw new Error("You are already friends with this user");
+      } else {
+        throw new Error("A friend request is already pending");
+      }
     }
-  }
 
-  const userId1 = data.targetUserId < uid ? data.targetUserId : uid;
-  const userId2 = data.targetUserId < uid ? uid : data.targetUserId;
+    const userId1 = data.targetUserId < uid ? data.targetUserId : uid;
+    const userId2 = data.targetUserId < uid ? uid : data.targetUserId;
 
-  await db.insert(friendships).values({
-    userId1,
-    userId2,
-    status: "PENDING",
-    initiatorId: uid,
+    await tx.insert(friendships).values({
+      userId1,
+      userId2,
+      status: "PENDING",
+      initiatorId: uid,
+    });
+
+    if (data.contactId) {
+      await tx
+        .update(contacts)
+        .set({ linkedUserId: data.targetUserId })
+        .where(and(eq(contacts.id, data.contactId), eq(contacts.userId, uid)));
+    }
+
+    await tx.insert(notifications).values({
+      userId: data.targetUserId,
+      type: "FRIEND_REQ",
+      title: "New Friend Request",
+      message: "Someone wants to connect with you.",
+      data: { initiator_id: uid },
+    });
+
+    return { success: true };
   });
-
-  if (data.contactId) {
-    await db
-      .update(contacts)
-      .set({ linkedUserId: data.targetUserId })
-      .where(and(eq(contacts.id, data.contactId), eq(contacts.userId, uid)));
-  }
-
-  await db.insert(notifications).values({
-    userId: data.targetUserId,
-    type: "FRIEND_REQ",
-    title: "New Friend Request",
-    message: "Someone wants to connect with you.",
-    data: { initiator_id: uid },
-  });
-
-  return { success: true };
 }
 
 export async function acceptInAppRequestAction(friendshipId: string, userIdOverride?: string) {

@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/db";
 import { groups, groupMembers, transactions, transactionSplits, profiles } from "@/db/schema";
-import { eq, and, isNull, count } from "drizzle-orm";
+import { eq, and, isNull, count, inArray } from "drizzle-orm";
 
 async function getSessionUser(userIdOverride?: string) {
   if (userIdOverride) {
@@ -324,7 +324,8 @@ export async function getGroupBalancesAction(groupId: string, userIdOverride?: s
       groupMemberId: transactionSplits.groupMemberId,
       amount: transactionSplits.amount,
     })
-    .from(transactionSplits);
+    .from(transactionSplits)
+    .where(inArray(transactionSplits.transactionId, txnIds));
 
   const splitsByTxn: Record<string, typeof splits> = {};
   for (const split of splits) {
