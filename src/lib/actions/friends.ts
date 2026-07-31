@@ -1,28 +1,13 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { db } from "@/db";
 import { friendships, contacts, profiles, notifications, user as userTable } from "@/db/schema";
 import { eq, and, or, isNull, inArray } from "drizzle-orm";
+import { getSessionUser } from "@/lib/auth-session";
 
-async function getSessionUser(userIdOverride?: string) {
-  if (userIdOverride) {
-    return { id: userIdOverride };
-  }
-  let reqHeaders: Headers | undefined;
-  try {
-    reqHeaders = await headers();
-  } catch {
-    reqHeaders = undefined;
-  }
-  const session = await auth.api.getSession({ headers: reqHeaders ?? new Headers() });
-  if (!session?.user) throw new Error("Unauthorized");
-  return session.user;
-}
-
-export async function detectUserByPhoneAction(phone: string, userIdOverride?: string) {
-  await getSessionUser(userIdOverride);
+export async function detectUserByPhoneAction(phone: string) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
 
   const matched = await db
     .select({
@@ -44,10 +29,10 @@ export async function detectUserByPhoneAction(phone: string, userIdOverride?: st
 }
 
 export async function sendFriendRequestAction(
-  data: { targetUserId: string; contactId?: string },
-  userIdOverride?: string
+  data: { targetUserId: string; contactId?: string }
 ) {
-  const sessionUser = await getSessionUser(userIdOverride);
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
   const uid = sessionUser.id;
 
   if (uid === data.targetUserId) {
@@ -103,8 +88,9 @@ export async function sendFriendRequestAction(
   });
 }
 
-export async function acceptInAppRequestAction(friendshipId: string, userIdOverride?: string) {
-  const sessionUser = await getSessionUser(userIdOverride);
+export async function acceptInAppRequestAction(friendshipId: string) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
   const uid = sessionUser.id;
 
   return await db.transaction(async (tx) => {
@@ -202,8 +188,9 @@ export async function acceptInAppRequestAction(friendshipId: string, userIdOverr
   });
 }
 
-export async function rejectInAppRequestAction(friendshipId: string, userIdOverride?: string) {
-  const sessionUser = await getSessionUser(userIdOverride);
+export async function rejectInAppRequestAction(friendshipId: string) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
   const uid = sessionUser.id;
 
   const fRecords = await db
@@ -233,8 +220,9 @@ export async function rejectInAppRequestAction(friendshipId: string, userIdOverr
   return { success: true };
 }
 
-export async function removeFriendAction(friendId: string, userIdOverride?: string) {
-  const sessionUser = await getSessionUser(userIdOverride);
+export async function removeFriendAction(friendId: string) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
   const uid = sessionUser.id;
 
   return await db.transaction(async (tx) => {
@@ -261,8 +249,9 @@ export async function removeFriendAction(friendId: string, userIdOverride?: stri
   });
 }
 
-export async function acceptContactInviteAction(token: string, userIdOverride?: string) {
-  const sessionUser = await getSessionUser(userIdOverride);
+export async function acceptContactInviteAction(token: string) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
   const uid = sessionUser.id;
 
   return await db.transaction(async (tx) => {
@@ -323,8 +312,9 @@ export async function acceptContactInviteAction(token: string, userIdOverride?: 
   });
 }
 
-export async function acceptFriendInviteAction(inviteToken: string, userIdOverride?: string) {
-  const sessionUser = await getSessionUser(userIdOverride);
+export async function acceptFriendInviteAction(inviteToken: string) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
   const uid = sessionUser.id;
 
   return await db.transaction(async (tx) => {
@@ -409,8 +399,9 @@ export async function acceptFriendInviteAction(inviteToken: string, userIdOverri
   });
 }
 
-export async function getFriendshipsAction(userIdOverride?: string) {
-  const sessionUser = await getSessionUser(userIdOverride);
+export async function getFriendshipsAction() {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
   const uid = sessionUser.id;
 
   const friendshipRows = await db
@@ -456,8 +447,9 @@ export async function getFriendshipsAction(userIdOverride?: string) {
     .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
-export async function getFriendRequestsAction(userIdOverride?: string) {
-  const sessionUser = await getSessionUser(userIdOverride);
+export async function getFriendRequestsAction() {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) throw new Error("Unauthorized");
   const uid = sessionUser.id;
 
   const friendshipRows = await db

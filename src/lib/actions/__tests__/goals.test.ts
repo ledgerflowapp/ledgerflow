@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { mockAuthSession } from "@/lib/__tests__/test-utils";
 
 const {
   mockInsertValues,
@@ -75,10 +76,12 @@ import {
 describe("Goals Server Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAuthSession({ id: "user-1" });
   });
 
   describe("createGoalAction", () => {
     it("throws Unauthorized if no session user is found", async () => {
+      mockAuthSession(null);
       await expect(
         createGoalAction({
           name: "New Laptop",
@@ -101,14 +104,11 @@ describe("Goals Server Actions", () => {
         returning: vi.fn().mockResolvedValue([mockGoal]),
       });
 
-      const result = await createGoalAction(
-        {
-          name: "New Laptop",
-          targetAmount: 5000000,
-          deadline: "2026-12-31",
-        },
-        "user-1"
-      );
+      const result = await createGoalAction({
+        name: "New Laptop",
+        targetAmount: 5000000,
+        deadline: "2026-12-31",
+      });
 
       expect(result).toEqual({
         id: "goal-1",
@@ -122,6 +122,7 @@ describe("Goals Server Actions", () => {
 
   describe("getGoalsAction", () => {
     it("throws Unauthorized if no session user is found", async () => {
+      mockAuthSession(null);
       await expect(getGoalsAction()).rejects.toThrow("Unauthorized");
     });
 
@@ -139,7 +140,7 @@ describe("Goals Server Actions", () => {
 
       mockDb.query.goals.findMany.mockResolvedValueOnce(mockGoals);
 
-      const result = await getGoalsAction("user-1");
+      const result = await getGoalsAction();
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
         id: "goal-1",
@@ -153,6 +154,7 @@ describe("Goals Server Actions", () => {
 
   describe("contributeGoalAction", () => {
     it("throws Unauthorized if no session user is found", async () => {
+      mockAuthSession(null);
       await expect(
         contributeGoalAction({ id: "goal-1", amount: 10000 })
       ).rejects.toThrow("Unauthorized");
@@ -162,7 +164,7 @@ describe("Goals Server Actions", () => {
       mockTx.query.goals.findFirst.mockResolvedValueOnce(null);
 
       await expect(
-        contributeGoalAction({ id: "goal-missing", amount: 10000 }, "user-1")
+        contributeGoalAction({ id: "goal-missing", amount: 10000 })
       ).rejects.toThrow("Goal not found or unauthorized");
     });
 
@@ -175,7 +177,7 @@ describe("Goals Server Actions", () => {
       });
 
       await expect(
-        contributeGoalAction({ id: "goal-1", amount: 10000 }, "user-1")
+        contributeGoalAction({ id: "goal-1", amount: 10000 })
       ).rejects.toThrow("Contribution would exceed goal target");
     });
 
@@ -205,8 +207,7 @@ describe("Goals Server Actions", () => {
       mockInsertValues.mockResolvedValueOnce(undefined);
 
       const result = await contributeGoalAction(
-        { id: "goal-1", amount: 1000000 },
-        "user-1"
+        { id: "goal-1", amount: 1000000 }
       );
 
       expect(mockDb.transaction).toHaveBeenCalled();
@@ -224,7 +225,7 @@ describe("Goals Server Actions", () => {
     it("throws error if goal is not found or owned by another user", async () => {
       mockDb.query.goals.findFirst.mockResolvedValueOnce(null);
 
-      await expect(deleteGoalAction("goal-other", "user-1")).rejects.toThrow(
+      await expect(deleteGoalAction("goal-other")).rejects.toThrow(
         "Unauthorized or goal not found"
       );
     });
@@ -237,7 +238,7 @@ describe("Goals Server Actions", () => {
 
       mockDeleteWhere.mockResolvedValueOnce(undefined);
 
-      const result = await deleteGoalAction("goal-1", "user-1");
+      const result = await deleteGoalAction("goal-1");
       expect(result).toEqual({ success: true });
     });
   });

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { mockAuthSession } from "@/lib/__tests__/test-utils";
 
 const { mockInsertValues, mockReturning, mockUpdateSet, mockDeleteWhere, mockTx, mockDb } =
   vi.hoisted(() => {
@@ -63,10 +64,12 @@ import {
 describe("Transactions Server Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAuthSession({ id: "user-1" });
   });
 
   describe("createTransactionAction", () => {
     it("throws Unauthorized if no session user is found", async () => {
+      mockAuthSession(null);
       await expect(
         createTransactionAction({
           amount: 5000,
@@ -86,23 +89,20 @@ describe("Transactions Server Actions", () => {
         })
         .mockReturnValueOnce(Promise.resolve());
 
-      const result = await createTransactionAction(
-        {
-          amount: 5000,
-          flow: "OUT",
-          mode: "PERSONAL",
-          name: "Lunch",
-          date: new Date("2026-07-31"),
-          splits: [
-            {
-              userId: "user-2",
-              amount: 2500,
-              memberNameSnapshot: "Bob",
-            },
-          ],
-        },
-        "user-1"
-      );
+      const result = await createTransactionAction({
+        amount: 5000,
+        flow: "OUT",
+        mode: "PERSONAL",
+        name: "Lunch",
+        date: new Date("2026-07-31"),
+        splits: [
+          {
+            userId: "user-2",
+            amount: 2500,
+            memberNameSnapshot: "Bob",
+          },
+        ],
+      });
 
       expect(mockDb.transaction).toHaveBeenCalled();
       expect(result).toEqual({
@@ -116,6 +116,7 @@ describe("Transactions Server Actions", () => {
 
   describe("getTransactionsAction", () => {
     it("throws Unauthorized if no user provided", async () => {
+      mockAuthSession(null);
       await expect(getTransactionsAction()).rejects.toThrow("Unauthorized");
     });
 
@@ -140,7 +141,7 @@ describe("Transactions Server Actions", () => {
 
       mockDb.query.transactions.findMany.mockResolvedValueOnce(mockTxData);
 
-      const result = await getTransactionsAction({ mode: "PERSONAL" }, "user-1");
+      const result = await getTransactionsAction({ mode: "PERSONAL" });
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe("tx-1");
@@ -167,7 +168,7 @@ describe("Transactions Server Actions", () => {
         },
       ]);
 
-      const result = await getPersonalTransactionsAction({}, "user-1");
+      const result = await getPersonalTransactionsAction({});
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe("Coffee");
       expect(result[0].amount).toBe(2000);
@@ -194,7 +195,7 @@ describe("Transactions Server Actions", () => {
         },
       ]);
 
-      const result = await getUnifiedTransactionsAction({}, "user-1");
+      const result = await getUnifiedTransactionsAction({});
       expect(result).toHaveLength(1);
       expect(result[0].amount).toBe(50000);
     });
@@ -205,17 +206,14 @@ describe("Transactions Server Actions", () => {
       mockDb.query.transactions.findFirst.mockResolvedValueOnce(null);
 
       await expect(
-        updateTransactionAction(
-          {
-            id: "tx-missing",
-            amount: 1000,
-            flow: "OUT",
-            mode: "PERSONAL",
-            name: "Updated",
-            date: new Date(),
-          },
-          "user-1"
-        )
+        updateTransactionAction({
+          id: "tx-missing",
+          amount: 1000,
+          flow: "OUT",
+          mode: "PERSONAL",
+          name: "Updated",
+          date: new Date(),
+        })
       ).rejects.toThrow("Unauthorized or transaction not found");
     });
 
@@ -232,17 +230,14 @@ describe("Transactions Server Actions", () => {
         }),
       });
 
-      const result = await updateTransactionAction(
-        {
-          id: "tx-1",
-          amount: 2000,
-          flow: "OUT",
-          mode: "PERSONAL",
-          name: "Updated Name",
-          date: new Date(),
-        },
-        "user-1"
-      );
+      const result = await updateTransactionAction({
+        id: "tx-1",
+        amount: 2000,
+        flow: "OUT",
+        mode: "PERSONAL",
+        name: "Updated Name",
+        date: new Date(),
+      });
 
       expect(result).toEqual(updatedRow);
     });
@@ -252,7 +247,7 @@ describe("Transactions Server Actions", () => {
     it("throws error if transaction does not exist or owned by another user", async () => {
       mockDb.query.transactions.findFirst.mockResolvedValueOnce(null);
 
-      await expect(deleteTransactionAction("tx-other", "user-1")).rejects.toThrow(
+      await expect(deleteTransactionAction("tx-other")).rejects.toThrow(
         "Unauthorized or transaction not found"
       );
     });
@@ -265,7 +260,7 @@ describe("Transactions Server Actions", () => {
 
       mockDeleteWhere.mockResolvedValueOnce(undefined);
 
-      const result = await deleteTransactionAction("tx-1", "user-1");
+      const result = await deleteTransactionAction("tx-1");
       expect(result).toEqual({ success: true });
     });
   });

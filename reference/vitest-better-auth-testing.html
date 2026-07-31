@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reference: Vitest & Better Auth Session Mocking</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1>Reference: Vitest & Better Auth Mocking Patterns</h1>
+    <p class="subtitle">Quick reference guide for test helpers, module mocking, and type casting</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. The Core Concepts</h2>
+      <ul>
+        <li><strong>Why mock auth?</strong> Server Actions depend on <code>auth.api.getSession()</code>. In unit tests, we simulate logged-in and logged-out states without reaching a real database or browser cookie engine.</li>
+        <li><strong><code>vi.mock("@/lib/auth")</code>:</strong> Tells Vitest to intercept imports of <code>@/lib/auth</code> and substitute mock functions.</li>
+        <li><strong><code>vi.mocked(fn)</code>:</strong> A TypeScript-only wrapper that exposes mock methods (like <code>mockResolvedValue</code>) on typed functions without manual <code>as unknown as Mock</code> casting.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. Pattern Comparison Cheat Sheet</h2>
+      
+      <div class="card">
+        <h3>Option A: Direct <code>vi.mocked</code> in Test Setup</h3>
+        <pre><code>// 1. Mock module
+vi.mock("@/lib/auth", () => ({
+  auth: { api: { getSession: vi.fn() } }
+}));
+
+// 2. Set return value in test
+vi.mocked(auth.api.getSession).mockResolvedValue({
+  user: { id: "user-1", email: "user@example.com" },
+  session: { id: "sess-1", userId: "user-1", expiresAt: new Date() }
+} as any);</code></pre>
+        <p><strong>Best for:</strong> One-off tests needing bespoke user objects or testing edge-case user properties.</p>
+      </div>
+
+      <div class="card">
+        <h3>Option B: Shared Helper (e.g. <code>mockSession(user)</code>)</h3>
+        <pre><code>// In src/test/utils.ts
+export function mockSession(user: { id: string; email?: string } | null = { id: "user-1" }) {
+  if (!user) {
+    vi.mocked(auth.api.getSession).mockResolvedValue(null);
+    return;
+  }
+  vi.mocked(auth.api.getSession).mockResolvedValue({
+    user: { id: user.id, email: user.email ?? `${user.id}@example.com` },
+    session: { id: `sess-${user.id}`, userId: user.id, expiresAt: new Date() },
+  } as any);
+}
+
+// In test files:
+describe("Server Actions", () => {
+  beforeEach(() => {
+    mockSession({ id: "user-1" }); // default auth state
+  });
+
+  it("rejects when unauthenticated", async () => {
+    mockSession(null);
+    await expect(myAction()).rejects.toThrow("Unauthorized");
+  });
+});</code></pre>
+        <p><strong>Best for:</strong> Multi-file test suites (like <code>goals.test.ts</code>, <code>transactions.test.ts</code>, <code>friends.test.ts</code>, <code>groups.test.ts</code>) to keep tests DRY and readable.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

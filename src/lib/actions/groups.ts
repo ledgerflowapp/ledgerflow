@@ -1,25 +1,9 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { db } from "@/db";
 import { groups, groupMembers, transactions, transactionSplits, profiles } from "@/db/schema";
 import { eq, and, isNull, count, inArray } from "drizzle-orm";
-
-async function getSessionUser(userIdOverride?: string) {
-  if (userIdOverride) {
-    return { id: userIdOverride };
-  }
-  let reqHeaders: Headers | undefined;
-  try {
-    reqHeaders = await headers();
-  } catch {
-    reqHeaders = undefined;
-  }
-  const session = await auth.api.getSession({ headers: reqHeaders ?? new Headers() });
-  if (!session?.user) throw new Error("Unauthorized");
-  return session.user;
-}
+import { getSessionUser } from "@/lib/auth-session";
 
 export async function getGroupByInviteAction(inviteCode: string) {
   const targetGroup = await db.select().from(groups).where(eq(groups.inviteCode, inviteCode)).limit(1);
@@ -51,8 +35,9 @@ export async function getGroupByInviteAction(inviteCode: string) {
   }];
 }
 
-export async function joinGroupAction(inviteCode: string, claimGhostMemberId: string | null = null, userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function joinGroupAction(inviteCode: string, claimGhostMemberId: string | null = null) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   const userId = user.id;
   
   return await db.transaction(async (tx) => {
@@ -103,8 +88,9 @@ export async function joinGroupAction(inviteCode: string, claimGhostMemberId: st
   });
 }
 
-export async function linkGhostToFriendAction(groupId: string, ghostMemberId: string, friendUserId: string, userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function linkGhostToFriendAction(groupId: string, ghostMemberId: string, friendUserId: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   const currentUserId = user.id;
   
   return await db.transaction(async (tx) => {
@@ -153,10 +139,10 @@ export async function createGroupAction(
     name: string;
     type?: string;
     members?: Array<{ id?: string; name: string; type: "REAL" | "GHOST"; avatar_url?: string | null }>;
-  },
-  userIdOverride?: string
+  }
 ) {
-  const user = await getSessionUser(userIdOverride);
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   const userId = user.id;
 
   return await db.transaction(async (tx) => {
@@ -203,8 +189,9 @@ async function assertGroupMember(groupId: string, userId: string) {
   }
 }
 
-export async function updateGroupAction(data: { id: string; name: string }, userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function updateGroupAction(data: { id: string; name: string }) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   await assertGroupMember(data.id, user.id);
 
   await db
@@ -215,8 +202,9 @@ export async function updateGroupAction(data: { id: string; name: string }, user
   return { success: true };
 }
 
-export async function deleteGroupAction(data: { id: string }, userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function deleteGroupAction(data: { id: string }) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   await assertGroupMember(data.id, user.id);
 
   await db.delete(groups).where(eq(groups.id, data.id));
@@ -224,8 +212,9 @@ export async function deleteGroupAction(data: { id: string }, userIdOverride?: s
   return { success: true };
 }
 
-export async function removeGroupMemberAction(data: { groupId: string; memberId: string }, userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function removeGroupMemberAction(data: { groupId: string; memberId: string }) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   await assertGroupMember(data.groupId, user.id);
 
   await db.delete(groupMembers).where(
@@ -238,8 +227,9 @@ export async function removeGroupMemberAction(data: { groupId: string; memberId:
   return { success: true };
 }
 
-export async function getGroupsAction(userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function getGroupsAction() {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
 
   const rows = await db
     .select({
@@ -260,8 +250,9 @@ export async function getGroupsAction(userIdOverride?: string) {
   }));
 }
 
-export async function getGroupDetailsAction(groupId: string, userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function getGroupDetailsAction(groupId: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   await assertGroupMember(groupId, user.id);
 
   const groupRows = await db.select().from(groups).where(eq(groups.id, groupId)).limit(1);
@@ -307,8 +298,9 @@ export async function getGroupDetailsAction(groupId: string, userIdOverride?: st
   };
 }
 
-export async function getGroupBalancesAction(groupId: string, userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function getGroupBalancesAction(groupId: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   await assertGroupMember(groupId, user.id);
 
   const membersList = await db
@@ -381,8 +373,9 @@ export async function getGroupBalancesAction(groupId: string, userIdOverride?: s
   return balanceMap;
 }
 
-export async function getGroupTransactionCountAction(groupId: string, userIdOverride?: string) {
-  const user = await getSessionUser(userIdOverride);
+export async function getGroupTransactionCountAction(groupId: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("Unauthorized");
   await assertGroupMember(groupId, user.id);
 
   const [result] = await db

@@ -84,10 +84,12 @@ import {
   getFriendRequestsAction,
 } from "../friends";
 import { auth } from "@/lib/auth";
+import { mockAuthSession } from "@/lib/__tests__/test-utils";
 
 describe("Friends Server Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAuthSession({ id: "user-1" });
   });
 
   describe("detectUserByPhoneAction", () => {
@@ -100,7 +102,7 @@ describe("Friends Server Actions", () => {
         }),
       });
 
-      const user = await detectUserByPhoneAction("+1234567890", "user-1");
+      const user = await detectUserByPhoneAction("+1234567890");
       expect(user).toBeNull();
     });
 
@@ -115,7 +117,7 @@ describe("Friends Server Actions", () => {
         }),
       });
 
-      const user = await detectUserByPhoneAction("+1234567890", "user-1");
+      const user = await detectUserByPhoneAction("+1234567890");
       expect(user).toEqual({
         id: "u2",
         full_name: "Jane Doe",
@@ -287,7 +289,7 @@ describe("Friends Server Actions", () => {
 
       mockDeleteWhere.mockResolvedValueOnce(undefined);
 
-      const res = await removeFriendAction("friend-2", "user-1");
+      const res = await removeFriendAction("friend-2");
       expect(mockDb.transaction).toHaveBeenCalled();
       expect(res).toEqual({ success: true });
     });
@@ -325,7 +327,8 @@ describe("Friends Server Actions", () => {
         where: vi.fn().mockResolvedValueOnce(undefined),
       });
 
-      const res = await acceptContactInviteAction("valid-token", "user-2");
+      mockAuthSession({ id: "user-2" });
+      const res = await acceptContactInviteAction("valid-token");
       expect(res).toEqual({ success: true, owner_name: "Owner Name" });
     });
 
@@ -371,7 +374,8 @@ describe("Friends Server Actions", () => {
         }),
       });
 
-      const res = await acceptFriendInviteAction("friend-token", "user-2");
+      mockAuthSession({ id: "user-2" });
+      const res = await acceptFriendInviteAction("friend-token");
       expect(res).toEqual({ success: true, target_name: "Target User" });
     });
   });
@@ -393,7 +397,7 @@ describe("Friends Server Actions", () => {
         }),
       });
 
-      const list = await getFriendshipsAction("user-1");
+      const list = await getFriendshipsAction();
       expect(list).toHaveLength(1);
       expect(list[0].profile.full_name).toBe("Friend Two");
     });
@@ -414,7 +418,7 @@ describe("Friends Server Actions", () => {
         }),
       });
 
-      const requests = await getFriendRequestsAction("user-1");
+      const requests = await getFriendRequestsAction();
       expect(requests).toHaveLength(1);
       expect(requests[0].type).toBe("INCOMING");
       expect(requests[0].profile.full_name).toBe("Friend Two");

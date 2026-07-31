@@ -1,8 +1,7 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { db } from "@/db";
+import { getSessionUser } from "@/lib/auth-session";
 import {
   transactions,
   transactionSplits,
@@ -65,25 +64,10 @@ export interface GetTransactionsFilters {
   offset?: number;
 }
 
-export async function getSessionUser() {
-  try {
-    const reqHeaders = await headers();
-    const session = await auth.api.getSession({ headers: reqHeaders });
-    return session?.user ?? null;
-  } catch (err) {
-    return null;
-  }
-}
-
-/**
- * Creates a transaction and optional splits atomically using a Drizzle ORM database transaction.
- * Replaces the atomic_add_transaction_rpc / add_transaction_with_splits stored procedure.
- */
 export async function createTransactionAction(
-  input: CreateTransactionInput,
-  overrideUserId?: string
+  input: CreateTransactionInput
 ) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -133,10 +117,9 @@ export async function createTransactionAction(
  * Fetches transactions filtered by mode, contactId, or groupId.
  */
 export async function getTransactionsAction(
-  filters?: GetTransactionsFilters,
-  overrideUserId?: string
+  filters?: GetTransactionsFilters
 ) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -241,10 +224,9 @@ export async function getPersonalTransactionsAction(
   filters?: {
     limit?: number;
     offset?: number;
-  },
-  overrideUserId?: string
+  }
 ) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -310,10 +292,9 @@ export async function getUnifiedTransactionsAction(
   filters?: {
     limit?: number;
     offset?: number;
-  },
-  overrideUserId?: string
+  }
 ) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -403,10 +384,9 @@ export async function getUnifiedTransactionsAction(
  * Updates an existing transaction if owned by the logged-in user.
  */
 export async function updateTransactionAction(
-  input: UpdateTransactionInput,
-  overrideUserId?: string
+  input: UpdateTransactionInput
 ) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -442,8 +422,8 @@ export async function updateTransactionAction(
 /**
  * Deletes a transaction by ID if owned by the logged-in user.
  */
-export async function deleteTransactionAction(id: string, overrideUserId?: string) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+export async function deleteTransactionAction(id: string) {
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 0001: Testing Patterns for Better Auth & Server Actions</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <h1>Lesson 0001: Mocking Auth Sessions in Vitest</h1>
+    <p class="subtitle">Understanding <code>vi.mocked</code>, Better Auth session guards, and Option A vs Option B design tradeoffs</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Mission Context</h2>
+      <p>You are designing test suites for server actions across multiple domain modules (<code>goals.test.ts</code>, <code>transactions.test.ts</code>, <code>friends.test.ts</code>, and <code>groups.test.ts</code>). To test these actions cleanly, you need to understand how session verification works and how Vitest mocks it.</p>
+    </section>
+
+    <section>
+      <h2>Concept 1: What is Session Mocking & Why Do We Need It?</h2>
+      <p>In Next.js server actions, your backend checks who is making the request using Better Auth:</p>
+      <pre><code>// Example inside a Server Action
+const session = await auth.api.getSession({ headers: await headers() });
+if (!session) {
+  throw new Error("Unauthorized");
+}
+// Proceed with business logic...</code></pre>
+      <p>During automated unit tests, running a real auth flow (hitting PostgreSQL or cookie parsers) is slow and complex. Instead, we <strong>mock</strong> <code>auth.api.getSession</code> so that it returns a fake session object when we want an authenticated user, or <code>null</code> when testing an unauthenticated user.</p>
+    </section>
+
+    <section>
+      <h2>Concept 2: What is <code>vi.mocked()</code>?</h2>
+      <p>Vitest replaces your real module with a mock object via <code>vi.mock("@/lib/auth")</code>. However, TypeScript still thinks <code>auth.api.getSession</code> is a standard function, not a mock!</p>
+      <p><code>vi.mocked(auth.api.getSession)</code> does not change any runtime code—it simply tells TypeScript: <em>"Treat this function as a Vitest mock so I can call <code>.mockResolvedValue()</code> or <code>.mockReturnValue()</code> safely with full autocompletion."</em></p>
+    </section>
+
+    <section>
+      <h2>Concept 3: Option A vs Option B Tradeoff Analysis</h2>
+
+      <div class="option-box">
+        <h3>Option A: Direct <code>vi.mocked</code> calls inside test setup/files</h3>
+        <p><strong>Code Example:</strong></p>
+        <pre><code>vi.mocked(auth.api.getSession).mockResolvedValue({
+  user: { id: "user-1", email: "user@example.com" },
+  session: { id: "sess-1", userId: "user-1", expiresAt: new Date() }
+} as any);</code></pre>
+        <ul>
+          <li><strong>Pros:</strong> Zero extra abstraction files. Explicit per-test visibility.</li>
+          <li><strong>Cons:</strong> High repetition (duplicating session shapes across 4+ test files). If Better Auth session schema changes, every single test file needs manual updating.</li>
+        </ul>
+      </div>
+
+      <div class="option-box">
+        <h3>Option B (Recommended for standard suites): Shared Test Helper Function</h3>
+        <p><strong>Code Example:</strong></p>
+        <pre><code>// In a shared utility like src/test/utils.ts
+export function mockSession(user: { id: string; email?: string } | null = { id: "user-1" }) {
+  if (!user) {
+    vi.mocked(auth.api.getSession).mockResolvedValue(null);
+    return;
+  }
+  vi.mocked(auth.api.getSession).mockResolvedValue({
+    user: { id: user.id, email: user.email ?? `${user.id}@example.com` },
+    session: { id: `sess-${user.id}`, userId: user.id, expiresAt: new Date() },
+  } as any);
+}</code></pre>
+        <ul>
+          <li><strong>Pros:</strong> DRY (Don't Repeat Yourself). One-line calls in tests (<code>mockSession({ id: "u1" })</code> or <code>mockSession(null)</code>). Single source of truth if session fields change.</li>
+          <li><strong>Cons:</strong> Requires setting up a shared helper module (e.g. <code>src/test/utils.ts</code>).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recommendation for Ledgerflow</h2>
+      <p>Option B with Option A fallbacks is the industry gold standard:</p>
+      <ol>
+        <li>Create a helper <code>mockSession(user)</code> in a shared test utility.</li>
+        <li>Use <code>mockSession()</code> in <code>beforeEach</code> across <code>goals.test.ts</code>, <code>transactions.test.ts</code>, <code>friends.test.ts</code>, and <code>groups.test.ts</code>.</li>
+        <li>Reach for direct <code>vi.mocked(...)</code> only when a test requires unique, non-standard session properties.</li>
+      </ol>
+    </section>
+
+    <section class="quiz-container">
+      <h2>Check Your Understanding</h2>
+      <p><strong>Question:</strong> What does <code>vi.mocked(auth.api.getSession)</code> actually do?</p>
+      <button class="quiz-option" onclick="checkQuiz(0)">A. It executes the real auth backend and records its return values.</button>
+      <button class="quiz-option" onclick="checkQuiz(1)">B. It casts the function type in TypeScript so IDEs provide autocomplete for Vitest mock methods.</button>
+      <button class="quiz-option" onclick="checkQuiz(2)">C. It deletes the session from the PostgreSQL database after every test run.</button>
+      
+      <div id="quiz-feedback" class="quiz-feedback"></div>
+    </section>
+
+    <section>
+      <h2>Primary Sources & Further Reading</h2>
+      <ul>
+        <li><a href="https://vitest.dev/guide/mocking.html" target="_blank">Vitest Official Mocking Guide</a></li>
+        <li>Check the local reference document: <a href="../reference/vitest-better-auth-testing.html">Reference: Vitest & Better Auth Session Mocking</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Questions or need clarification? Ask your AI pair programmer! We can adjust or walk through live examples anytime.</p>
+  </footer>
+
+  <script>
+    function checkQuiz(index) {
+      const feedback = document.getElementById('quiz-feedback');
+      if (index === 1) {
+        feedback.className = 'quiz-feedback correct';
+        feedback.innerHTML = '<strong>Correct!</strong> <code>vi.mocked()</code> is a TypeScript helper that adds Vitest mock type definitions to the function without altering runtime behavior.';
+      } else {
+        feedback.className = 'quiz-feedback incorrect';
+        feedback.innerHTML = '<strong>Not quite.</strong> <code>vi.mocked()</code> is purely a TypeScript type-casting utility for Vitest mock functions.';
+      }
+    }
+  </script>
+</body>
+</html>

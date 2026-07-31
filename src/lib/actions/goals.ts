@@ -1,10 +1,9 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { db } from "@/db";
 import { goals, goalContributions } from "@/db/schema";
 import { eq, and, asc } from "drizzle-orm";
+import { getSessionUser } from "@/lib/auth-session";
 
 export interface CreateGoalInput {
   name: string;
@@ -18,24 +17,11 @@ export interface ContributeGoalInput {
   note?: string | null;
 }
 
-export async function getSessionUser() {
-  try {
-    const reqHeaders = await headers();
-    const session = await auth.api.getSession({ headers: reqHeaders });
-    return session?.user ?? null;
-  } catch (err) {
-    return null;
-  }
-}
-
 /**
  * Creates a new goal for the authenticated user.
  */
-export async function createGoalAction(
-  input: CreateGoalInput,
-  overrideUserId?: string
-) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+export async function createGoalAction(input: CreateGoalInput) {
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -63,8 +49,8 @@ export async function createGoalAction(
 /**
  * Fetches all goals for the authenticated user ordered by deadline.
  */
-export async function getGoalsAction(overrideUserId?: string) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+export async function getGoalsAction() {
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -87,11 +73,8 @@ export async function getGoalsAction(overrideUserId?: string) {
  * Contributes an amount to a goal using an atomic Drizzle database transaction.
  * Replaces the atomic_contribute_goal_rpc / contribute_to_goal PostgreSQL procedure.
  */
-export async function contributeGoalAction(
-  input: ContributeGoalInput,
-  overrideUserId?: string
-) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+export async function contributeGoalAction(input: ContributeGoalInput) {
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }
@@ -143,8 +126,8 @@ export async function contributeGoalAction(
 /**
  * Deletes a goal by ID if owned by the logged-in user.
  */
-export async function deleteGoalAction(id: string, overrideUserId?: string) {
-  const currentUser = overrideUserId ? { id: overrideUserId } : await getSessionUser();
+export async function deleteGoalAction(id: string) {
+  const currentUser = await getSessionUser();
   if (!currentUser) {
     throw new Error("Unauthorized");
   }

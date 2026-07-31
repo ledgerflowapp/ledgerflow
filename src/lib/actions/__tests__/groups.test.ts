@@ -86,10 +86,12 @@ import {
   getGroupTransactionCountAction,
 } from "../groups";
 import { auth } from "@/lib/auth";
+import { mockAuthSession } from "@/lib/__tests__/test-utils";
 
 describe("Groups Server Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAuthSession({ id: "user-1" });
   });
 
   describe("getGroupByInviteAction", () => {
@@ -379,7 +381,7 @@ describe("Groups Server Actions", () => {
         where: vi.fn().mockResolvedValueOnce(undefined),
       });
 
-      const res = await updateGroupAction({ id: "g1", name: "Updated Name" }, "user-1");
+      const res = await updateGroupAction({ id: "g1", name: "Updated Name" });
       expect(res).toEqual({ success: true });
     });
 
@@ -394,7 +396,7 @@ describe("Groups Server Actions", () => {
       });
       mockDeleteWhere.mockResolvedValueOnce(undefined);
 
-      const res = await deleteGroupAction({ id: "g1" }, "user-1");
+      const res = await deleteGroupAction({ id: "g1" });
       expect(res).toEqual({ success: true });
     });
 
@@ -409,7 +411,7 @@ describe("Groups Server Actions", () => {
       });
       mockDeleteWhere.mockResolvedValueOnce(undefined);
 
-      const res = await removeGroupMemberAction({ groupId: "g1", memberId: "gm1" }, "user-1");
+      const res = await removeGroupMemberAction({ groupId: "g1", memberId: "gm1" });
       expect(res).toEqual({ success: true });
     });
   });
@@ -441,7 +443,7 @@ describe("Groups Server Actions", () => {
         }),
       });
 
-      const groups = await getGroupsAction("user-1");
+      const groups = await getGroupsAction();
       expect(groups).toHaveLength(1);
       expect(groups[0].name).toBe("Flatmates");
     });
@@ -499,7 +501,7 @@ describe("Groups Server Actions", () => {
         }),
       });
 
-      const details = await getGroupDetailsAction("g1", "user-1");
+      const details = await getGroupDetailsAction("g1");
       expect(details.group.name).toBe("Trip");
       expect(details.members).toHaveLength(1);
       expect(details.members[0].profiles?.full_name).toBe("User One");
@@ -551,7 +553,7 @@ describe("Groups Server Actions", () => {
         }),
       });
 
-      const balances = await getGroupBalancesAction("g1", "user-1");
+      const balances = await getGroupBalancesAction("g1");
       expect(balances).toEqual({
         gm1: 50, // paid 100, split -50 = +50
         gm2: -50, // paid 0, split -50 = -50
@@ -576,7 +578,7 @@ describe("Groups Server Actions", () => {
         }),
       });
 
-      const res = await getGroupTransactionCountAction("g1", "user-1");
+      const res = await getGroupTransactionCountAction("g1");
       expect(res).toEqual({ count: 5 });
     });
   });
