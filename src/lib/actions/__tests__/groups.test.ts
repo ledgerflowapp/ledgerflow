@@ -171,6 +171,157 @@ describe("Groups Server Actions", () => {
       const res = await joinGroupAction("code123", null);
       expect(res).toEqual({ success: true, group_id: "g1" });
     });
+
+    it("returns existing status if already a member", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({
+        user: { id: "user-1" },
+      });
+
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "g1" }]),
+          }),
+        }),
+      });
+
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "gm-existing" }]),
+          }),
+        }),
+      });
+
+      const res = await joinGroupAction("code123");
+      expect(res).toEqual({ success: true, message: "Already a member", group_id: "g1" });
+    });
+
+    it("claims ghost member if claimGhostMemberId is provided", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({
+        user: { id: "user-1" },
+      });
+
+      // 1. group lookup
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "g1" }]),
+          }),
+        }),
+      });
+
+      // 2. existing member check (empty)
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([]),
+          }),
+        }),
+      });
+
+      // 3. ghost member lookup (found)
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "ghost-1", groupId: "g1", userId: null }]),
+          }),
+        }),
+      });
+
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce(undefined),
+      });
+
+      const res = await joinGroupAction("code123", "ghost-1");
+      expect(res).toEqual({ success: true, group_id: "g1" });
+      expect(mockTx.update).toHaveBeenCalled();
+    });
+  });
+
+  describe("linkGhostToFriendAction", () => {
+    it("throws if group is not found", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([]),
+          }),
+        }),
+      });
+
+      await expect(linkGhostToFriendAction("g1", "ghost-1", "friend-1")).rejects.toThrow("Group not found");
+    });
+
+    it("throws if user is not group admin", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-2" } });
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "g1", createdBy: "user-1" }]),
+          }),
+        }),
+      });
+
+      await expect(linkGhostToFriendAction("g1", "ghost-1", "friend-1")).rejects.toThrow("Only group admin can link members");
+    });
+
+    it("throws if target friend is already a member", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // group lookup
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "g1", createdBy: "user-1" }]),
+          }),
+        }),
+      });
+      // friend member lookup (found)
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "gm-friend", userId: "friend-1" }]),
+          }),
+        }),
+      });
+
+      await expect(linkGhostToFriendAction("g1", "ghost-1", "friend-1")).rejects.toThrow("This friend is already a member of the group. Cannot merge.");
+    });
+
+    it("links ghost member to friend successfully", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // group lookup
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "g1", createdBy: "user-1" }]),
+          }),
+        }),
+      });
+      // friend member lookup (not found)
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([]),
+          }),
+        }),
+      });
+      // ghost match lookup (found)
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "ghost-1", groupId: "g1", userId: null }]),
+          }),
+        }),
+      });
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce(undefined),
+      });
+
+      const res = await linkGhostToFriendAction("g1", "ghost-1", "friend-1");
+      expect(res).toEqual({ success: true });
+      expect(mockTx.update).toHaveBeenCalled();
+    });
   });
 
   describe("createGroupAction", () => {
@@ -214,6 +365,34 @@ describe("Groups Server Actions", () => {
     });
   });
 
+  describe("updateGroupAction, deleteGroupAction, removeGroupMemberAction", () => {
+    it("updates group name", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce(undefined),
+      });
+
+      const res = await updateGroupAction({ id: "g1", name: "Updated Name" }, "user-1");
+      expect(res).toEqual({ success: true });
+    });
+
+    it("deletes group", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockDeleteWhere.mockResolvedValueOnce(undefined);
+
+      const res = await deleteGroupAction({ id: "g1" }, "user-1");
+      expect(res).toEqual({ success: true });
+    });
+
+    it("removes group member", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockDeleteWhere.mockResolvedValueOnce(undefined);
+
+      const res = await removeGroupMemberAction({ groupId: "g1", memberId: "gm1" }, "user-1");
+      expect(res).toEqual({ success: true });
+    });
+  });
+
   describe("getGroupsAction", () => {
     it("returns user groups list", async () => {
       (auth.api.getSession as any).mockResolvedValueOnce({
@@ -246,4 +425,118 @@ describe("Groups Server Actions", () => {
       expect(groups[0].name).toBe("Flatmates");
     });
   });
+
+  describe("getGroupDetailsAction", () => {
+    it("returns group details and member list with profiles", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([
+              {
+                id: "g1",
+                name: "Trip",
+                type: "TRIP",
+                createdBy: "user-1",
+                avatarUrl: null,
+                inviteCode: "code",
+                createdAt: new Date("2026-01-01"),
+              },
+            ]),
+          }),
+        }),
+      });
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          leftJoin: vi.fn().mockReturnValueOnce({
+            where: vi.fn().mockResolvedValueOnce([
+              {
+                member: {
+                  id: "gm1",
+                  groupId: "g1",
+                  userId: "user-1",
+                  ghostName: null,
+                  avatarUrl: null,
+                  joinedAt: new Date("2026-01-01"),
+                },
+                profile: {
+                  fullName: "User One",
+                  avatarUrl: null,
+                },
+              },
+            ]),
+          }),
+        }),
+      });
+
+      const details = await getGroupDetailsAction("g1", "user-1");
+      expect(details.group.name).toBe("Trip");
+      expect(details.members).toHaveLength(1);
+      expect(details.members[0].profiles?.full_name).toBe("User One");
+    });
+  });
+
+  describe("getGroupBalancesAction", () => {
+    it("calculates member balances accurately from transactions and splits", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+
+      // member list
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockResolvedValueOnce([
+            { id: "gm1", userId: "user-1" },
+            { id: "gm2", userId: "user-2" },
+          ]),
+        }),
+      });
+
+      // transactions
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockResolvedValueOnce([
+            {
+              id: "t1",
+              amount: "100",
+              payerId: "user-1",
+              payerGroupMemberId: "gm1",
+            },
+          ]),
+        }),
+      });
+
+      // transaction splits
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockResolvedValueOnce([
+            { transactionId: "t1", groupMemberId: "gm1", amount: "50" },
+            { transactionId: "t1", groupMemberId: "gm2", amount: "50" },
+          ]),
+        }),
+      });
+
+      const balances = await getGroupBalancesAction("g1", "user-1");
+      expect(balances).toEqual({
+        gm1: 50, // paid 100, split -50 = +50
+        gm2: -50, // paid 0, split -50 = -50
+      });
+    });
+  });
+
+  describe("getGroupTransactionCountAction", () => {
+    it("returns transaction count for group", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockResolvedValueOnce([{ count: 5 }]),
+        }),
+      });
+
+      const res = await getGroupTransactionCountAction("g1", "user-1");
+      expect(res).toEqual({ count: 5 });
+    });
+  });
 });
+

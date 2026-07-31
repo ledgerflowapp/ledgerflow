@@ -134,6 +134,145 @@ describe("Friends Server Actions", () => {
         sendFriendRequestAction({ targetUserId: "user-1" })
       ).rejects.toThrow("Cannot send a friend request to yourself");
     });
+
+    it("throws error if already friends", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ status: "ACCEPTED" }]),
+          }),
+        }),
+      });
+
+      await expect(
+        sendFriendRequestAction({ targetUserId: "user-2" })
+      ).rejects.toThrow("You are already friends with this user");
+    });
+
+    it("creates friendship and notification when sending valid request", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      // existing check (empty)
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([]),
+          }),
+        }),
+      });
+
+      mockInsertValues.mockResolvedValue(undefined);
+
+      const res = await sendFriendRequestAction({ targetUserId: "user-2" });
+      expect(res).toEqual({ success: true });
+      expect(mockTx.insert).toHaveBeenCalled();
+    });
+  });
+
+  describe("acceptInAppRequestAction", () => {
+    it("throws error if request not found", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([]),
+          }),
+        }),
+      });
+
+      await expect(acceptInAppRequestAction("f-id")).rejects.toThrow("Friend request not found");
+    });
+
+    it("throws error if trying to accept own request", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([
+              { id: "f1", status: "PENDING", initiatorId: "user-1", userId1: "user-1", userId2: "user-2" },
+            ]),
+          }),
+        }),
+      });
+
+      await expect(acceptInAppRequestAction("f1")).rejects.toThrow("You cannot accept your own request");
+    });
+
+    it("accepts in-app request successfully", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-2" } });
+      // 1. friendship lookup
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([
+              { id: "f1", status: "PENDING", initiatorId: "user-1", userId1: "user-1", userId2: "user-2" },
+            ]),
+          }),
+        }),
+      });
+      // 2. update status
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce(undefined),
+      });
+      // 3. sender profile
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-1", fullName: "User One" }]),
+          }),
+        }),
+      });
+      // 4. receiver profile
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-2", fullName: "User Two" }]),
+          }),
+        }),
+      });
+      // 5. receiver contacts check
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "c1" }]),
+          }),
+        }),
+      });
+      // 6. sender contacts check
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "c2" }]),
+          }),
+        }),
+      });
+
+      const res = await acceptInAppRequestAction("f1");
+      expect(res).toEqual({ success: true, sender_name: "User One" });
+    });
+  });
+
+  describe("rejectInAppRequestAction", () => {
+    it("rejects and deletes in-app request", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-2" } });
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([
+              { id: "f1", userId1: "user-1", userId2: "user-2" },
+            ]),
+          }),
+        }),
+      });
+
+      mockDeleteWhere.mockResolvedValueOnce(undefined);
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce(undefined),
+      });
+
+      const res = await rejectInAppRequestAction("f1");
+      expect(res).toEqual({ success: true });
+    });
   });
 
   describe("removeFriendAction", () => {
@@ -153,4 +292,139 @@ describe("Friends Server Actions", () => {
       expect(res).toEqual({ success: true });
     });
   });
+
+  describe("acceptContactInviteAction and acceptFriendInviteAction", () => {
+    it("accepts contact invite token successfully", async () => {
+      // contact match
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "c1", userId: "user-1" }]),
+          }),
+        }),
+      });
+      // owner profile
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ fullName: "Owner Name" }]),
+          }),
+        }),
+      });
+      // existing friendship check
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([]),
+          }),
+        }),
+      });
+
+      mockInsertValues.mockResolvedValueOnce(undefined);
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce(undefined),
+      });
+
+      const res = await acceptContactInviteAction("valid-token", "user-2");
+      expect(res).toEqual({ success: true, owner_name: "Owner Name" });
+    });
+
+    it("accepts friend invite token successfully", async () => {
+      // target profile match
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-1", fullName: "Target User" }]),
+          }),
+        }),
+      });
+      // current user profile
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-2", fullName: "Current User" }]),
+          }),
+        }),
+      });
+      // existing friendship check
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([]),
+          }),
+        }),
+      });
+      // current contact match
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "c1" }]),
+          }),
+        }),
+      });
+      // target contact match
+      mockTx.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "c2" }]),
+          }),
+        }),
+      });
+
+      const res = await acceptFriendInviteAction("friend-token", "user-2");
+      expect(res).toEqual({ success: true, target_name: "Target User" });
+    });
+  });
+
+  describe("getFriendshipsAction and getFriendRequestsAction", () => {
+    it("returns list of accepted friendships", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockResolvedValueOnce([
+            { id: "f1", userId1: "user-1", userId2: "user-2", status: "ACCEPTED" },
+          ]),
+        }),
+      });
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([
+              { id: "user-2", fullName: "Friend Two", avatarUrl: null, email: "friend@example.com" },
+            ]),
+          }),
+        }),
+      });
+
+      const list = await getFriendshipsAction("user-1");
+      expect(list).toHaveLength(1);
+      expect(list[0].profile.full_name).toBe("Friend Two");
+    });
+
+    it("returns list of pending friend requests", async () => {
+      (auth.api.getSession as any).mockResolvedValueOnce({ user: { id: "user-1" } });
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockResolvedValueOnce([
+            { id: "f1", userId1: "user-2", userId2: "user-1", status: "PENDING", initiatorId: "user-2" },
+          ]),
+        }),
+      });
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([
+              { id: "user-2", fullName: "Friend Two", avatarUrl: null },
+            ]),
+          }),
+        }),
+      });
+
+      const requests = await getFriendRequestsAction("user-1");
+      expect(requests).toHaveLength(1);
+      expect(requests[0].type).toBe("INCOMING");
+      expect(requests[0].profile.full_name).toBe("Friend Two");
+    });
+  });
 });
+
