@@ -4,10 +4,10 @@
 
 **Blocked by:** 04 — Financial Goals & Atomic Contributions, 05 — Groups, Friends & Shared Ledgers
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `@supabase/supabase-js` and `@supabase/ssr` uninstalled from `package.json`.
-- [ ] Legacy Supabase helpers (`src/lib/supabase/`) deleted.
-- [ ] Environment variables updated in `.env.local` to use `DATABASE_URL` and `BETTER_AUTH_SECRET`.
-- [ ] All Vitest unit tests (`pnpm test`) pass cleanly.
-- [ ] All Playwright E2E tests (`pnpm test:e2e`) pass cleanly.
+- [x] `@supabase/supabase-js` and `@supabase/ssr` uninstalled from `package.json`.
+- [x] Legacy Supabase helpers (`src/lib/supabase/`) deleted.
+- [x] Environment variables updated in `.env.local` to use `DATABASE_URL` and `BETTER_AUTH_SECRET`.
+- [x] All Vitest unit tests (`pnpm test`) pass cleanly.
+- [x] All Playwright E2E tests (`pnpm test:e2e`) pass cleanly.

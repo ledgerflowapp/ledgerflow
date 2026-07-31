@@ -12,15 +12,10 @@ vi.mock('sonner', () => ({
     },
 }))
 
-const mockRpc = vi.fn()
-const mockGetUser = vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } } })
-const mockSupabase = {
-    rpc: mockRpc,
-    auth: { getUser: mockGetUser },
-}
+const mockAddTransactionAction = vi.fn().mockResolvedValue({ id: 'txn-1' })
 
-vi.mock('@/lib/supabase/client', () => ({
-    createClient: () => mockSupabase,
+vi.mock('@/lib/actions/transactions', () => ({
+    addTransactionAction: (data: any) => mockAddTransactionAction(data),
 }))
 
 vi.mock('@/store/useAppStore', () => ({
@@ -54,7 +49,7 @@ const mockQueryClient = {
 }
 
 vi.mock('@tanstack/react-query', () => ({
-    useMutation: (config: Record<string, any>) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    useMutation: (config: Record<string, any>) => {
         return {
             mutationFn: config.mutationFn,
             onMutate: config.onMutate,
@@ -67,7 +62,6 @@ vi.mock('@tanstack/react-query', () => ({
     useQueryClient: () => mockQueryClient,
 }))
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyHook = Record<string, any>
 
 import { useAddTransaction } from '../useAddTransaction'
@@ -108,21 +102,18 @@ describe('useAddTransaction — onMutate optimistic update', () => {
         queryDataStore.clear()
     })
 
-    it('sets cache under key [\"transactions\", { contactId, mode }] — NOT [\"transactions\", contactId]', async () => {
+    it('sets cache under key ["transactions", { contactId, mode }] — NOT ["transactions", contactId]', async () => {
         const hook = useAddTransaction() as unknown as AnyHook
         await hook.onMutate(baseTransaction)
 
-        // The correct key shape
         const correctKey = JSON.stringify(['transactions', { contactId: 'contact-1', mode: 'BUSINESS' }])
-        // The old broken key shape
         const brokenKey = JSON.stringify(['transactions', 'contact-1'])
 
         expect(queryDataStore.has(correctKey)).toBe(true)
         expect(queryDataStore.has(brokenKey)).toBe(false)
     })
 
-    it('prepends a temp transaction with id starting with \"temp-\" to page 0', async () => {
-        // Seed existing cache with correct key shape
+    it('prepends a temp transaction with id starting with "temp-" to page 0', async () => {
         const existingKey = ['transactions', { contactId: 'contact-1', mode: 'BUSINESS' }]
         queryDataStore.set(JSON.stringify(existingKey), {
             pages: [[{ id: 'existing-1', name: 'Old' }]],
@@ -132,7 +123,7 @@ describe('useAddTransaction — onMutate optimistic update', () => {
         const hook = useAddTransaction() as unknown as AnyHook
         await hook.onMutate(baseTransaction)
 
-        const cached = queryDataStore.get(JSON.stringify(existingKey)) as any // eslint-disable-line @typescript-eslint/no-explicit-any
+        const cached = queryDataStore.get(JSON.stringify(existingKey)) as any
         expect(cached.pages[0]).toHaveLength(2)
         expect(cached.pages[0][0].id).toMatch(/^temp-/)
         expect(cached.pages[0][1].id).toBe('existing-1')
@@ -146,7 +137,6 @@ describe('useAddTransaction — onMutate optimistic update', () => {
 
         const contacts = queryDataStore.get(JSON.stringify(['contacts'])) as Contact[]
         const alice = contacts.find(c => c.id === 'contact-1')!
-        // OUT = you gave = balance increases by amount
         expect(alice.net_balance).toBe(12000) // 10000 + 2000
     })
 
@@ -158,7 +148,6 @@ describe('useAddTransaction — onMutate optimistic update', () => {
 
         const contacts = queryDataStore.get(JSON.stringify(['contacts'])) as Contact[]
         const alice = contacts.find(c => c.id === 'contact-1')!
-        // IN = you got = balance decreases by amount
         expect(alice.net_balance).toBe(7000) // 10000 - 3000
     })
 
@@ -189,10 +178,8 @@ describe('useAddTransaction — onError rollback', () => {
         const hook = useAddTransaction() as unknown as AnyHook
         const context = await hook.onMutate(baseTransaction)
 
-        // Simulate error rollback
         hook.onError(new Error('Network error'), baseTransaction, context)
 
-        // Check setQueryData was called to restore the optimistic key
         expect(mockSetQueryData).toHaveBeenCalledWith(
             existingKey,
             originalData,
@@ -241,7 +228,7 @@ describe('useAddTransaction — onSettled', () => {
         expect(toast.success).not.toHaveBeenCalled()
     })
 
-    it('invalidates [\"transactions\"], [\"contacts\"], [\"analytics\"], [\"group-balances\"], [\"budgets\"]', () => {
+    it('invalidates ["transactions"], ["contacts"], ["analytics"], ["group-balances"], ["budgets"]', () => {
         const hook = useAddTransaction() as unknown as AnyHook
         hook.onSettled()
 

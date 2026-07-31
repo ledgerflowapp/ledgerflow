@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useRef, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,7 +19,7 @@ interface AvatarUploadProps {
     folder?: string
 }
 
-export function AvatarUpload({ value, onChange, disabled, name, folder = 'profiles' }: AvatarUploadProps) {
+export function AvatarUpload({ value, onChange, disabled, name }: AvatarUploadProps) {
     const [uploading, setUploading] = useState(false)
     const [imageSrc, setImageSrc] = useState<string | null>(null)
     const [crop, setCrop] = useState({ x: 0, y: 0 })
@@ -29,7 +28,6 @@ export function AvatarUpload({ value, onChange, disabled, name, folder = 'profil
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const supabase = createClient()
 
     const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: Area) => {
         setCroppedAreaPixels(croppedAreaPixels)
@@ -59,7 +57,6 @@ export function AvatarUpload({ value, onChange, disabled, name, folder = 'profil
             setImageSrc(imageDataUrl)
             setIsDialogOpen(true)
 
-            // Reset input so same file can be selected again
             if (fileInputRef.current) {
                 fileInputRef.current.value = ''
             }
@@ -74,32 +71,18 @@ export function AvatarUpload({ value, onChange, disabled, name, folder = 'profil
             const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels)
             if (!croppedImageBlob) throw new Error('Could not crop image')
 
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('Not authenticated')
+            const dataUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader()
+                reader.onloadend = () => resolve(reader.result as string)
+                reader.readAsDataURL(croppedImageBlob)
+            })
 
-            const fileExt = 'jpeg' // We always output jpeg from canvas
-            // Use folder prop here
-            const filePath = `${user.id}/${folder}/${Math.random()}.${fileExt}`
-
-            const { error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(filePath, croppedImageBlob, {
-                    upsert: true,
-                    contentType: 'image/jpeg'
-                })
-
-            if (uploadError) throw uploadError
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(filePath)
-
-            // Just call onChange with the new URL, do NOT update profile directly
-            onChange?.(publicUrl)
+            onChange?.(dataUrl)
             setIsDialogOpen(false)
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : 'Error uploading avatar'
             console.error('Error uploading avatar:', error)
-            toast.error(error.message || 'Error uploading avatar')
+            toast.error(msg)
         } finally {
             setUploading(false)
             setImageSrc(null)

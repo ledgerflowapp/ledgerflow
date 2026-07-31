@@ -1,31 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { deleteContact } from '@/lib/actions/contacts'
 import { toast } from 'sonner'
 
 export function useDeleteContact() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async (id: string) => {
-            // Auth gate — RLS enforces ownership, this prevents unauthenticated client calls
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
-
-            const { error } = await supabase
-                .from('contacts')
-                .delete()
-                .eq('id', id)
-
-            if (error) throw error
-            return id
+            return await deleteContact(id)
         },
         onSuccess: (id) => {
-            // Invalidate lists
             queryClient.invalidateQueries({ queryKey: ['contacts'] })
             queryClient.invalidateQueries({ queryKey: ['personal-people'] })
-
-            // We might want to remove the specific query or just let it be refetched (and return 404/null)
             queryClient.removeQueries({ queryKey: ['contact', id] })
 
             toast.success('Contact deleted successfully')

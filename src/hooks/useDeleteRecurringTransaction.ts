@@ -1,23 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { deleteRecurringTransaction } from '@/lib/actions/recurring'
 import { toast } from 'sonner'
 
 export function useDeleteRecurringTransaction() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async (id: string) => {
-            // Auth gate — RLS enforces ownership, this prevents unauthenticated client calls
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
-
-            const { error } = await supabase
-                .from('recurring_transactions')
-                .delete()
-                .eq('id', id)
-
-            if (error) throw error
+            return await deleteRecurringTransaction(id)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['recurring-transactions'] })

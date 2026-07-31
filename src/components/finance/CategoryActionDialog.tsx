@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -12,7 +11,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
+import { getCategoryTransactionCount, getCategories, deleteCategory, disableCategory } from '@/lib/actions/categories'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
@@ -26,7 +25,6 @@ interface CategoryActionDialogProps {
 }
 
 export function CategoryActionDialog({ category, action, onClose }: CategoryActionDialogProps) {
-    const supabase = createClient()
     const queryClient = useQueryClient()
     const [isPending, setIsPending] = useState(false)
     const [targetCategoryId, setTargetCategoryId] = useState<string>('uncategorized')
@@ -36,13 +34,7 @@ export function CategoryActionDialog({ category, action, onClose }: CategoryActi
         queryKey: ['category-transaction-count', category?.id],
         queryFn: async () => {
             if (!category?.id) return 0
-            const { count, error } = await supabase
-                .from('transactions')
-                .select('*', { count: 'exact', head: true })
-                .eq('category_id', category.id)
-
-            if (error) throw error
-            return count || 0
+            return await getCategoryTransactionCount(category.id)
         },
         enabled: !!category?.id
     })
@@ -52,13 +44,8 @@ export function CategoryActionDialog({ category, action, onClose }: CategoryActi
         queryKey: ['other-categories', category?.id],
         queryFn: async () => {
             if (!category) return []
-            const { data } = await supabase
-                .from('categories')
-                .select('id, name, icon')
-                .neq('id', category.id)
-                .eq('type', category.type) // Only same type
-                .eq('active', true)
-            return data || []
+            const cats = await getCategories()
+            return cats.filter(c => c.id !== category.id && c.type === category.type && c.active)
         },
         enabled: !!category?.id
     })
@@ -68,39 +55,11 @@ export function CategoryActionDialog({ category, action, onClose }: CategoryActi
         setIsPending(true)
 
         try {
-            // 1. Handle Transactions if any
-            if (transactionCount && transactionCount > 0) {
-                if (targetCategoryId === 'uncategorized') {
-                    // Set category_id to null
-                    const { error } = await supabase
-                        .from('transactions')
-                        .update({ category_id: null })
-                        .eq('category_id', category.id)
-                    if (error) throw error
-                } else {
-                    // Move to target category
-                    const { error } = await supabase
-                        .from('transactions')
-                        .update({ category_id: targetCategoryId })
-                        .eq('category_id', category.id)
-                    if (error) throw error
-                }
-            }
-
-            // 2. Perform Action (Delete or Disable)
             if (action === 'DELETE') {
-                const { error } = await supabase
-                    .from('categories')
-                    .delete()
-                    .eq('id', category.id)
-                if (error) throw error
+                await deleteCategory({ id: category.id, targetCategoryId })
                 toast.success('Category deleted')
             } else {
-                const { error } = await supabase
-                    .from('categories')
-                    .update({ active: false })
-                    .eq('id', category.id)
-                if (error) throw error
+                await disableCategory({ id: category.id, targetCategoryId })
                 toast.success('Category disabled')
             }
 

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { getBusinesses, createBusiness } from '@/lib/actions/businesses'
 import { toast } from 'sonner'
 
 export interface Business {
@@ -9,42 +9,20 @@ export interface Business {
 }
 
 export function useBusinesses() {
-    const supabase = createClient()
-
     return useQuery({
         queryKey: ['businesses'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('businesses')
-                .select('*')
-                .order('created_at', { ascending: true })
-
-            if (error) throw error
-            return data as Business[]
+            return await getBusinesses() as Business[]
         },
     })
 }
 
 export function useCreateBusiness() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async (name: string) => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
-
-            const { data, error } = await supabase
-                .from('businesses')
-                .insert({
-                    user_id: user.id,
-                    name,
-                })
-                .select()
-                .single()
-
-            if (error) throw error
-            return data as Business
+            return await createBusiness(name) as Business
         },
         onSuccess: () => {
             toast.success('Business created')

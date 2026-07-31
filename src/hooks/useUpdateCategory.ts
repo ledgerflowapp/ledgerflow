@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { updateCategory } from '@/lib/actions/categories'
 import { toast } from 'sonner'
 
 interface UpdateCategoryParams {
@@ -8,28 +8,16 @@ interface UpdateCategoryParams {
 }
 
 export function useUpdateCategory() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async ({ id, budget_limit }: UpdateCategoryParams) => {
-            // Auth gate — RLS enforces ownership, this prevents unauthenticated client calls
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
-
-            const { data, error } = await supabase
-                .from('categories')
-                .update({ budget_limit })
-                .eq('id', id)
-                .select()
-                .single()
-
-            if (error) throw error
-            return data
+            return await updateCategory({ id, budgetLimit: budget_limit })
         },
         onSuccess: () => {
             toast.success('Budget updated')
             queryClient.invalidateQueries({ queryKey: ['budgets'] })
+            queryClient.invalidateQueries({ queryKey: ['categories'] })
         },
         onError: (error) => {
             toast.error(`Failed to update budget: ${error.message}`)

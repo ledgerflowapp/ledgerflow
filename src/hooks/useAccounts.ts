@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { getAccounts } from '@/lib/actions/accounts'
 
 export interface Account {
     id: string
@@ -10,18 +10,10 @@ export interface Account {
 }
 
 export function useAccounts() {
-    const supabase = createClient()
-
     return useQuery({
         queryKey: ['accounts'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('accounts')
-                .select('*')
-                .order('created_at', { ascending: true })
-
-            if (error) throw error
-            return data as Account[]
+            return await getAccounts() as Account[]
         },
     })
 }

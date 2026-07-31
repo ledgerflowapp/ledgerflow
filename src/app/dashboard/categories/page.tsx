@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { getCategories, updateCategory } from '@/lib/actions/categories'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, MoreVertical, Edit, Trash2, EyeOff, CheckCircle2, Loader2 } from 'lucide-react'
@@ -15,12 +15,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 export default function CategoriesPage() {
-    const supabase = createClient()
-    const router = useRouter()
     const queryClient = useQueryClient()
     const [editingCategory, setEditingCategory] = useState<{ id: string; name: string; type: 'INCOME' | 'EXPENSE'; icon: string } | null>(null)
     const [editOpen, setEditOpen] = useState(false)
@@ -30,28 +27,17 @@ export default function CategoriesPage() {
     const { data: categories, isLoading } = useQuery({
         queryKey: ['categories'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('categories')
-                .select('*')
-                .order('active', { ascending: false }) // Active first
-                .order('name', { ascending: true })
-
-            if (error) throw error
-            return data
+            return await getCategories()
         }
     })
 
     const handleEnable = async (category: { id: string }) => {
-        const { error } = await supabase
-            .from('categories')
-            .update({ active: true })
-            .eq('id', category.id)
-
-        if (error) {
-            toast.error('Failed to enable category')
-        } else {
+        try {
+            await updateCategory({ id: category.id, active: true })
             toast.success('Category enabled')
             queryClient.invalidateQueries({ queryKey: ['categories'] })
+        } catch {
+            toast.error('Failed to enable category')
         }
     }
 

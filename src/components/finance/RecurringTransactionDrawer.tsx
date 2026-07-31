@@ -59,35 +59,15 @@ export function RecurringTransactionDrawer({
         },
     })
 
-
-
-    // Better way to handle submit with user_id
     const handleSubmit = async (values: z.infer<typeof recurringSchema>) => {
         if (!values.category_id && flow === 'OUT') {
             toast.error('Please select a category')
             return
         }
 
-        // Get current user
-        // We can't easily get it here without a hook.
-        // I'll assume the hook `useAddRecurringTransaction` handles it or I need to pass it.
-        // Let's update `useAddRecurringTransaction` to attach user_id if missing?
-        // Or just use `supabase.auth.getUser()` here.
-
-        // Actually, let's just use the client to get the user.
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            toast.error('You must be logged in')
-            return
-        }
-
         const data = {
             ...values,
             flow,
-            user_id: user.id,
             next_run_date: values.start_date.toISOString(),
         }
 

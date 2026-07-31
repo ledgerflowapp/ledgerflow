@@ -14,8 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Contact } from '@/types'
 import { Trash2, Edit, Phone, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
-import { useQueryClient } from '@tanstack/react-query'
+import { useDeleteContact } from '@/hooks/useDeleteContact'
 import { useRemoveFriend } from '@/hooks/friends/useRemoveFriend'
 import { useFriendRequests } from '@/hooks/friends/useFriendRequests'
 import { useFriendRequestActions } from '@/hooks/friends/useFriendRequestActions'
@@ -27,8 +26,7 @@ interface PersonDetailsDrawerProps {
 }
 
 export function PersonDetailsDrawer({ person, open, onOpenChange }: PersonDetailsDrawerProps) {
-    const supabase = createClient()
-    const queryClient = useQueryClient()
+    const { mutate: deleteContact } = useDeleteContact()
     const { mutate: removeFriend, isPending: isRemoving } = useRemoveFriend()
     const { data: requests } = useFriendRequests()
     const { rejectRequest } = useFriendRequestActions()
@@ -46,19 +44,10 @@ export function PersonDetailsDrawer({ person, open, onOpenChange }: PersonDetail
         }
     }
 
-    const handleDelete = async () => {
-        const { error } = await supabase
-            .from('contacts')
-            .delete()
-            .eq('id', person.id)
-
-        if (error) {
-            toast.error('Failed to delete person')
-        } else {
-            toast.success('Person deleted')
-            queryClient.invalidateQueries({ queryKey: ['personal-people'] })
-            onOpenChange(false)
-        }
+    const handleDelete = () => {
+        deleteContact(person.id, {
+            onSuccess: () => onOpenChange(false)
+        })
     }
 
     return (

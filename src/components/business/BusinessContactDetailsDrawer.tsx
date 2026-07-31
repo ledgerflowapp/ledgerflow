@@ -14,8 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Contact } from '@/types'
 import { Trash2, Edit, Phone } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
-import { useQueryClient } from '@tanstack/react-query'
+import { useDeleteContact } from '@/hooks/useDeleteContact'
 
 interface BusinessContactDetailsDrawerProps {
     contact: Contact | null
@@ -24,24 +23,14 @@ interface BusinessContactDetailsDrawerProps {
 }
 
 export function BusinessContactDetailsDrawer({ contact, open, onOpenChange }: BusinessContactDetailsDrawerProps) {
-    const supabase = createClient()
-    const queryClient = useQueryClient()
+    const { mutate: deleteContact } = useDeleteContact()
 
     if (!contact) return null
 
-    const handleDelete = async () => {
-        const { error } = await supabase
-            .from('contacts')
-            .delete()
-            .eq('id', contact.id)
-
-        if (error) {
-            toast.error('Failed to delete contact')
-        } else {
-            toast.success('Contact deleted')
-            queryClient.invalidateQueries({ queryKey: ['contacts'] })
-            onOpenChange(false)
-        }
+    const handleDelete = () => {
+        deleteContact(contact.id, {
+            onSuccess: () => onOpenChange(false)
+        })
     }
 
     return (

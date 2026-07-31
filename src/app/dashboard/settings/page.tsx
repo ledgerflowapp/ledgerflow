@@ -14,7 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useProfile, Profile } from '@/hooks/use-profile'
 import { AvatarUpload } from '@/components/ui/avatar-upload'
-import { createClient } from '@/lib/supabase/client'
+import { authClient } from '@/lib/auth-client'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -49,7 +49,6 @@ export default function SettingsPage() {
     const [updatingPrivacy, setUpdatingPrivacy] = useState<string | null>(null)
     const [claimingUsername, setClaimingUsername] = useState(false)
     const [newUsername, setNewUsername] = useState('')
-    const supabase = createClient()
 
     // Fallback if themeSettings is not yet loaded or structure is missing
     const currentSettings = themeSettings?.[mode] || { theme: mode === 'business' ? 'light' : 'dark', accent: mode === 'business' ? 'blue' : 'green' }
@@ -106,8 +105,7 @@ export default function SettingsPage() {
     const handleLinkGoogle = async () => {
         setIsLinkingGoogle(true)
         try {
-            const { error } = await supabase.auth.linkIdentity({ provider: 'google' })
-            if (error) throw error
+            await authClient.signIn.social({ provider: 'google' })
         } catch (error) {
             console.error('Error linking Google:', error)
             toast.error('Failed to link Google account')
@@ -119,8 +117,7 @@ export default function SettingsPage() {
         if (!newEmail) return
         setIsUpdatingEmail(true)
         try {
-            const { error } = await supabase.auth.updateUser({ email: newEmail })
-            if (error) throw error
+            await authClient.changeEmail({ newEmail })
             toast.success('Confirmation email sent! Please check your inbox.')
             setNewEmail('')
         } catch (error: any) {

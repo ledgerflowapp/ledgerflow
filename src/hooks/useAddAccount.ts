@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { createAccount } from '@/lib/actions/accounts'
 import { toast } from 'sonner'
 
 interface AddAccountParams {
@@ -9,25 +9,11 @@ interface AddAccountParams {
 }
 
 export function useAddAccount() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: async (newAccount: AddAccountParams) => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
-
-            const { data, error } = await supabase
-                .from('accounts')
-                .insert({
-                    ...newAccount,
-                    user_id: user.id,
-                })
-                .select()
-                .single()
-
-            if (error) throw error
-            return data
+            return await createAccount(newAccount)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['accounts'] })

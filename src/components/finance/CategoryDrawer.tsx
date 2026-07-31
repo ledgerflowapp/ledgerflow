@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { createCategory, updateCategory } from '@/lib/actions/categories'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const categorySchema = z.object({
     name: z.string().min(1, 'Name is required'),
-    icon: z.string().min(1, 'Icon is required'), // In a real app, use an emoji picker
+    icon: z.string().min(1, 'Icon is required'),
     type: z.enum(['INCOME', 'EXPENSE']),
 })
 
@@ -37,7 +37,6 @@ export function CategoryDrawer({
     const open = controlledOpen ?? internalOpen
     const setOpen = setControlledOpen ?? setInternalOpen
 
-    const supabase = createClient()
     const queryClient = useQueryClient()
     const [isPending, setIsPending] = useState(false)
 
@@ -69,21 +68,11 @@ export function CategoryDrawer({
     const handleSubmit = async (values: z.infer<typeof categorySchema>) => {
         setIsPending(true)
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('Not authenticated')
-
             if (initialData?.id) {
-                const { error } = await supabase
-                    .from('categories')
-                    .update({ ...values })
-                    .eq('id', initialData.id)
-                if (error) throw error
+                await updateCategory({ id: initialData.id, ...values })
                 toast.success('Category updated')
             } else {
-                const { error } = await supabase
-                    .from('categories')
-                    .insert({ ...values, user_id: user.id, active: true })
-                if (error) throw error
+                await createCategory(values)
                 toast.success('Category created')
             }
 
@@ -103,7 +92,7 @@ export function CategoryDrawer({
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger render={children as React.ReactElement} />
+            {children && <DrawerTrigger render={children as React.ReactElement} />}
             <DrawerContent className="max-h-[90dvh]">
                 <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
                     <DrawerHeader className="shrink-0">

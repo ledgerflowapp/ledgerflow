@@ -1,12 +1,12 @@
-
-import { createClient } from '@/lib/supabase/server';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export default async function Home() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await auth.api.getSession({ headers: await headers() });
+  const user = session?.user;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -19,7 +19,7 @@ export default async function Home() {
             <Link href="/dashboard" className="flex items-center gap-2">
               <span className="text-sm font-medium hover:underline underline-offset-4">Dashboard</span>
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.user_metadata.avatar_url} alt={user.user_metadata.full_name || 'User'} />
+                <AvatarImage src={user.image || undefined} alt={user.name || 'User'} />
                 <AvatarFallback>{user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
               </Avatar>
             </Link>
@@ -40,7 +40,7 @@ export default async function Home() {
                 </h1>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
                   {user
-                    ? `Welcome back${user.user_metadata.full_name ? `, ${user.user_metadata.full_name}` : ''}! Ready to manage your finances?`
+                    ? `Welcome back${user.name ? `, ${user.name}` : ''}! Ready to manage your finances?`
                     : "Manage your personal and business finances in one place. Track expenses, manage contacts, and gain insights with LedgerFlow."
                   }
                 </p>
@@ -70,4 +70,3 @@ export default async function Home() {
     </div>
   );
 }
-
