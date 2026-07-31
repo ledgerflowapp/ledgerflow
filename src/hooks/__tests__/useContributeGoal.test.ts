@@ -13,14 +13,10 @@ vi.mock('sonner', () => ({
   },
 }))
 
-// Mock Supabase client
-const mockRpc = vi.fn()
-const mockSupabase = {
-  rpc: mockRpc,
-}
-
-vi.mock('@/lib/supabase/client', () => ({
-  createClient: () => mockSupabase,
+// Mock goals server action
+const mockContributeGoalAction = vi.fn()
+vi.mock('@/lib/actions/goals', () => ({
+  contributeGoalAction: (...args: any[]) => mockContributeGoalAction(...args),
 }))
 
 // Mock react-query
@@ -53,17 +49,17 @@ describe('useContributeGoal', () => {
     vi.clearAllMocks()
   })
 
-  it('calls rpc("contribute_to_goal") with correct paise value (not raw rupees)', async () => {
-    mockRpc.mockResolvedValue({ data: { id: 'goal-1', current_amount: 15000 }, error: null })
+  it('calls contributeGoalAction with correct paise value (not raw rupees)', async () => {
+    mockContributeGoalAction.mockResolvedValue({ id: 'goal-1', current_amount: 15000 })
 
     const hook = useContributeGoal() as unknown as AnyHook
     await hook.mutationFn({ id: 'goal-1', amount: 150 })
 
-    expect(mockRpc).toHaveBeenCalledWith('contribute_to_goal', {
-      p_goal_id: 'goal-1',
-      p_amount: rupeesToPaise(150), // 15000 paise, not 150
+    expect(mockContributeGoalAction).toHaveBeenCalledWith({
+      id: 'goal-1',
+      amount: rupeesToPaise(150), // 15000 paise, not 150
     })
-    expect(mockRpc).toHaveBeenCalledTimes(1)
+    expect(mockContributeGoalAction).toHaveBeenCalledTimes(1)
   })
 
   it('calls queryClient.invalidateQueries with ["goals"] on success', () => {
@@ -73,7 +69,7 @@ describe('useContributeGoal', () => {
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['goals'] })
   })
 
-  it('calls toast.error on RPC failure', () => {
+  it('calls toast.error on action failure', () => {
     const hook = useContributeGoal() as unknown as AnyHook
     const error = new Error('DB connection failed')
     hook.onError(error)
@@ -81,29 +77,26 @@ describe('useContributeGoal', () => {
     expect(toast.error).toHaveBeenCalledWith('Failed to update goal: DB connection failed')
   })
 
-  it('does NOT call a separate .select() before the RPC (confirms no read-modify-write)', async () => {
-    mockRpc.mockResolvedValue({ data: { id: 'goal-1', current_amount: 25000 }, error: null })
+  it('invokes contributeGoalAction directly (confirms single server action execution)', async () => {
+    mockContributeGoalAction.mockResolvedValue({ id: 'goal-1', current_amount: 25000 })
 
     const hook = useContributeGoal() as unknown as AnyHook
     await hook.mutationFn({ id: 'goal-1', amount: 250 })
 
-    // The mock supabase object has no .from() or .select() — if the hook tried
-    // to call them, it would throw. The fact that this test passes confirms
-    // no read-modify-write pattern is used.
-    expect(mockRpc).toHaveBeenCalledTimes(1)
-    expect(mockRpc).toHaveBeenCalledWith('contribute_to_goal', expect.any(Object))
+    expect(mockContributeGoalAction).toHaveBeenCalledTimes(1)
+    expect(mockContributeGoalAction).toHaveBeenCalledWith(expect.objectContaining({ id: 'goal-1' }))
   })
 
-  it('throws when RPC returns an error', async () => {
-    const rpcError = { message: 'Goal not found or unauthorized', code: '42501' }
-    mockRpc.mockResolvedValue({ data: null, error: rpcError })
+  it('throws when contributeGoalAction rejects with an error', async () => {
+    const actionError = new Error('Goal not found or unauthorized')
+    mockContributeGoalAction.mockRejectedValue(actionError)
 
     const hook = useContributeGoal() as unknown as AnyHook
 
-    await expect(hook.mutationFn({ id: 'bad-id', amount: 100 })).rejects.toEqual(rpcError)
+    await expect(hook.mutationFn({ id: 'bad-id', amount: 100 })).rejects.toThrow('Goal not found or unauthorized')
   })
 
-  it('shows specific toast "Amount exceeds the remaining goal balance." when RPC throws the overcontribution error message', () => {
+  it('shows specific toast "Amount exceeds the remaining goal balance." when action throws the overcontribution error message', () => {
     const hook = useContributeGoal() as unknown as AnyHook
     const error = { message: 'Contribution would exceed goal target' }
     hook.onError(error)
@@ -112,7 +105,7 @@ describe('useContributeGoal', () => {
     expect(toast.error).not.toHaveBeenCalledWith(expect.stringContaining('Failed to update goal'))
   })
 
-  it('shows generic toast.error for all other RPC errors', () => {
+  it('shows generic toast.error for all other action errors', () => {
     const hook = useContributeGoal() as unknown as AnyHook
     const error = { message: 'Some unexpected database error' }
     hook.onError(error)
