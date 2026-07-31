@@ -17,7 +17,7 @@ import {
     List,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
+import { signOut } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -29,12 +29,11 @@ export function Sidebar() {
     const searchParams = useSearchParams()
     const { mode, toggleMode } = useAppStore()
     const router = useRouter()
-    const supabase = createClient()
     const { profile } = useProfile()
 
     const handleLogout = async () => {
         try {
-            await supabase.auth.signOut()
+            await signOut()
             window.location.href = '/login'
         } catch {
             toast.error('Failed to sign out. Please try again.')

@@ -1,51 +1,30 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Flow', () => {
-    test('should render login page correctly', async ({ page }) => {
+    test('should render login page correctly with email and Google options', async ({ page }) => {
         await page.goto('/login');
 
-        // Check for title or main heading
+        // Check for title
         await expect(page.getByText(/Welcome to LedgerFlow/i)).toBeVisible();
 
-        // Check for phone input
-        await page.getByRole('button', { name: /Sign in with Phone \(Legacy\)/i }).click();
-        await expect(page.getByPlaceholder('9999999999')).toBeVisible();
-        await expect(page.getByRole('button', { name: /Send OTP/i })).toBeVisible();
+        // Check for Google OAuth button
+        await expect(page.getByRole('button', { name: /Continue with Google/i })).toBeVisible();
+
+        // Check for Email & Password inputs
+        await expect(page.getByPlaceholder('m@example.com')).toBeVisible();
+        await expect(page.getByPlaceholder('••••••••')).toBeVisible();
+        await expect(page.getByRole('button', { name: /^Sign In$/i })).toBeVisible();
     });
 
-    test('should allow user to login with phone and OTP', async ({ page }) => {
+    test('should toggle to sign up mode', async ({ page }) => {
         await page.goto('/login');
 
-        // Click on Phone auth
-        await page.getByRole('button', { name: /Sign in with Phone \(Legacy\)/i }).click();
+        // Click Sign Up button
+        await page.getByRole('button', { name: /Sign Up/i }).click();
 
-        // Fill phone number
-        await page.getByPlaceholder('9999999999').fill('9999999999');
-
-        // Click Send OTP
-        await page.getByRole('button', { name: /Send OTP/i }).click();
-
-        // Wait for OTP input to appear
-        await expect(page.getByText(/Enter the OTP sent to/i)).toBeVisible();
-
-        // Fill OTP (InputOTP usually splits input, keeping it simple by typing sequentially if possible or just filling)
-        // The shadcn InputOTP component might need sequential key presses or a fill on the hidden input if accessible.
-        // Usually 'fill' on the first visible input or typing works.
-        // Let's try typing `123456` which often works with OTP inputs.
-        await page.locator('input[autocomplete="one-time-code"]').fill('123456');
-
-        // Click Verify OTP
-        await page.getByRole('button', { name: /Verify OTP/i }).click();
-
-        // Expect redirection to dashboard
-        await expect(page).toHaveURL(/\/dashboard/);
-
-        // Expect dashboard content
-        // Adjust this text expectation based on actual dashboard content if "Dashboard" isn't explicitly visible
-        // But the prompt asked for "Dashboard" or "Overview".
-        // Let's wait for a common dashboard element.
-        // Given the previous context, maybe there is a visible header.
-        // I'll stick to the URL check as primary and a text check as secondary.
-        await expect(page.locator('body')).toContainText(/Dashboard|Overview/i);
+        // Check for Sign Up elements
+        await expect(page.getByText(/Create an Account/i)).toBeVisible();
+        await expect(page.getByPlaceholder('John Doe')).toBeVisible();
+        await expect(page.getByRole('button', { name: /Create Account/i })).toBeVisible();
     });
 });

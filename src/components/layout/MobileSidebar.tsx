@@ -3,7 +3,7 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store/useAppStore'
-import { createClient } from '@/lib/supabase/client'
+import { signOut } from '@/lib/auth-client'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Briefcase, LogOut, Menu, Wallet, Settings, Users, LayoutDashboard, PieChart, List } from 'lucide-react'
 import { useState } from 'react'
@@ -18,13 +18,12 @@ export function MobileSidebar() {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    const supabase = createClient()
     const [open, setOpen] = useState(false)
     const { profile } = useProfile()
 
     const handleLogout = async () => {
         try {
-            await supabase.auth.signOut()
+            await signOut()
             window.location.href = '/login'
         } catch {
             toast.error('Failed to sign out. Please try again.')

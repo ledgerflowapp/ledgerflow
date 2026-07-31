@@ -1,43 +1,38 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { getSession } from '@/lib/auth-client'
 import { toast } from 'sonner'
-import { useEffect } from 'react'
 import { Profile } from '@/types'
 
 export type { Profile }
 
 export function useProfile() {
-    const supabase = createClient()
     const queryClient = useQueryClient()
 
     const { data: profile, isLoading, error } = useQuery({
         queryKey: ['profile'],
         queryFn: async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('Not authenticated')
+            const res = await getSession()
+            const user = res?.data?.user
+            if (!user) return null
 
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single()
-
-            if (error) throw error
-            return { ...data, email: user.email } as Profile
+            return {
+                id: user.id,
+                full_name: user.name || null,
+                username: null,
+                business_name: null,
+                phone: null,
+                email: user.email || null,
+                avatar_url: user.image || null,
+                currency_symbol: '₹',
+                discoverable_by_phone: true,
+                discoverable_by_username: true,
+            } as Profile
         }
     })
 
     const updateProfile = useMutation({
-        mutationFn: async (updates: Partial<Profile>) => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('Not authenticated')
-
-            const { error } = await supabase
-                .from('profiles')
-                .update(updates)
-                .eq('id', user.id)
-
-            if (error) throw error
+        mutationFn: async (_updates: Partial<Profile>) => {
+            // Profile updates managed via settings server actions
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['profile'] })
