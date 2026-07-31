@@ -168,13 +168,13 @@ export function PersonalTransactionDrawer({
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger
                                     value="OUT"
-                                    className="data-[state=active]:bg-red-100 data-[state=active]:text-red-900 dark:data-[state=active]:bg-red-900/50 dark:data-[state=active]:text-red-100"
+                                    className="data-active:bg-red-100 data-active:text-red-900 dark:data-active:bg-red-900/50 dark:data-active:text-red-100"
                                 >
                                     Expense
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="IN"
-                                    className="data-[state=active]:bg-green-100 data-[state=active]:text-green-900 dark:data-[state=active]:bg-green-900/50 dark:data-[state=active]:text-green-100"
+                                    className="data-active:bg-green-100 data-active:text-green-900 dark:data-active:bg-green-900/50 dark:data-active:text-green-100"
                                 >
                                     Income
                                 </TabsTrigger>
@@ -253,7 +253,7 @@ export function PersonalTransactionDrawer({
                                                                 key={cat.id}
                                                                 value={cat.id}
                                                                 aria-label={cat.name}
-                                                                className="h-9 px-3 border border-input data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                                                className="h-9 px-3 border border-input data-pressed:bg-primary data-pressed:text-primary-foreground"
                                                             >
                                                                 <span className="mr-2">{cat.icon}</span>
                                                                 {cat.name}
@@ -301,7 +301,7 @@ export function PersonalTransactionDrawer({
                                                                 key={acc.id}
                                                                 value={acc.id}
                                                                 aria-label={acc.name}
-                                                                className="h-9 px-3 border border-input data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                                                className="h-9 px-3 border border-input data-pressed:bg-primary data-pressed:text-primary-foreground"
                                                             >
                                                                 {acc.name} (₹{acc.balance})
                                                             </ToggleGroupItem>

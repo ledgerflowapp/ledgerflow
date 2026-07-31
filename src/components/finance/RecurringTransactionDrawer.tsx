@@ -168,7 +168,7 @@ export function RecurringTransactionDrawer({
                                                                 key={cat.id}
                                                                 value={cat.id}
                                                                 aria-label={cat.name}
-                                                                className="h-9 px-3 border border-input data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                                                className="h-9 px-3 border border-input data-pressed:bg-primary data-pressed:text-primary-foreground"
                                                             >
                                                                 <span className="mr-2">{cat.icon}</span>
                                                                 {cat.name}
@@ -199,7 +199,7 @@ export function RecurringTransactionDrawer({
                                                             key={acc.id}
                                                             value={acc.id}
                                                             aria-label={acc.name}
-                                                            className="h-9 px-3 border border-input data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                                            className="h-9 px-3 border border-input data-pressed:bg-primary data-pressed:text-primary-foreground"
                                                         >
                                                             {acc.name}
                                                         </ToggleGroupItem>

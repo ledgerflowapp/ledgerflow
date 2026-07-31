@@ -154,13 +154,13 @@ export function BusinessTransactionDrawer({
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger
                                     value="OUT"
-                                    className="data-[state=active]:bg-red-100 data-[state=active]:text-red-900 dark:data-[state=active]:bg-red-900/50 dark:data-[state=active]:text-red-100"
+                                    className="data-active:bg-red-100 data-active:text-red-900 dark:data-active:bg-red-900/50 dark:data-active:text-red-100"
                                 >
                                     You Gave
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="IN"
-                                    className="data-[state=active]:bg-green-100 data-[state=active]:text-green-900 dark:data-[state=active]:bg-green-900/50 dark:data-[state=active]:text-green-100"
+                                    className="data-active:bg-green-100 data-active:text-green-900 dark:data-active:bg-green-900/50 dark:data-active:text-green-100"
                                 >
                                     You Got
                                 </TabsTrigger>
