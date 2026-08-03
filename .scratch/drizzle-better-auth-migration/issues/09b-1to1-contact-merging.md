@@ -1,7 +1,7 @@
 # 09b — 1:1 Direct Contact Merging & Friendship Linking
 
 Category: enhancement
-Status: ready-for-agent
+Status: completed
 Blocked by: 09a
 
 ## Description
@@ -22,13 +22,13 @@ Implement direct 1:1 contact merging into registered user profiles, auto-creatin
 - Emit in-app audit notification (`notifications` table) to contact owner upon merge completion.
 
 ## Acceptance Criteria
-- [ ] Server action `mergeContactToUserProfile(contactId, targetUserId)` implemented in `src/lib/actions/contacts.ts`.
-- [ ] Target contact linked (`linkedUserId = targetUserId`) without wiping local custom notes, custom names, or net balance.
-- [ ] `ACCEPTED` friendship auto-created between inviter and target user.
-- [ ] Contact invite link copy/prompt explicitly states friendship connection upon acceptance.
-- [ ] Executed within an atomic Drizzle `db.transaction(...)`.
-- [ ] In-app audit notification emitted to contact owner upon completion.
-- [ ] Unit tests added in `src/lib/actions/__tests__/contacts-merge.test.ts`.
+- [x] Server action `mergeContactToUserProfile(contactId, targetUserId)` implemented in `src/lib/actions/contacts.ts`.
+- [x] Target contact linked (`linkedUserId = targetUserId`) without wiping local custom notes, custom names, or net balance.
+- [x] `ACCEPTED` friendship auto-created between inviter and target user.
+- [x] Contact invite link copy/prompt explicitly states friendship connection upon acceptance.
+- [x] Executed within an atomic Drizzle `db.transaction(...)`.
+- [x] In-app audit notification emitted to contact owner upon completion.
+- [x] Unit tests added in `src/lib/actions/__tests__/contacts-merge.test.ts`.
 
 ## Comments
 > *Split from original combined issue 09 to isolate 1:1 contact linking and friendship creation.*
