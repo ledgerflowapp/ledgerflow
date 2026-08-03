@@ -8,6 +8,8 @@ import { eq, and, isNull, desc, gte } from "drizzle-orm";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 import { Contact } from "@/types";
 
+export { validateContactMergeGuards } from "./contacts-guards";
+
 async function getAuthenticatedUser(reqHeaders?: Headers) {
   const h = reqHeaders ?? (await headers());
   const session = await auth.api.getSession({ headers: h });

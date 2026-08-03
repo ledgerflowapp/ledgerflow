@@ -352,14 +352,11 @@ describe("Groups Server Actions", () => {
         values: mockInsertValues.mockResolvedValueOnce(undefined),
       });
 
-      const res = await createGroupAction(
-        {
-          name: "Goa Vacation",
-          type: "TRIP",
-          members: [{ name: "Alice", type: "GHOST" }],
-        },
-        "user-1"
-      );
+      const res = await createGroupAction({
+        name: "Goa Vacation",
+        type: "TRIP",
+        members: [{ name: "Alice", type: "GHOST" }],
+      });
 
       expect(mockDb.transaction).toHaveBeenCalled();
       expect(res.id).toBe("g-new");
