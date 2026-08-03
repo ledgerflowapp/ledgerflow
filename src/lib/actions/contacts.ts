@@ -256,8 +256,10 @@ export async function mergeContactToUserProfile(contactId: string, targetUserId:
       .limit(1);
 
     if (existingFriendships.length === 0) {
-      const firstUserId = contact.userId < targetUserId ? contact.userId : targetUserId;
-      const secondUserId = contact.userId < targetUserId ? targetUserId : contact.userId;
+      const [firstUserId, secondUserId] =
+        contact.userId < targetUserId
+          ? [contact.userId, targetUserId]
+          : [targetUserId, contact.userId];
       await tx.insert(friendships).values({
         userId1: firstUserId,
         userId2: secondUserId,
@@ -267,7 +269,7 @@ export async function mergeContactToUserProfile(contactId: string, targetUserId:
     } else if (existingFriendships[0].status !== "ACCEPTED") {
       await tx
         .update(friendships)
-        .set({ status: "ACCEPTED" })
+        .set({ status: "ACCEPTED", initiatorId: sessionUser.id })
         .where(eq(friendships.id, existingFriendships[0].id));
     }
 

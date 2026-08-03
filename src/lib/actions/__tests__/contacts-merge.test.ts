@@ -250,7 +250,7 @@ describe("mergeContactToUserProfile Server Action", () => {
 
     await mergeContactToUserProfile("c-1", "user-target");
 
-    expect(mockUpdateSet).toHaveBeenCalledWith({ status: "ACCEPTED" });
+    expect(mockUpdateSet).toHaveBeenCalledWith({ status: "ACCEPTED", initiatorId: "user-target" });
     expect(mockInsertValues).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: "user-owner",
