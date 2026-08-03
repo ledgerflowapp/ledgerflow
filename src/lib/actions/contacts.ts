@@ -188,53 +188,56 @@ export async function deleteContact(id: string) {
 
 export async function mergeContactToUserProfile(contactId: string, targetUserId: string) {
   const sessionUser = await getSessionUser();
-
-  const contactRecords = await db
-    .select()
-    .from(contacts)
-    .where(eq(contacts.id, contactId))
-    .limit(1);
-
-  if (contactRecords.length === 0) {
-    throw new Error("Contact not found");
+  if (!sessionUser) {
+    throw new Error("Unauthorized: Active session required");
   }
-  const contact = contactRecords[0];
-
-  const targetUserRecords = await db
-    .select({
-      id: userTable.id,
-      emailVerified: userTable.emailVerified,
-    })
-    .from(userTable)
-    .where(eq(userTable.id, targetUserId))
-    .limit(1);
-
-  if (targetUserRecords.length === 0) {
-    throw new Error("Target user profile not found");
-  }
-  const targetUser = targetUserRecords[0];
-
-  const profileRecords = await db
-    .select({
-      phone: profiles.phone,
-    })
-    .from(profiles)
-    .where(eq(profiles.id, targetUserId))
-    .limit(1);
-
-  const targetProfile = {
-    id: targetUser.id,
-    emailVerified: targetUser.emailVerified,
-    phoneVerified: Boolean(profileRecords[0]?.phone),
-  };
-
-  await validateContactMergeGuards({
-    contact,
-    targetProfile,
-    sessionUser,
-  });
 
   return await db.transaction(async (tx) => {
+    const contactRecords = await tx
+      .select()
+      .from(contacts)
+      .where(eq(contacts.id, contactId))
+      .limit(1);
+
+    if (contactRecords.length === 0) {
+      throw new Error("Contact not found");
+    }
+    const contact = contactRecords[0];
+
+    const targetUserRecords = await tx
+      .select({
+        id: userTable.id,
+        emailVerified: userTable.emailVerified,
+      })
+      .from(userTable)
+      .where(eq(userTable.id, targetUserId))
+      .limit(1);
+
+    if (targetUserRecords.length === 0) {
+      throw new Error("Target user profile not found");
+    }
+    const targetUser = targetUserRecords[0];
+
+    const profileRecords = await tx
+      .select({
+        phone: profiles.phone,
+      })
+      .from(profiles)
+      .where(eq(profiles.id, targetUserId))
+      .limit(1);
+
+    const targetProfile = {
+      id: targetUser.id,
+      emailVerified: targetUser.emailVerified,
+      phoneVerified: Boolean(profileRecords[0]?.phone),
+    };
+
+    await validateContactMergeGuards({
+      contact,
+      targetProfile,
+      sessionUser,
+    });
+
     const [updatedContact] = await tx
       .update(contacts)
       .set({ linkedUserId: targetUserId })
@@ -253,13 +256,13 @@ export async function mergeContactToUserProfile(contactId: string, targetUserId:
       .limit(1);
 
     if (existingFriendships.length === 0) {
-      const u1 = contact.userId < targetUserId ? contact.userId : targetUserId;
-      const u2 = contact.userId < targetUserId ? targetUserId : contact.userId;
+      const firstUserId = contact.userId < targetUserId ? contact.userId : targetUserId;
+      const secondUserId = contact.userId < targetUserId ? targetUserId : contact.userId;
       await tx.insert(friendships).values({
-        userId1: u1,
-        userId2: u2,
+        userId1: firstUserId,
+        userId2: secondUserId,
         status: "ACCEPTED",
-        initiatorId: sessionUser!.id,
+        initiatorId: sessionUser.id,
       });
     } else if (existingFriendships[0].status !== "ACCEPTED") {
       await tx

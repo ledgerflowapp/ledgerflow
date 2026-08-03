@@ -54,6 +54,18 @@ function makeSessionUser(id: string) {
   };
 }
 
+function mockTxQuerySequence(...results: any[][]) {
+  results.forEach((data) => {
+    mockTx.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockReturnValueOnce({
+          limit: vi.fn().mockResolvedValueOnce(data),
+        }),
+      }),
+    });
+  });
+}
+
 describe("mergeContactToUserProfile Server Action", () => {
   const mockGetSessionUser = vi.mocked(getSessionUser);
 
@@ -63,13 +75,7 @@ describe("mergeContactToUserProfile Server Action", () => {
 
   it("throws error if contact is not found", async () => {
     mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-owner"));
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([]),
-        }),
-      }),
-    });
+    mockTxQuerySequence([]);
 
     await expect(
       mergeContactToUserProfile("non-existent-contact", "user-target")
@@ -79,25 +85,11 @@ describe("mergeContactToUserProfile Server Action", () => {
   it("throws error if target user profile is not found", async () => {
     mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-owner"));
 
-    // 1. contact query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "c-1", userId: "user-owner", name: "Alice", netBalance: "100.00" },
-          ]),
-        }),
-      }),
-    });
-
-    // 2. target user query (not found)
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([]),
-        }),
-      }),
-    });
+    // 1. contact query found, 2. target user query empty
+    mockTxQuerySequence(
+      [{ id: "c-1", userId: "user-owner", name: "Alice", netBalance: "100.00" }],
+      []
+    );
 
     await expect(
       mergeContactToUserProfile("c-1", "non-existent-target")
@@ -107,36 +99,12 @@ describe("mergeContactToUserProfile Server Action", () => {
   it("fails 09a guards if caller is neither owner nor target user", async () => {
     mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-unrelated"));
 
-    // 1. contact query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "c-1", userId: "user-owner", name: "Alice" },
-          ]),
-        }),
-      }),
-    });
-
-    // 2. target user query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "user-target", emailVerified: true },
-          ]),
-        }),
-      }),
-    });
-
-    // 3. profile query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([{ phone: "+123456789" }]),
-        }),
-      }),
-    });
+    // 1. contact, 2. target user, 3. profile
+    mockTxQuerySequence(
+      [{ id: "c-1", userId: "user-owner", name: "Alice" }],
+      [{ id: "user-target", emailVerified: true }],
+      [{ phone: "+123456789" }]
+    );
 
     await expect(mergeContactToUserProfile("c-1", "user-target")).rejects.toThrow(
       "Unauthorized: Caller must be contact owner or target user"
@@ -146,36 +114,12 @@ describe("mergeContactToUserProfile Server Action", () => {
   it("fails 09a guards on self-merge attempt", async () => {
     mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-owner"));
 
-    // 1. contact query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "c-1", userId: "user-owner", name: "Self Contact" },
-          ]),
-        }),
-      }),
-    });
-
-    // 2. target user query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "user-owner", emailVerified: true },
-          ]),
-        }),
-      }),
-    });
-
-    // 3. profile query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([{ phone: null }]),
-        }),
-      }),
-    });
+    // 1. contact, 2. target user, 3. profile
+    mockTxQuerySequence(
+      [{ id: "c-1", userId: "user-owner", name: "Self Contact" }],
+      [{ id: "user-owner", emailVerified: true }],
+      [{ phone: null }]
+    );
 
     await expect(mergeContactToUserProfile("c-1", "user-owner")).rejects.toThrow(
       "Invalid merge: Cannot merge contact into owner profile"
@@ -185,36 +129,12 @@ describe("mergeContactToUserProfile Server Action", () => {
   it("fails 09a guards if target profile is unverified", async () => {
     mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-owner"));
 
-    // 1. contact query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "c-1", userId: "user-owner", name: "Alice" },
-          ]),
-        }),
-      }),
-    });
-
-    // 2. target user query (email unverified)
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "user-target", emailVerified: false },
-          ]),
-        }),
-      }),
-    });
-
-    // 3. profile query (no phone)
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([{ phone: null }]),
-        }),
-      }),
-    });
+    // 1. contact, 2. target user (unverified), 3. profile (no phone)
+    mockTxQuerySequence(
+      [{ id: "c-1", userId: "user-owner", name: "Alice" }],
+      [{ id: "user-target", emailVerified: false }],
+      [{ phone: null }]
+    );
 
     await expect(mergeContactToUserProfile("c-1", "user-target")).rejects.toThrow(
       "Invalid merge: Target profile must have verified phone or email"
@@ -239,36 +159,14 @@ describe("mergeContactToUserProfile Server Action", () => {
       linkedUserId: null,
     };
 
-    // 1. contact query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([existingContact]),
-        }),
-      }),
-    });
+    // 1. contact query, 2. target user query, 3. profile query, 4. friendships check query (empty)
+    mockTxQuerySequence(
+      [existingContact],
+      [{ id: "user-target", emailVerified: true }],
+      [{ phone: "+1234567890" }],
+      []
+    );
 
-    // 2. target user query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "user-target", emailVerified: true },
-          ]),
-        }),
-      }),
-    });
-
-    // 3. profile query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([{ phone: "+1234567890" }]),
-        }),
-      }),
-    });
-
-    // Inside transaction:
     // tx.update(contacts) returning updated contact
     const updatedContactRecord = {
       ...existingContact,
@@ -277,15 +175,6 @@ describe("mergeContactToUserProfile Server Action", () => {
     mockUpdateSet.mockReturnValueOnce({
       where: vi.fn().mockReturnValueOnce({
         returning: vi.fn().mockResolvedValueOnce([updatedContactRecord]),
-      }),
-    });
-
-    // tx.select(friendships) -> no existing friendship
-    mockTx.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([]),
-        }),
       }),
     });
 
@@ -337,50 +226,18 @@ describe("mergeContactToUserProfile Server Action", () => {
       linkedUserId: null,
     };
 
-    // 1. contact query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([existingContact]),
-        }),
-      }),
-    });
-
-    // 2. target user query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "user-target", emailVerified: true },
-          ]),
-        }),
-      }),
-    });
-
-    // 3. profile query
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([]),
-        }),
-      }),
-    });
+    // 1. contact, 2. target user, 3. profile, 4. existing pending friendship
+    mockTxQuerySequence(
+      [existingContact],
+      [{ id: "user-target", emailVerified: true }],
+      [],
+      [{ id: "f-pending", status: "PENDING", userId1: "user-owner", userId2: "user-target" }]
+    );
 
     // tx.update(contacts) returning updated contact
     mockUpdateSet.mockReturnValueOnce({
       where: vi.fn().mockReturnValueOnce({
         returning: vi.fn().mockResolvedValueOnce([{ ...existingContact, linkedUserId: "user-target" }]),
-      }),
-    });
-
-    // tx.select(friendships) -> existing pending friendship
-    mockTx.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([
-            { id: "f-pending", status: "PENDING", userId1: "user-owner", userId2: "user-target" },
-          ]),
-        }),
       }),
     });
 
