@@ -266,7 +266,7 @@ export async function mergeContactToUserProfile(contactId: string, targetUserId:
         status: "ACCEPTED",
         initiatorId: sessionUser.id,
       });
-    } else if (existingFriendships[0].status !== "ACCEPTED") {
+    } else if (existingFriendships[0].status === "PENDING") {
       await tx
         .update(friendships)
         .set({ status: "ACCEPTED", initiatorId: sessionUser.id })
