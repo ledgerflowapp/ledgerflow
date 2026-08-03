@@ -1,12 +1,14 @@
 "use server";
 
 import { db } from "@/db";
-import { contacts } from "@/db/schema";
+import { contacts, friendships, notifications, profiles, user as userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { eq, and, isNull, desc, gte } from "drizzle-orm";
+import { eq, and, isNull, desc, gte, or } from "drizzle-orm";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 import { Contact } from "@/types";
+import { getSessionUser } from "@/lib/auth-session";
+import { validateContactMergeGuards } from "./contacts-guards";
 
 export { validateContactMergeGuards } from "./contacts-guards";
 
@@ -183,3 +185,101 @@ export async function deleteContact(id: string) {
 
   return deleted?.id;
 }
+
+export async function mergeContactToUserProfile(contactId: string, targetUserId: string) {
+  const sessionUser = await getSessionUser();
+
+  const contactRecords = await db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.id, contactId))
+    .limit(1);
+
+  if (contactRecords.length === 0) {
+    throw new Error("Contact not found");
+  }
+  const contact = contactRecords[0];
+
+  const targetUserRecords = await db
+    .select({
+      id: userTable.id,
+      emailVerified: userTable.emailVerified,
+    })
+    .from(userTable)
+    .where(eq(userTable.id, targetUserId))
+    .limit(1);
+
+  if (targetUserRecords.length === 0) {
+    throw new Error("Target user profile not found");
+  }
+  const targetUser = targetUserRecords[0];
+
+  const profileRecords = await db
+    .select({
+      phone: profiles.phone,
+    })
+    .from(profiles)
+    .where(eq(profiles.id, targetUserId))
+    .limit(1);
+
+  const targetProfile = {
+    id: targetUser.id,
+    emailVerified: targetUser.emailVerified,
+    phoneVerified: Boolean(profileRecords[0]?.phone),
+  };
+
+  await validateContactMergeGuards({
+    contact,
+    targetProfile,
+    sessionUser,
+  });
+
+  return await db.transaction(async (tx) => {
+    const [updatedContact] = await tx
+      .update(contacts)
+      .set({ linkedUserId: targetUserId })
+      .where(eq(contacts.id, contactId))
+      .returning();
+
+    const existingFriendships = await tx
+      .select()
+      .from(friendships)
+      .where(
+        or(
+          and(eq(friendships.userId1, contact.userId), eq(friendships.userId2, targetUserId)),
+          and(eq(friendships.userId1, targetUserId), eq(friendships.userId2, contact.userId))
+        )
+      )
+      .limit(1);
+
+    if (existingFriendships.length === 0) {
+      const u1 = contact.userId < targetUserId ? contact.userId : targetUserId;
+      const u2 = contact.userId < targetUserId ? targetUserId : contact.userId;
+      await tx.insert(friendships).values({
+        userId1: u1,
+        userId2: u2,
+        status: "ACCEPTED",
+        initiatorId: sessionUser!.id,
+      });
+    } else if (existingFriendships[0].status !== "ACCEPTED") {
+      await tx
+        .update(friendships)
+        .set({ status: "ACCEPTED" })
+        .where(eq(friendships.id, existingFriendships[0].id));
+    }
+
+    await tx.insert(notifications).values({
+      userId: contact.userId,
+      type: "CONTACT_MERGED",
+      title: "Contact Merged",
+      message: `Contact '${contact.name}' was successfully merged with user profile.`,
+      data: {
+        contactId: contact.id,
+        targetUserId,
+      },
+    });
+
+    return mapContact(updatedContact);
+  });
+}
+

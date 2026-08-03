@@ -125,13 +125,16 @@ export function PersonDetailsDrawer({ person, open, onOpenChange }: PersonDetail
                             ) : (
                                 <div className="flex flex-col gap-2 p-3 rounded-lg border border-border">
                                     <p className="text-sm font-medium">Not on LedgerFlow?</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Accepting this invite link will connect the recipient as a friend with you on LedgerFlow.
+                                    </p>
                                     <Button
                                         variant="secondary"
                                         className="w-full gap-2"
                                         onClick={() => {
                                             const link = `${window.location.origin}/invite/contact/${person.invite_token}`
                                             navigator.clipboard.writeText(link)
-                                            toast.success('Invite link copied')
+                                            toast.success('Invite link copied (connects recipient as a friend upon acceptance)')
                                         }}
                                     >
                                         Copy Invite Link

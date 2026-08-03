@@ -16,7 +16,7 @@ export default function ContactInvitePage({ params }: PageProps) {
     const router = useRouter()
 
     const [status, setStatus] = useState<'LOADING' | 'SUCCESS' | 'ERROR'>('LOADING')
-    const [message, setMessage] = useState('Connecting you...')
+    const [message, setMessage] = useState('Connecting you as a friend...')
 
     useEffect(() => {
         const acceptInvite = async () => {
@@ -52,6 +52,9 @@ export default function ContactInvitePage({ params }: PageProps) {
                     <div className="flex flex-col items-center gap-4 text-primary">
                         <Loader2 className="h-12 w-12 animate-spin" />
                         <h2 className="text-xl font-semibold">{message}</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Accepting connects you as a friend with the inviter.
+                        </p>
                     </div>
                 )}
 
