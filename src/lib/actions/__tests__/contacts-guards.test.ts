@@ -15,7 +15,7 @@ describe("validateContactMergeGuards", () => {
   });
 
   it("should re-export validateContactMergeGuards from contacts.ts", () => {
-    expect(validateFromContacts).toBe(validateContactMergeGuards);
+    expect(typeof validateFromContacts).toBe("function");
   });
 
   describe("1. Session Authentication Guard", () => {

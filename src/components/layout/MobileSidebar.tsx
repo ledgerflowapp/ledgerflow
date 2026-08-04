@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store/useAppStore'
 import { signOut } from '@/lib/auth-client'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { Briefcase, LogOut, Menu, Wallet, Settings, Users, LayoutDashboard, PieChart, List } from 'lucide-react'
+import { Briefcase, LogOut, Menu, Wallet, Settings, Users, LayoutDashboard, PieChart, List, Bell } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -64,6 +64,12 @@ export function MobileSidebar() {
             label: 'Manage Categories',
             href: '/dashboard/categories',
             icon: List,
+            showIn: 'personal',
+        },
+        {
+            label: 'Notifications',
+            href: '/dashboard/notifications',
+            icon: Bell,
             showIn: 'personal',
         },
         {

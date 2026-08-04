@@ -8,9 +8,13 @@ import { eq, and, isNull, desc, gte, or } from "drizzle-orm";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 import { Contact } from "@/types";
 import { getSessionUser } from "@/lib/auth-session";
-import { validateContactMergeGuards } from "./contacts-guards";
+import { validateContactMergeGuards as validateGuards } from "./contacts-guards";
 
-export { validateContactMergeGuards } from "./contacts-guards";
+export async function validateContactMergeGuards(
+  ...args: Parameters<typeof validateGuards>
+) {
+  return validateGuards(...args);
+}
 
 async function getAuthenticatedUser(reqHeaders?: Headers) {
   const h = reqHeaders ?? (await headers());

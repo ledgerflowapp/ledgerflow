@@ -15,6 +15,7 @@ import {
     Briefcase,
     Wallet,
     List,
+    Bell,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { signOut } from '@/lib/auth-client'
@@ -68,6 +69,12 @@ export function Sidebar() {
             label: 'Manage Categories',
             href: '/dashboard/categories',
             icon: List,
+            showIn: 'personal',
+        },
+        {
+            label: 'Notifications',
+            href: '/dashboard/notifications',
+            icon: Bell,
             showIn: 'personal',
         },
         {

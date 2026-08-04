@@ -11,7 +11,8 @@ const ROOT_ROUTES = [
     '/dashboard/settings',
     '/dashboard/analytics',
     '/dashboard/friends',
-    '/dashboard/categories'
+    '/dashboard/categories',
+    '/dashboard/notifications'
 ]
 
 export function MobileHeader() {
