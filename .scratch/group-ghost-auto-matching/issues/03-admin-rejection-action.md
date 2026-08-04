@@ -4,10 +4,10 @@
 
 **Blocked by:** 01 — Auto-Matching Detector & Notification Dispatch Service
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `rejectGroupGhostMerge(requestId)` verifies caller is group admin.
-- [ ] Updates notification state to `REJECTED` idempotently.
-- [ ] Dispatches `GROUP_GHOST_MERGE_REJECTED` audit notification to target user and admin.
-- [ ] Group member slots and `transaction_splits` remain completely untouched.
-- [ ] Unit tests added for rejection authorization, idempotency, and data immutability.
+- [x] `rejectGroupGhostMerge(requestId)` verifies caller is group admin.
+- [x] Updates notification state to `REJECTED` idempotently.
+- [x] Dispatches `GROUP_GHOST_MERGE_REJECTED` audit notification to target user and admin.
+- [x] Group member slots and `transaction_splits` remain completely untouched.
+- [x] Unit tests added for rejection authorization, idempotency, and data immutability.
