@@ -1,7 +1,7 @@
 # 09c — Token-Based Group Ghost Member Claiming
 
 Category: enhancement
-Status: ready-for-agent
+Status: completed
 Blocked by: 09b
 
 ## Description
@@ -20,12 +20,12 @@ Implement immediate token-based claiming for group ghost members when an unregis
 - Emit in-app notifications to claimer and group admin upon claim completion.
 
 ## Acceptance Criteria
-- [ ] Server action `claimGroupGhostMemberByToken(inviteToken, targetUserId)` implemented in `src/lib/actions/groups.ts`.
-- [ ] Ghost member upgraded to full member (`group_members.userId` set, `ghostName` cleared).
-- [ ] All past `transaction_splits` re-assigned to `targetUserId` without orphaned records.
-- [ ] Updates wrapped in atomic `db.transaction(...)`.
-- [ ] In-app notification emitted to group admin and claimer upon completion.
-- [ ] Unit tests added in `src/lib/actions/__tests__/group-ghost-token-claim.test.ts`.
+- [x] Server action `claimGroupGhostMemberByToken(inviteToken, targetUserId)` implemented in `src/lib/actions/groups.ts`.
+- [x] Ghost member upgraded to full member (`group_members.userId` set, `ghostName` cleared).
+- [x] All past `transaction_splits` re-assigned to `targetUserId` without orphaned records.
+- [x] Updates wrapped in atomic `db.transaction(...)`.
+- [x] In-app notification emitted to group admin and claimer upon completion.
+- [x] Unit tests added in `src/lib/actions/__tests__/group-ghost-token-claim.test.ts`.
 
 ## Comments
 > *Split from original combined issue 09 to isolate token-based group ghost member claiming.*

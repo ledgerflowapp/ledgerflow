@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { groups, groupMembers, transactions, transactionSplits, profiles } from "@/db/schema";
+import { groups, groupMembers, transactions, transactionSplits, profiles, contacts, notifications, user as userTable } from "@/db/schema";
 import { eq, and, isNull, count, inArray } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth-session";
 
@@ -385,3 +385,173 @@ export async function getGroupTransactionCountAction(groupId: string) {
 
   return { count: result ? result.count : 0 };
 }
+
+export async function claimGroupGhostMemberByToken(
+  inviteToken: string,
+  targetUserId: string
+) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    throw new Error("Unauthorized");
+  }
+
+  return await db.transaction(async (tx) => {
+    // 1. Locate ghost member record associated with inviteToken
+    let ghostMember: typeof groupMembers.$inferSelect | undefined;
+
+    // Direct ghost member ID lookup
+    const directGhostMatch = await tx
+      .select()
+      .from(groupMembers)
+      .where(and(eq(groupMembers.id, inviteToken), isNull(groupMembers.userId)))
+      .limit(1);
+
+    if (directGhostMatch.length > 0) {
+      ghostMember = directGhostMatch[0];
+    } else {
+      // Look up contact by inviteToken
+      const contactMatch = await tx
+        .select()
+        .from(contacts)
+        .where(eq(contacts.inviteToken, inviteToken))
+        .limit(1);
+
+      if (contactMatch.length > 0) {
+        const contact = contactMatch[0];
+        const ghostByContact = await tx
+          .select()
+          .from(groupMembers)
+          .where(and(eq(groupMembers.ghostName, contact.name), isNull(groupMembers.userId)))
+          .limit(1);
+
+        if (ghostByContact.length > 0) {
+          ghostMember = ghostByContact[0];
+        }
+      } else {
+        // Look up group by inviteCode
+        const groupMatch = await tx
+          .select()
+          .from(groups)
+          .where(eq(groups.inviteCode, inviteToken))
+          .limit(1);
+
+        if (groupMatch.length > 0) {
+          const ghostByGroup = await tx
+            .select()
+            .from(groupMembers)
+            .where(and(eq(groupMembers.groupId, groupMatch[0].id), isNull(groupMembers.userId)))
+            .limit(1);
+
+          if (ghostByGroup.length > 0) {
+            ghostMember = ghostByGroup[0];
+          }
+        }
+      }
+    }
+
+    if (!ghostMember) {
+      throw new Error("Ghost member not found or invalid invite token");
+    }
+
+    // 2. Validate target user profile existence
+    const targetUserRecords = await tx
+      .select({ id: userTable.id })
+      .from(userTable)
+      .where(eq(userTable.id, targetUserId))
+      .limit(1);
+
+    if (targetUserRecords.length === 0) {
+      throw new Error("Target user profile not found");
+    }
+
+    // 3. Retrieve group record
+    if (!ghostMember.groupId) {
+      throw new Error("Group not found");
+    }
+
+    const groupRecords = await tx
+      .select()
+      .from(groups)
+      .where(eq(groups.id, ghostMember.groupId))
+      .limit(1);
+
+    if (groupRecords.length === 0) {
+      throw new Error("Group not found");
+    }
+    const group = groupRecords[0];
+
+    // Check if target user is already a full member in this group
+    const existingMember = await tx
+      .select()
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.groupId, group.id),
+          eq(groupMembers.userId, targetUserId)
+        )
+      )
+      .limit(1);
+
+    if (existingMember.length > 0) {
+      throw new Error("User is already a member of this group");
+    }
+
+    // 4. Upgrade ghost member to full member
+    await tx
+      .update(groupMembers)
+      .set({
+        userId: targetUserId,
+        ghostName: null,
+        joinedAt: new Date(),
+      })
+      .where(eq(groupMembers.id, ghostMember.id));
+
+    // 5. Bulk re-assign transaction_splits.userId = targetUserId
+    await tx
+      .update(transactionSplits)
+      .set({ userId: targetUserId })
+      .where(eq(transactionSplits.groupMemberId, ghostMember.id));
+
+    // Also re-assign transactions payerId if payerGroupMemberId matches
+    await tx
+      .update(transactions)
+      .set({ payerId: targetUserId })
+      .where(eq(transactions.payerGroupMemberId, ghostMember.id));
+
+    // 6. In-app notifications
+    await tx.insert(notifications).values({
+      userId: targetUserId,
+      type: "GHOST_CLAIMED",
+      title: "Group Member Claimed",
+      message: `You have claimed your member slot in group '${group.name}'.`,
+      data: {
+        groupId: group.id,
+        ghostMemberId: ghostMember.id,
+        inviteToken,
+      },
+    });
+
+    if (group.createdBy && group.createdBy !== targetUserId) {
+      await tx.insert(notifications).values({
+        userId: group.createdBy,
+        type: "GHOST_CLAIMED",
+        title: "Ghost Member Claimed",
+        message: `A ghost member in '${group.name}' was claimed by a user.`,
+        data: {
+          groupId: group.id,
+          ghostMemberId: ghostMember.id,
+          targetUserId,
+          inviteToken,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      groupId: group.id,
+      claimedMemberId: ghostMember.id,
+      targetUserId,
+    };
+  });
+}
+
