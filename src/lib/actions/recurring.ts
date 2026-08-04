@@ -38,10 +38,11 @@ export function calculateNextRunDate(
       // CALENDAR mode: preserves target day of month from startDate
       const targetDay = effectiveStartDate.getDate();
       const nextMonthBase = addMonths(currentDate, 1);
-      const maxDaysInNextMonth = getDaysInMonth(nextMonthBase);
+      const nextDate = new Date(nextMonthBase);
+      nextDate.setDate(1);
+      const maxDaysInNextMonth = getDaysInMonth(nextDate);
       const newDay = Math.min(targetDay, maxDaysInNextMonth);
 
-      const nextDate = new Date(nextMonthBase);
       nextDate.setDate(newDay);
       return nextDate;
     }
@@ -54,12 +55,15 @@ export function calculateNextRunDate(
       const targetDay = effectiveStartDate.getDate();
       const targetMonth = effectiveStartDate.getMonth();
       const nextYearBase = addYears(currentDate, 1);
-      nextYearBase.setMonth(targetMonth);
-      const maxDaysInNextMonth = getDaysInMonth(nextYearBase);
+      
+      const nextDate = new Date(nextYearBase);
+      nextDate.setDate(1);
+      nextDate.setMonth(targetMonth);
+      const maxDaysInNextMonth = getDaysInMonth(nextDate);
       const newDay = Math.min(targetDay, maxDaysInNextMonth);
 
-      nextYearBase.setDate(newDay);
-      return nextYearBase;
+      nextDate.setDate(newDay);
+      return nextDate;
     }
 
     default:
@@ -172,8 +176,8 @@ export async function getRecurringTransactions(): Promise<RecurringTransaction[]
   // Session catch-up processing
   try {
     await processDueRecurringTransactions(user.id);
-  } catch (e) {
-    // catch-up errors logged silently to ensure view load doesn't crash
+  } catch (err) {
+    console.warn("[Recurring Catch-up Error]:", err);
   }
 
   const rows = await db
@@ -280,16 +284,13 @@ export async function updateRecurringTransaction(
   if (data.account_id !== undefined) updateData.accountId = data.account_id;
   if (data.note !== undefined) updateData.note = data.note;
 
-  // Reset failure count & reason whenever user updates or re-activates the rule
+  // Reset failure count & reason ONLY when active: true is explicitly provided (e.g., resuming rule)
   if (data.active !== undefined) {
     updateData.active = data.active;
-    if (data.active) {
+    if (data.active === true) {
       updateData.failureCount = 0;
       updateData.lastFailureReason = null;
     }
-  } else {
-    updateData.failureCount = 0;
-    updateData.lastFailureReason = null;
   }
 
   const [updated] = await db

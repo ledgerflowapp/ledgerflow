@@ -278,8 +278,8 @@ describe("Recurring Transactions Actions & Generator", () => {
       );
     });
 
-    it("updateRecurringTransaction resets circuit breaker state when user updates", async () => {
-      const updatedRow = { id: "rec-1", name: "Gym", active: true, failureCount: 0 };
+    it("updateRecurringTransaction resets circuit breaker state when active: true is explicitly passed", async () => {
+      const updatedRow = { id: "rec-1", name: "Gym", active: true, failureCount: 0, lastFailureReason: null };
       mockUpdateSet.mockReturnValueOnce({
         where: vi.fn().mockReturnValueOnce({
           returning: vi.fn().mockResolvedValueOnce([updatedRow]),
@@ -296,12 +296,39 @@ describe("Recurring Transactions Actions & Generator", () => {
       });
 
       expect(res).toEqual(updatedRow);
-      expect(mockUpdateSet).toHaveBeenCalledWith(
+      expect(mockUpdateSet).toHaveBeenCalledWith({
+        name: "Gym Updated",
+        amount: "200000",
+        flow: "OUT",
+        frequency: "MONTHLY",
+        scheduleMode: "FIXED_INTERVAL",
+        active: true,
+        failureCount: 0,
+        lastFailureReason: null,
+      });
+    });
+
+    it("updateRecurringTransaction retains circuit breaker state when active is omitted", async () => {
+      const updatedRow = { id: "rec-1", name: "Gym Updated", failureCount: 3, lastFailureReason: "Account missing" };
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockReturnValueOnce({
+          returning: vi.fn().mockResolvedValueOnce([updatedRow]),
+        }),
+      });
+
+      const res = await updateRecurringTransaction("rec-1", {
+        name: "Gym Updated",
+        amount: 2000,
+      });
+
+      expect(res).toEqual(updatedRow);
+      expect(mockUpdateSet).toHaveBeenCalledWith({
+        name: "Gym Updated",
+        amount: "200000",
+      });
+      expect(mockUpdateSet).not.toHaveBeenCalledWith(
         expect.objectContaining({
-          scheduleMode: "FIXED_INTERVAL",
-          failureCount: 0,
-          lastFailureReason: null,
-          active: true,
+          failureCount: expect.anything(),
         })
       );
     });
