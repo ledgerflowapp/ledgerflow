@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { groups, groupMembers, transactions, transactionSplits, profiles, contacts, notifications, user as userTable } from "@/db/schema";
 import { eq, and, isNull, count, inArray } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth-session";
+import { scanGhostMatchesForUser } from "@/lib/services/ghost-auto-matcher";
 
 export async function getGroupByInviteAction(inviteCode: string) {
   const targetGroup = await db.select().from(groups).where(eq(groups.inviteCode, inviteCode)).limit(1);
@@ -932,5 +933,14 @@ export async function rejectGroupGhostMerge(requestId: string) {
     };
   });
 }
+
+export async function triggerGhostAutoMatchingAction() {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    throw new Error("Unauthorized");
+  }
+  return await scanGhostMatchesForUser(sessionUser.id);
+}
+
 
 

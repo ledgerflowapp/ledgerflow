@@ -4,9 +4,10 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Completed At: 2026-08-04T11:08:30+05:30
+Status: completed
 
-- [ ] Auto-matching detector scans group member ghost slots where `userId IS NULL` matching verified target user phone or email.
-- [ ] Automatically dispatches pending `GROUP_GHOST_MERGE_REQUEST` notification to `groups.createdBy`.
-- [ ] Emits `GROUP_GHOST_MERGE_REQUEST_SENT` audit notification to requesting target user.
-- [ ] Unit tests added for matching logic, contact evaluation, and notification payload structure.
+- [x] Auto-matching detector scans group member ghost slots where `userId IS NULL` matching verified target user phone or email.
+- [x] Automatically dispatches pending `GROUP_GHOST_MERGE_REQUEST` notification to `groups.createdBy`.
+- [x] Emits `GROUP_GHOST_MERGE_REQUEST_SENT` audit notification to requesting target user.
+- [x] Unit tests added for matching logic, contact evaluation, and notification payload structure.
