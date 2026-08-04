@@ -40,9 +40,9 @@ const recurringSchema = z.object({
 })
 
 export function getFormDefaults(initialData?: RecurringTransaction | null) {
-    const frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' = initialData?.frequency ?? 'MONTHLY'
-    const schedule_mode: 'CALENDAR' | 'FIXED_INTERVAL' = initialData?.schedule_mode ?? 'CALENDAR'
-    const flow: 'IN' | 'OUT' = initialData?.flow ?? 'OUT'
+    const frequency = initialData?.frequency ?? 'MONTHLY'
+    const schedule_mode = initialData?.schedule_mode ?? 'CALENDAR'
+    const flow = initialData?.flow ?? 'OUT'
 
     return {
         amount: initialData ? paiseToRupees(initialData.amount).toNumber() : undefined,

@@ -38,7 +38,7 @@ vi.mock('sonner', () => ({
     },
 }))
 
-function createMockRule(overrides?: Partial<RecurringTransaction>): RecurringTransaction {
+function createMockRecurringTransaction(overrides?: Partial<RecurringTransaction>): RecurringTransaction {
     return {
         id: 'rec-1',
         account_id: 'acc-1',
@@ -73,7 +73,7 @@ describe('getFormDefaults', () => {
     })
 
     it('populates initial values correctly from initialData including paise to rupees conversion', () => {
-        const mockRule = createMockRule()
+        const mockRule = createMockRecurringTransaction()
         const defaults = getFormDefaults(mockRule)
 
         expect(defaults.amount).toBe(5000)
@@ -105,7 +105,7 @@ describe('RecurringTransactionDrawer active state preservation on edit', () => {
         container.remove()
     })
 
-    const pausedRule = createMockRule({
+    const pausedRule = createMockRecurringTransaction({
         id: 'rec-paused',
         name: 'Spotify',
         note: 'Music',
@@ -142,7 +142,7 @@ describe('RecurringTransactionDrawer active state preservation on edit', () => {
     })
 
     it('preserves active: true when submitting updates to an active rule', async () => {
-        const activeRule = createMockRule({
+        const activeRule = createMockRecurringTransaction({
             id: 'rec-active',
             active: true,
             failure_count: 0,
