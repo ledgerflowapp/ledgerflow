@@ -4,10 +4,10 @@
 
 **Blocked by:** 01 — Auto-Matching Detector & Notification Dispatch Service
 
-**Status:** ready-for-agent
+**Status: completed
 
-- [ ] `approveGroupGhostMerge(requestId)` verifies session user is group admin (`groups.createdBy === sessionUser.id`).
-- [ ] Atomic `db.transaction(...)` upgrades `group_members` slot, re-assigns `transaction_splits` and payer references.
-- [ ] Merge request notification state updated to `APPROVED` idempotently.
-- [ ] In-app audit notifications emitted to target user and admin upon successful approval.
-- [ ] Unit tests added for authorization guards, transactional split re-assignments, and failure rollbacks.
+- [x] `approveGroupGhostMerge(requestId)` verifies session user is group admin (`groups.createdBy === sessionUser.id`).
+- [x] Atomic `db.transaction(...)` upgrades `group_members` slot, re-assigns `transaction_splits` and payer references.
+- [x] Merge request notification state updated to `APPROVED` idempotently.
+- [x] In-app audit notifications emitted to target user and admin upon successful approval.
+- [x] Unit tests added for authorization guards, transactional split re-assignments, and failure rollbacks.
