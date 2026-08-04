@@ -343,6 +343,69 @@ describe("Group Ghost Admin Approval Workflow Server Actions", () => {
         })
       );
     });
+
+    it("throws error if ghost member is not found or already claimed inside transaction", async () => {
+      mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-admin"));
+
+      const requestNotif = {
+        id: "req-123",
+        userId: "user-admin",
+        type: "GROUP_GHOST_MERGE_REQUEST",
+        data: {
+          groupId: "g-1",
+          ghostMemberId: "ghost-1",
+          targetUserId: "user-target",
+          status: "PENDING",
+        },
+      };
+
+      mockDbQuerySequence(
+        [requestNotif],
+        [{ id: "g-1", name: "Ski Trip", createdBy: "user-admin" }]
+      );
+
+      // Inside transaction: ghost member query returns empty (already claimed / not found)
+      mockTxQuerySequence([]);
+
+      await expect(approveGroupGhostMerge("req-123")).rejects.toThrow(
+        "Ghost member not found or already claimed"
+      );
+    });
+
+    it("throws error if target user is already a member of the group inside transaction", async () => {
+      mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-admin"));
+
+      const requestNotif = {
+        id: "req-123",
+        userId: "user-admin",
+        type: "GROUP_GHOST_MERGE_REQUEST",
+        data: {
+          groupId: "g-1",
+          ghostMemberId: "ghost-1",
+          targetUserId: "user-target",
+          status: "PENDING",
+        },
+      };
+
+      const ghostMember = {
+        id: "ghost-1",
+        groupId: "g-1",
+        userId: null,
+        ghostName: "Ghost Bob",
+      };
+
+      mockDbQuerySequence(
+        [requestNotif],
+        [{ id: "g-1", name: "Ski Trip", createdBy: "user-admin" }]
+      );
+
+      // Inside transaction: ghost member found, but target user already member
+      mockTxQuerySequence([ghostMember], [{ id: "gm-existing", userId: "user-target" }]);
+
+      await expect(approveGroupGhostMerge("req-123")).rejects.toThrow(
+        "Target user is already a member of this group"
+      );
+    });
   });
 
   describe("rejectGroupGhostMerge", () => {
