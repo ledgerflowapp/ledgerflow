@@ -394,6 +394,9 @@ export async function claimGroupGhostMemberByToken(
   if (!sessionUser) {
     throw new Error("Unauthorized");
   }
+  if (sessionUser.id !== targetUserId) {
+    throw new Error("Forbidden: Cannot claim ghost member for another user");
+  }
 
   return await db.transaction(async (tx) => {
     // 1. Locate ghost member record associated with inviteToken

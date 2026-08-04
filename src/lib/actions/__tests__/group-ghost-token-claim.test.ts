@@ -100,8 +100,16 @@ describe("claimGroupGhostMemberByToken Server Action", () => {
     ).rejects.toThrow("Ghost member not found or invalid invite token");
   });
 
-  it("throws error if target user profile is not found", async () => {
+  it("throws Forbidden error if session user does not match targetUserId", async () => {
     mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-claimer"));
+
+    await expect(
+      claimGroupGhostMemberByToken("ghost-1", "user-victim")
+    ).rejects.toThrow("Forbidden: Cannot claim ghost member for another user");
+  });
+
+  it("throws error if target user profile is not found", async () => {
+    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("non-existent-user"));
 
     const ghostMember = {
       id: "ghost-1",
