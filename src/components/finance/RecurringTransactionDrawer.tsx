@@ -1,17 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useAddRecurringTransaction } from '@/hooks/useAddRecurringTransaction'
+import { useUpdateRecurringTransaction } from '@/hooks/useUpdateRecurringTransaction'
 import { useAccounts } from '@/hooks/useAccounts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-
-import { Loader2, Plus } from 'lucide-react'
+import { Loader2, Plus, Edit } from 'lucide-react'
 import { useBudgets } from '@/hooks/useBudgets'
 import {
     Select,
@@ -20,10 +20,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { RecurringTransaction } from '@/types'
+import { paiseToRupees } from '@/lib/currency'
 
 const recurringSchema = z.object({
     amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
@@ -33,31 +35,58 @@ const recurringSchema = z.object({
     account_id: z.string().min(1, 'Account is required'),
     start_date: z.coerce.date(),
     frequency: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']),
+    schedule_mode: z.enum(['CALENDAR', 'FIXED_INTERVAL']),
     flow: z.enum(['IN', 'OUT']),
 })
 
 export function RecurringTransactionDrawer({
-    children
+    children,
+    initialData,
 }: {
     children?: React.ReactNode
+    initialData?: RecurringTransaction | null
 }) {
     const { data: budgets } = useBudgets()
     const { data: accounts } = useAccounts()
-    const { mutate: addRecurring, isPending } = useAddRecurringTransaction()
+    const { mutate: addRecurring, isPending: isAdding } = useAddRecurringTransaction()
+    const { mutate: updateRecurring, isPending: isUpdating } = useUpdateRecurringTransaction()
+    const isPending = isAdding || isUpdating
     const [open, setOpen] = useState(false)
-    const [flow, setFlow] = useState<'IN' | 'OUT'>('OUT')
+    const [flow, setFlow] = useState<'IN' | 'OUT'>(initialData?.flow || 'OUT')
+
+    const isEdit = !!initialData
 
     const form = useForm({
         resolver: zodResolver(recurringSchema),
         defaultValues: {
-            amount: '' as unknown as number,
-            name: '',
-            note: '',
-            start_date: new Date(),
-            frequency: 'MONTHLY' as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
-            flow: 'OUT' as 'IN' | 'OUT',
+            amount: initialData ? paiseToRupees(initialData.amount).toNumber() : ('' as unknown as number),
+            name: initialData?.name || '',
+            note: initialData?.note || '',
+            start_date: initialData ? new Date(initialData.start_date) : new Date(),
+            frequency: (initialData?.frequency || 'MONTHLY') as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
+            schedule_mode: (initialData?.schedule_mode || 'CALENDAR') as 'CALENDAR' | 'FIXED_INTERVAL',
+            category_id: initialData?.category_id || undefined,
+            account_id: initialData?.account_id || undefined,
+            flow: (initialData?.flow || 'OUT') as 'IN' | 'OUT',
         },
     })
+
+    useEffect(() => {
+        if (open) {
+            form.reset({
+                amount: initialData ? paiseToRupees(initialData.amount).toNumber() : ('' as unknown as number),
+                name: initialData?.name || '',
+                note: initialData?.note || '',
+                start_date: initialData ? new Date(initialData.start_date) : new Date(),
+                frequency: initialData?.frequency || 'MONTHLY',
+                schedule_mode: initialData?.schedule_mode || 'CALENDAR',
+                category_id: initialData?.category_id || undefined,
+                account_id: initialData?.account_id || undefined,
+                flow: initialData?.flow || 'OUT',
+            })
+            setFlow(initialData?.flow || 'OUT')
+        }
+    }, [open, initialData, form])
 
     const handleSubmit = async (values: z.infer<typeof recurringSchema>) => {
         if (!values.category_id && flow === 'OUT') {
@@ -65,20 +94,42 @@ export function RecurringTransactionDrawer({
             return
         }
 
-        const data = {
-            ...values,
-            flow,
-            next_run_date: values.start_date.toISOString(),
-        }
-
-        addRecurring({ ...data, start_date: data.start_date.toISOString() }, {
-            onSuccess: () => {
-                setOpen(false)
-                form.reset()
-                setFlow('OUT')
-                toast.success('Subscription added')
+        if (isEdit && initialData) {
+            updateRecurring(
+                {
+                    id: initialData.id,
+                    data: {
+                        ...values,
+                        flow,
+                        active: true, // re-activates rule if paused
+                    },
+                },
+                {
+                    onSuccess: () => {
+                        setOpen(false)
+                        toast.success('Subscription updated')
+                    },
+                }
+            )
+        } else {
+            const data = {
+                ...values,
+                flow,
+                next_run_date: values.start_date.toISOString(),
             }
-        })
+
+            addRecurring(
+                { ...data, start_date: data.start_date.toISOString() },
+                {
+                    onSuccess: () => {
+                        setOpen(false)
+                        form.reset()
+                        setFlow('OUT')
+                        toast.success('Subscription added')
+                    },
+                }
+            )
+        }
     }
 
     return (
@@ -87,17 +138,17 @@ export function RecurringTransactionDrawer({
                 <DrawerTrigger render={children as React.ReactElement} />
             ) : (
                 <DrawerTrigger render={<Button size="sm" variant="outline" />}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Subscription
+                    {isEdit ? <Edit className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
+                    {isEdit ? 'Edit Subscription' : 'Add Subscription'}
                 </DrawerTrigger>
             )}
             <DrawerContent className="max-h-[90dvh]">
                 <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
                     <DrawerHeader className="shrink-0">
-                        <DrawerTitle>Add Recurring Payment</DrawerTitle>
+                        <DrawerTitle>{isEdit ? 'Edit Recurring Payment' : 'Add Recurring Payment'}</DrawerTitle>
                     </DrawerHeader>
                     <div className="p-4 pb-8 overflow-y-auto flex-1 min-h-0">
-                        <Tabs defaultValue="OUT" className="w-full mb-4" onValueChange={(v) => setFlow(v as 'IN' | 'OUT')}>
+                        <Tabs value={flow} className="w-full mb-4" onValueChange={(v) => setFlow(v as 'IN' | 'OUT')}>
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="OUT">Expense</TabsTrigger>
                                 <TabsTrigger value="IN">Income</TabsTrigger>
@@ -118,7 +169,7 @@ export function RecurringTransactionDrawer({
                                                     placeholder="0.00"
                                                     {...field}
                                                     value={field.value as number}
-                                                    onChange={e => field.onChange(e.target.value)}
+                                                    onChange={(e) => field.onChange(e.target.value)}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -132,7 +183,16 @@ export function RecurringTransactionDrawer({
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Frequency</FormLabel>
-                                            <Select items={[ {value: 'DAILY', label: 'Daily'}, {value: 'WEEKLY', label: 'Weekly'}, {value: 'MONTHLY', label: 'Monthly'}, {value: 'YEARLY', label: 'Yearly'} ]} onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select
+                                                items={[
+                                                    { value: 'DAILY', label: 'Daily' },
+                                                    { value: 'WEEKLY', label: 'Weekly' },
+                                                    { value: 'MONTHLY', label: 'Monthly' },
+                                                    { value: 'YEARLY', label: 'Yearly' },
+                                                ]}
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                            >
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select frequency" />
@@ -145,6 +205,40 @@ export function RecurringTransactionDrawer({
                                                     <SelectItem value="YEARLY">Yearly</SelectItem>
                                                 </SelectContent>
                                             </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="schedule_mode"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Schedule Mode</FormLabel>
+                                            <Select
+                                                items={[
+                                                    { value: 'CALENDAR', label: 'Calendar Date' },
+                                                    { value: 'FIXED_INTERVAL', label: 'Fixed Interval' },
+                                                ]}
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select schedule mode" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="CALENDAR">Calendar Date (e.g. 31st of every month)</SelectItem>
+                                                    <SelectItem value="FIXED_INTERVAL">Fixed Interval (e.g. Jan 31 → Feb 28 → Mar 28)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription className="text-xs text-muted-foreground">
+                                                {field.value === 'CALENDAR'
+                                                    ? 'Calendar: Always aligns to the target calendar day (restores to 31st after short months).'
+                                                    : 'Fixed Interval: Advances relative to the actual run date.'}
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -211,20 +305,22 @@ export function RecurringTransactionDrawer({
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name="start_date"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel>Start Date</FormLabel>
-                                            <DateTimePicker
-                                                date={field.value as Date | undefined}
-                                                setDate={field.onChange}
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                {!isEdit && (
+                                    <FormField
+                                        control={form.control}
+                                        name="start_date"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col">
+                                                <FormLabel>Start Date</FormLabel>
+                                                <DateTimePicker
+                                                    date={field.value as Date | undefined}
+                                                    setDate={field.onChange}
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
 
                                 <FormField
                                     control={form.control}
@@ -256,7 +352,7 @@ export function RecurringTransactionDrawer({
 
                                 <Button type="submit" className="w-full" disabled={isPending}>
                                     {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Save Subscription
+                                    {isEdit ? 'Save Changes' : 'Save Subscription'}
                                 </Button>
                             </form>
                         </Form>

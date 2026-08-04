@@ -109,10 +109,13 @@ export const recurringTransactions = pgTable(
     categoryId: uuid("category_id").references(() => categories.id, { onDelete: "set null" }),
     accountId: uuid("account_id").references(() => accounts.id, { onDelete: "set null" }),
     frequency: text("frequency").notNull(), // 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+    scheduleMode: text("schedule_mode").default("CALENDAR").notNull(), // 'CALENDAR' | 'FIXED_INTERVAL'
     startDate: timestamp("start_date", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     nextRunDate: timestamp("next_run_date", { withTimezone: true, mode: "date" }).notNull(),
     lastRunDate: timestamp("last_run_date", { withTimezone: true, mode: "date" }),
     active: boolean("active").default(true),
+    failureCount: integer("failure_count").default(0).notNull(),
+    lastFailureReason: text("last_failure_reason"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow(),
     name: text("name").notNull(),
     note: text("note"),

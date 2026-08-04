@@ -141,14 +141,18 @@ export interface Goal {
 
 export interface RecurringTransaction {
     id: string
+    /** Stored as integer paise (100 paise = ₹1). Use currency.ts helpers for arithmetic. */
     amount: number
     name: string
     note?: string
     frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+    schedule_mode: 'CALENDAR' | 'FIXED_INTERVAL'
     start_date: string
     next_run_date: string
     last_run_date: string | null
     active: boolean
+    failure_count: number
+    last_failure_reason: string | null
     category_id: string | null
     account_id: string | null
     flow: 'IN' | 'OUT'

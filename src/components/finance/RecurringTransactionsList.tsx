@@ -3,17 +3,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRecurringTransactions } from '@/hooks/useRecurringTransactions'
 import { useDeleteRecurringTransaction } from '@/hooks/useDeleteRecurringTransaction'
+import { useUpdateRecurringTransaction } from '@/hooks/useUpdateRecurringTransaction'
 import { RecurringTransactionDrawer } from './RecurringTransactionDrawer'
 import { Button } from '@/components/ui/button'
-import { Loader2, Plus, Repeat, Trash2 } from 'lucide-react'
+import { AlertCircle, Edit, Loader2, Play, Plus, Repeat, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { paiseToRupees } from "@/lib/currency";
+import { paiseToRupees } from "@/lib/currency"
 
 export function RecurringTransactionsList() {
     const { data: transactions, isLoading } = useRecurringTransactions()
     const { mutate: deleteTransaction } = useDeleteRecurringTransaction()
+    const { mutate: updateTransaction, isPending: isUpdating } = useUpdateRecurringTransaction()
 
     return (
         <Card>
@@ -44,49 +46,97 @@ export function RecurringTransactionsList() {
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                        {transactions?.map((t) => (
-                            <div
-                                key={t.id}
-                                className="flex items-center justify-between p-3 border rounded-lg bg-card hover:bg-accent/50 transition-colors group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-lg">
-                                        {t.category?.icon || '🔄'}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-medium text-sm">
-                                                {t.name}
-                                            </p>
-                                            <Badge variant="outline" className="text-[10px] px-1 py-0 h-5">
-                                                {t.frequency}
-                                            </Badge>
+                    <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2">
+                        {transactions?.map((t) => {
+                            const isPaused = !t.active || t.failure_count >= 3
+                            return (
+                                <div
+                                    key={t.id}
+                                    className={`flex flex-col gap-2 p-3 border rounded-lg bg-card hover:bg-accent/50 transition-colors group ${
+                                        isPaused ? 'border-destructive/50 bg-destructive/5' : ''
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-lg">
+                                                {t.category?.icon || '🔄'}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <p className="font-medium text-sm">{t.name}</p>
+                                                    <Badge variant="outline" className="text-[10px] px-1 py-0 h-5">
+                                                        {t.frequency}
+                                                    </Badge>
+                                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-5">
+                                                        {t.schedule_mode === 'FIXED_INTERVAL' ? 'FIXED' : 'CALENDAR'}
+                                                    </Badge>
+                                                    {isPaused && (
+                                                        <Badge variant="destructive" className="text-[10px] px-1 py-0 h-5 flex items-center gap-1">
+                                                            <AlertCircle className="h-3 w-3" /> Paused
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-0.5">
+                                                    Next: {format(new Date(t.next_run_date), 'MMM d, yyyy')}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <p className="text-xs text-muted-foreground">
-                                            Next: {format(new Date(t.next_run_date), 'MMM d, yyyy')}
-                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`font-medium mr-1 ${t.flow === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
+                                                {t.flow === 'IN' ? '+' : '-'}₹{paiseToRupees(t.amount).toNumber().toLocaleString()}
+                                            </span>
+
+                                            {isPaused && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-7 text-xs px-2 text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                                                    disabled={isUpdating}
+                                                    onClick={() =>
+                                                        updateTransaction({
+                                                            id: t.id,
+                                                            data: { active: true },
+                                                        })
+                                                    }
+                                                >
+                                                    <Play className="h-3 w-3 mr-1" /> Resume
+                                                </Button>
+                                            )}
+
+                                            <RecurringTransactionDrawer initialData={t}>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </RecurringTransactionDrawer>
+
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => {
+                                                    if (confirm('Are you sure you want to delete this recurring payment?')) {
+                                                        deleteTransaction(t.id)
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
+
+                                    {isPaused && t.last_failure_reason && (
+                                        <div className="text-xs text-destructive bg-destructive/10 p-2 rounded flex items-center gap-1.5">
+                                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                            <span>Reason: {t.last_failure_reason}</span>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <span className={`font-medium ${t.flow === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
-                                        {t.flow === 'IN' ? '+' : '-'}₹{paiseToRupees(t.amount).toNumber().toLocaleString()}
-                                    </span>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={() => {
-                                            if (confirm('Are you sure you want to delete this recurring payment?')) {
-                                                deleteTransaction(t.id)
-                                            }
-                                        }}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 )}
             </CardContent>
