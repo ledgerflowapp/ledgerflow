@@ -861,13 +861,9 @@ export async function rejectGroupGhostMerge(requestId: string) {
   }
 
   const reqData = (requestNotif.data || {}) as Record<string, any>;
-  if (reqData.status !== "PENDING") {
-    throw new Error("Merge request has already been processed");
-  }
-
   const { groupId, ghostMemberId, targetUserId } = reqData;
 
-  // 2. Fetch group to verify admin caller
+  // 2. Fetch group to verify admin caller authorization
   const groupRecords = await db
     .select()
     .from(groups)
@@ -881,6 +877,19 @@ export async function rejectGroupGhostMerge(requestId: string) {
 
   if (group.createdBy !== sessionUser.id) {
     throw new Error("Forbidden: Only group admin can reject merge requests");
+  }
+
+  // 3. Idempotent check for status
+  if (reqData.status === "REJECTED") {
+    return {
+      success: true,
+      requestId,
+      status: "REJECTED",
+    };
+  }
+
+  if (reqData.status !== "PENDING") {
+    throw new Error("Merge request has already been processed");
   }
 
   return await db.transaction(async (tx) => {

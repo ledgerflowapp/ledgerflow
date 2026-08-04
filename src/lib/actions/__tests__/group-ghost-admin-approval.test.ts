@@ -510,5 +510,87 @@ describe("Group Ghost Admin Approval Workflow Server Actions", () => {
         })
       );
     });
+
+    it("handles already REJECTED merge requests idempotently", async () => {
+      mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-admin"));
+
+      const requestNotif = {
+        id: "req-123",
+        userId: "user-admin",
+        type: "GROUP_GHOST_MERGE_REQUEST",
+        data: {
+          groupId: "g-1",
+          ghostMemberId: "ghost-1",
+          targetUserId: "user-target",
+          status: "REJECTED",
+        },
+      };
+
+      const group = {
+        id: "g-1",
+        name: "Beach Trip",
+        createdBy: "user-admin",
+      };
+
+      mockDbQuerySequence([requestNotif], [group]);
+
+      const res = await rejectGroupGhostMerge("req-123");
+
+      expect(res).toEqual({
+        success: true,
+        requestId: "req-123",
+        status: "REJECTED",
+      });
+
+      // DB mutation methods not invoked on idempotent re-call
+      expect(mockUpdateSet).not.toHaveBeenCalled();
+      expect(mockInsertValues).not.toHaveBeenCalled();
+    });
+
+    it("throws error if merge request is not found", async () => {
+      mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-admin"));
+      mockDbQuerySequence([]);
+
+      await expect(rejectGroupGhostMerge("invalid-req")).rejects.toThrow(
+        "Merge request not found"
+      );
+    });
+
+    it("throws error if merge request type is invalid", async () => {
+      mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-admin"));
+      mockDbQuerySequence([{ id: "req-123", type: "OTHER_NOTIFICATION" }]);
+
+      await expect(rejectGroupGhostMerge("req-123")).rejects.toThrow(
+        "Invalid merge request"
+      );
+    });
+
+    it("throws error if merge request has already been approved", async () => {
+      mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-admin"));
+
+      const requestNotif = {
+        id: "req-123",
+        userId: "user-admin",
+        type: "GROUP_GHOST_MERGE_REQUEST",
+        data: {
+          groupId: "g-1",
+          ghostMemberId: "ghost-1",
+          targetUserId: "user-target",
+          status: "APPROVED",
+        },
+      };
+
+      const group = {
+        id: "g-1",
+        name: "Beach Trip",
+        createdBy: "user-admin",
+      };
+
+      mockDbQuerySequence([requestNotif], [group]);
+
+      await expect(rejectGroupGhostMerge("req-123")).rejects.toThrow(
+        "Merge request has already been processed"
+      );
+    });
   });
 });
