@@ -4,10 +4,11 @@
 
 **Blocked by:** 02 — Group Admin Approval & Atomic Split Transfer Server Action, 03 — Group Admin Rejection Server Action
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Notification feed renders pending group ghost merge request cards for group admins.
-- [ ] Includes group name, ghost member display name, target user profile info, and "Approve" / "Reject" buttons.
-- [ ] Invokes `approveGroupGhostMerge` and `rejectGroupGhostMerge` server actions with optimistic UI state transitions.
-- [ ] Displays success/error toast notifications via `sonner`.
-- [ ] Unit/UI component tests added for card rendering and action button interactions.
+- [x] Notification feed renders pending group ghost merge request cards for group admins.
+- [x] Includes group name, ghost member display name, target user profile info, and "Approve" / "Reject" buttons.
+- [x] Invokes `approveGroupGhostMerge` and `rejectGroupGhostMerge` server actions with optimistic UI state transitions.
+- [x] Displays success/error toast notifications via `sonner`.
+- [x] Unit/UI component tests added for card rendering and action button interactions.
+
