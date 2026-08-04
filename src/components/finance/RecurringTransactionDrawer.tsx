@@ -39,6 +39,20 @@ const recurringSchema = z.object({
     flow: z.enum(['IN', 'OUT']),
 })
 
+export function getFormDefaults(initialData?: RecurringTransaction | null) {
+    return {
+        amount: initialData ? paiseToRupees(initialData.amount).toNumber() : undefined,
+        name: initialData?.name || '',
+        note: initialData?.note || undefined,
+        start_date: initialData ? new Date(initialData.start_date) : new Date(),
+        frequency: (initialData?.frequency || 'MONTHLY') as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
+        schedule_mode: (initialData?.schedule_mode || 'CALENDAR') as 'CALENDAR' | 'FIXED_INTERVAL',
+        category_id: initialData?.category_id || undefined,
+        account_id: initialData?.account_id || '',
+        flow: (initialData?.flow || 'OUT') as 'IN' | 'OUT',
+    }
+}
+
 export function RecurringTransactionDrawer({
     children,
     initialData,
@@ -58,32 +72,12 @@ export function RecurringTransactionDrawer({
 
     const form = useForm({
         resolver: zodResolver(recurringSchema),
-        defaultValues: {
-            amount: initialData ? paiseToRupees(initialData.amount).toNumber() : ('' as unknown as number),
-            name: initialData?.name || '',
-            note: initialData?.note || '',
-            start_date: initialData ? new Date(initialData.start_date) : new Date(),
-            frequency: (initialData?.frequency || 'MONTHLY') as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
-            schedule_mode: (initialData?.schedule_mode || 'CALENDAR') as 'CALENDAR' | 'FIXED_INTERVAL',
-            category_id: initialData?.category_id || undefined,
-            account_id: initialData?.account_id || undefined,
-            flow: (initialData?.flow || 'OUT') as 'IN' | 'OUT',
-        },
+        defaultValues: getFormDefaults(initialData),
     })
 
     useEffect(() => {
         if (open) {
-            form.reset({
-                amount: initialData ? paiseToRupees(initialData.amount).toNumber() : ('' as unknown as number),
-                name: initialData?.name || '',
-                note: initialData?.note || '',
-                start_date: initialData ? new Date(initialData.start_date) : new Date(),
-                frequency: initialData?.frequency || 'MONTHLY',
-                schedule_mode: initialData?.schedule_mode || 'CALENDAR',
-                category_id: initialData?.category_id || undefined,
-                account_id: initialData?.account_id || undefined,
-                flow: initialData?.flow || 'OUT',
-            })
+            form.reset(getFormDefaults(initialData))
             setFlow(initialData?.flow || 'OUT')
         }
     }, [open, initialData, form])
@@ -101,7 +95,7 @@ export function RecurringTransactionDrawer({
                     data: {
                         ...values,
                         flow,
-                        active: true, // re-activates rule if paused
+                        active: initialData.active,
                     },
                 },
                 {
@@ -168,7 +162,7 @@ export function RecurringTransactionDrawer({
                                                     type="number"
                                                     placeholder="0.00"
                                                     {...field}
-                                                    value={field.value as number}
+                                                    value={(field.value as number | undefined) ?? ''}
                                                     onChange={(e) => field.onChange(e.target.value)}
                                                 />
                                             </FormControl>
