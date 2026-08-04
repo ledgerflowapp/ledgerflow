@@ -1,7 +1,7 @@
 # 10 — Automated Generation of Scheduled Recurring Transactions
 
 Category: enhancement
-Status: ready-for-agent
+Status: completed
 
 ## Description
 User Story 8 in `spec.md` specifies automatic generation of due recurring transactions. Currently `src/lib/actions/recurring.ts` provides manual CRUD actions only.
@@ -14,12 +14,12 @@ User Story 8 in `spec.md` specifies automatic generation of due recurring transa
 - Implement Circuit Breaker: track `failureCount` and `lastFailureReason` on rules, automatically pausing (`active = false`) rules that hit 3 consecutive execution errors and presenting warning UI.
 
 ## Acceptance Criteria
-- [ ] Due recurring transactions correctly create ledger transactions on execution.
-- [ ] Schedule dates update atomically per occurrence (incremental catch-up idempotency).
-- [ ] Hybrid triggering works via `POST /api/cron/recurring` and user session initialization.
-- [ ] User can configure `scheduleMode` (`CALENDAR` vs `FIXED_INTERVAL`) on recurring transaction creation/edit.
-- [ ] Circuit breaker pauses failing rules after 3 attempts and presents actionable UI feedback.
-- [ ] Unit tests added for recurring transaction generator logic, frequency calculations, catch-up limits, and circuit breaker.
+- [x] Due recurring transactions correctly create ledger transactions on execution.
+- [x] Schedule dates update atomically per occurrence (incremental catch-up idempotency).
+- [x] Hybrid triggering works via `POST /api/cron/recurring` and user session initialization.
+- [x] User can configure `scheduleMode` (`CALENDAR` vs `FIXED_INTERVAL`) on recurring transaction creation/edit.
+- [x] Circuit breaker pauses failing rules after 3 attempts and presents actionable UI feedback.
+- [x] Unit tests added for recurring transaction generator logic, frequency calculations, catch-up limits, and circuit breaker.
 
 ## Comments
 > *This was updated following a grilling session and recorded in ADR 0001.*
