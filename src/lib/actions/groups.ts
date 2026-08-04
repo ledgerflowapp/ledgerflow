@@ -558,3 +558,379 @@ export async function claimGroupGhostMemberByToken(
   });
 }
 
+export async function requestGroupGhostMerge(
+  groupIdOrParams: string | { groupId: string; ghostMemberId: string; targetUserId: string },
+  ghostMemberIdParam?: string,
+  targetUserIdParam?: string
+) {
+  let groupId: string;
+  let ghostMemberId: string;
+  let targetUserId: string;
+
+  if (typeof groupIdOrParams === "object" && groupIdOrParams !== null) {
+    groupId = groupIdOrParams.groupId;
+    ghostMemberId = groupIdOrParams.ghostMemberId;
+    targetUserId = groupIdOrParams.targetUserId;
+  } else {
+    groupId = groupIdOrParams;
+    ghostMemberId = ghostMemberIdParam!;
+    targetUserId = targetUserIdParam!;
+  }
+
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    throw new Error("Unauthorized");
+  }
+
+  // 1. Target user profile check
+  const targetUserRecords = await db
+    .select({ id: userTable.id })
+    .from(userTable)
+    .where(eq(userTable.id, targetUserId))
+    .limit(1);
+
+  if (targetUserRecords.length === 0) {
+    throw new Error("Target user profile not found");
+  }
+
+  // 2. Group check
+  const groupRecords = await db
+    .select()
+    .from(groups)
+    .where(eq(groups.id, groupId))
+    .limit(1);
+
+  if (groupRecords.length === 0) {
+    throw new Error("Group not found");
+  }
+  const group = groupRecords[0];
+  if (!group.createdBy) {
+    throw new Error("Group has no admin");
+  }
+
+  // 3. Ghost member check
+  const ghostMemberRecords = await db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.id, ghostMemberId),
+        eq(groupMembers.groupId, groupId),
+        isNull(groupMembers.userId)
+      )
+    )
+    .limit(1);
+
+  if (ghostMemberRecords.length === 0) {
+    throw new Error("Ghost member not found");
+  }
+  const ghostMember = ghostMemberRecords[0];
+
+  // 4. Target user already member check
+  const existingMember = await db
+    .select()
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.userId, targetUserId)
+      )
+    )
+    .limit(1);
+
+  if (existingMember.length > 0) {
+    throw new Error("User is already a member of this group");
+  }
+
+  // 5. Create merge request notification to group admin (group.createdBy)
+  const insertedNotificationResults = await db
+    .insert(notifications)
+    .values({
+      userId: group.createdBy,
+      type: "GROUP_GHOST_MERGE_REQUEST",
+      title: "Group Ghost Member Merge Request",
+      message: `Request to merge ghost member '${ghostMember.ghostName || "Ghost"}' with user profile in '${group.name}'.`,
+      data: {
+        groupId: group.id,
+        ghostMemberId: ghostMember.id,
+        targetUserId,
+        requestingUserId: sessionUser.id,
+        status: "PENDING",
+      },
+    })
+    .returning();
+
+  const insertedNotification = insertedNotificationResults[0];
+
+  // Audit notification to requesting user if different from admin
+  if (sessionUser.id !== group.createdBy) {
+    await db.insert(notifications).values({
+      userId: sessionUser.id,
+      type: "GROUP_GHOST_MERGE_REQUEST_SENT",
+      title: "Merge Request Sent",
+      message: `Your request to join group '${group.name}' as ghost member '${ghostMember.ghostName || "Ghost"}' has been sent to the group admin.`,
+      data: {
+        groupId: group.id,
+        ghostMemberId: ghostMember.id,
+        targetUserId,
+        requestId: insertedNotification ? insertedNotification.id : undefined,
+      },
+    });
+  }
+
+  return {
+    success: true,
+    requestId: insertedNotification ? insertedNotification.id : undefined,
+    groupId: group.id,
+  };
+}
+
+export async function approveGroupGhostMerge(requestId: string) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    throw new Error("Unauthorized");
+  }
+
+  // 1. Fetch merge request notification
+  const requestRecords = await db
+    .select()
+    .from(notifications)
+    .where(eq(notifications.id, requestId))
+    .limit(1);
+
+  if (requestRecords.length === 0) {
+    throw new Error("Merge request not found");
+  }
+  const requestNotif = requestRecords[0];
+
+  if (requestNotif.type !== "GROUP_GHOST_MERGE_REQUEST") {
+    throw new Error("Invalid merge request");
+  }
+
+  const reqData = (requestNotif.data || {}) as Record<string, any>;
+  if (reqData.status !== "PENDING") {
+    throw new Error("Merge request has already been processed");
+  }
+
+  const { groupId, ghostMemberId, targetUserId } = reqData;
+
+  // 2. Fetch group to verify admin caller
+  const groupRecords = await db
+    .select()
+    .from(groups)
+    .where(eq(groups.id, groupId))
+    .limit(1);
+
+  if (groupRecords.length === 0) {
+    throw new Error("Group not found");
+  }
+  const group = groupRecords[0];
+
+  if (group.createdBy !== sessionUser.id) {
+    throw new Error("Forbidden: Only group admin can approve merge requests");
+  }
+
+  return await db.transaction(async (tx) => {
+    // 3. Verify ghost member exists and unclaimed
+    const ghostMatch = await tx
+      .select()
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.id, ghostMemberId),
+          eq(groupMembers.groupId, groupId),
+          isNull(groupMembers.userId)
+        )
+      )
+      .limit(1);
+
+    if (ghostMatch.length === 0) {
+      throw new Error("Ghost member not found or already claimed");
+    }
+
+    // 4. Verify target user is not already full member
+    const existingMember = await tx
+      .select()
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.userId, targetUserId)
+        )
+      )
+      .limit(1);
+
+    if (existingMember.length > 0) {
+      throw new Error("Target user is already a member of this group");
+    }
+
+    // 5. Upgrade group member slot
+    await tx
+      .update(groupMembers)
+      .set({
+        userId: targetUserId,
+        ghostName: null,
+        joinedAt: new Date(),
+      })
+      .where(eq(groupMembers.id, ghostMemberId));
+
+    // 6. Re-assign transaction splits and transactions payer
+    await tx
+      .update(transactionSplits)
+      .set({ userId: targetUserId })
+      .where(eq(transactionSplits.groupMemberId, ghostMemberId));
+
+    await tx
+      .update(transactions)
+      .set({ payerId: targetUserId })
+      .where(eq(transactions.payerGroupMemberId, ghostMemberId));
+
+    // 7. Update request notification status
+    await tx
+      .update(notifications)
+      .set({
+        data: {
+          ...reqData,
+          status: "APPROVED",
+          approvedAt: new Date().toISOString(),
+        },
+        isRead: true,
+      })
+      .where(eq(notifications.id, requestId));
+
+    // 8. Audit notifications
+    await tx.insert(notifications).values({
+      userId: targetUserId,
+      type: "GROUP_GHOST_MERGE_APPROVED",
+      title: "Merge Request Approved",
+      message: `Your request to merge ghost member in '${group.name}' has been approved by the admin.`,
+      data: {
+        groupId: group.id,
+        ghostMemberId,
+        targetUserId,
+        requestId,
+      },
+    });
+
+    if (group.createdBy !== targetUserId) {
+      await tx.insert(notifications).values({
+        userId: group.createdBy,
+        type: "GROUP_GHOST_MERGE_APPROVED",
+        title: "Merge Request Approved",
+        message: `You approved the ghost merge request in '${group.name}'.`,
+        data: {
+          groupId: group.id,
+          ghostMemberId,
+          targetUserId,
+          requestId,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      requestId,
+      groupId: group.id,
+      claimedMemberId: ghostMemberId,
+      targetUserId,
+    };
+  });
+}
+
+export async function rejectGroupGhostMerge(requestId: string) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    throw new Error("Unauthorized");
+  }
+
+  // 1. Fetch merge request notification
+  const requestRecords = await db
+    .select()
+    .from(notifications)
+    .where(eq(notifications.id, requestId))
+    .limit(1);
+
+  if (requestRecords.length === 0) {
+    throw new Error("Merge request not found");
+  }
+  const requestNotif = requestRecords[0];
+
+  if (requestNotif.type !== "GROUP_GHOST_MERGE_REQUEST") {
+    throw new Error("Invalid merge request");
+  }
+
+  const reqData = (requestNotif.data || {}) as Record<string, any>;
+  if (reqData.status !== "PENDING") {
+    throw new Error("Merge request has already been processed");
+  }
+
+  const { groupId, ghostMemberId, targetUserId } = reqData;
+
+  // 2. Fetch group to verify admin caller
+  const groupRecords = await db
+    .select()
+    .from(groups)
+    .where(eq(groups.id, groupId))
+    .limit(1);
+
+  if (groupRecords.length === 0) {
+    throw new Error("Group not found");
+  }
+  const group = groupRecords[0];
+
+  if (group.createdBy !== sessionUser.id) {
+    throw new Error("Forbidden: Only group admin can reject merge requests");
+  }
+
+  return await db.transaction(async (tx) => {
+    // Update request notification status to REJECTED (group member data is untouched)
+    await tx
+      .update(notifications)
+      .set({
+        data: {
+          ...reqData,
+          status: "REJECTED",
+          rejectedAt: new Date().toISOString(),
+        },
+        isRead: true,
+      })
+      .where(eq(notifications.id, requestId));
+
+    // Audit notification to requesting target user
+    await tx.insert(notifications).values({
+      userId: targetUserId,
+      type: "GROUP_GHOST_MERGE_REJECTED",
+      title: "Merge Request Rejected",
+      message: `Your request to merge ghost member in '${group.name}' was rejected by the admin.`,
+      data: {
+        groupId: group.id,
+        ghostMemberId,
+        targetUserId,
+        requestId,
+      },
+    });
+
+    if (group.createdBy !== targetUserId) {
+      await tx.insert(notifications).values({
+        userId: group.createdBy,
+        type: "GROUP_GHOST_MERGE_REJECTED",
+        title: "Merge Request Rejected",
+        message: `You rejected the ghost merge request in '${group.name}'.`,
+        data: {
+          groupId: group.id,
+          ghostMemberId,
+          targetUserId,
+          requestId,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      requestId,
+      status: "REJECTED",
+    };
+  });
+}
+
+
