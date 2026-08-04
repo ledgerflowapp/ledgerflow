@@ -38,6 +38,29 @@ vi.mock('sonner', () => ({
     },
 }))
 
+function createMockRule(overrides?: Partial<RecurringTransaction>): RecurringTransaction {
+    return {
+        id: 'rec-1',
+        account_id: 'acc-1',
+        category_id: 'cat-1',
+        amount: 500000, // 5000 INR
+        flow: 'OUT',
+        name: 'Netflix',
+        note: 'Monthly subscription',
+        start_date: '2026-01-01T00:00:00.000Z',
+        next_run_date: '2026-02-01T00:00:00.000Z',
+        last_run_date: null,
+        frequency: 'MONTHLY',
+        schedule_mode: 'CALENDAR',
+        active: false,
+        failure_count: 2,
+        last_failure_reason: 'Insufficient funds',
+        category: { name: 'Entertainment', icon: '🎬' },
+        account: { name: 'HDFC Bank', type: 'BANK' },
+        ...overrides,
+    }
+}
+
 describe('getFormDefaults', () => {
     it('returns default values for new transaction when initialData is null/undefined', () => {
         const defaults = getFormDefaults(null)
@@ -50,27 +73,9 @@ describe('getFormDefaults', () => {
     })
 
     it('populates initial values correctly from initialData including paise to rupees conversion', () => {
-        const mockRule: RecurringTransaction = {
-            id: 'rec-1',
-            account_id: 'acc-1',
-            category_id: 'cat-1',
-            amount: 500000, // 5000 INR
-            flow: 'OUT',
-            name: 'Netflix',
-            note: 'Monthly subscription',
-            start_date: '2026-01-01T00:00:00.000Z',
-            next_run_date: '2026-02-01T00:00:00.000Z',
-            last_run_date: null,
-            frequency: 'MONTHLY',
-            schedule_mode: 'CALENDAR',
-            active: false,
-            failure_count: 2,
-            last_failure_reason: 'Insufficient funds',
-            category: { name: 'Entertainment', icon: '🎬' },
-            account: { name: 'HDFC Bank', type: 'BANK' },
-        }
-
+        const mockRule = createMockRule()
         const defaults = getFormDefaults(mockRule)
+
         expect(defaults.amount).toBe(5000)
         expect(defaults.name).toBe('Netflix')
         expect(defaults.note).toBe('Monthly subscription')
@@ -100,25 +105,15 @@ describe('RecurringTransactionDrawer active state preservation on edit', () => {
         container.remove()
     })
 
-    const pausedRule: RecurringTransaction = {
+    const pausedRule = createMockRule({
         id: 'rec-paused',
-        account_id: 'acc-1',
-        category_id: 'cat-1',
-        amount: 19900, // 199 INR
-        flow: 'OUT',
         name: 'Spotify',
         note: 'Music',
-        start_date: '2026-01-01T00:00:00.000Z',
-        next_run_date: '2026-02-01T00:00:00.000Z',
-        last_run_date: null,
-        frequency: 'MONTHLY',
-        schedule_mode: 'CALENDAR',
+        amount: 19900, // 199 INR
         active: false,
         failure_count: 3,
         last_failure_reason: 'Account closed',
-        category: { name: 'Entertainment', icon: '🎬' },
-        account: { name: 'HDFC Bank', type: 'BANK' },
-    }
+    })
 
     it('preserves active: false when submitting updates to a paused rule', async () => {
         await act(async () => {
@@ -147,13 +142,12 @@ describe('RecurringTransactionDrawer active state preservation on edit', () => {
     })
 
     it('preserves active: true when submitting updates to an active rule', async () => {
-        const activeRule: RecurringTransaction = {
-            ...pausedRule,
+        const activeRule = createMockRule({
             id: 'rec-active',
             active: true,
             failure_count: 0,
             last_failure_reason: null,
-        }
+        })
 
         await act(async () => {
             root.render(<RecurringTransactionDrawer initialData={activeRule} />)

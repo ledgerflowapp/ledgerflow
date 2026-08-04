@@ -40,16 +40,20 @@ const recurringSchema = z.object({
 })
 
 export function getFormDefaults(initialData?: RecurringTransaction | null) {
+    const frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' = initialData?.frequency ?? 'MONTHLY'
+    const schedule_mode: 'CALENDAR' | 'FIXED_INTERVAL' = initialData?.schedule_mode ?? 'CALENDAR'
+    const flow: 'IN' | 'OUT' = initialData?.flow ?? 'OUT'
+
     return {
         amount: initialData ? paiseToRupees(initialData.amount).toNumber() : undefined,
-        name: initialData?.name || '',
-        note: initialData?.note || undefined,
+        name: initialData?.name ?? '',
+        note: initialData?.note ?? undefined,
         start_date: initialData ? new Date(initialData.start_date) : new Date(),
-        frequency: (initialData?.frequency || 'MONTHLY') as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
-        schedule_mode: (initialData?.schedule_mode || 'CALENDAR') as 'CALENDAR' | 'FIXED_INTERVAL',
-        category_id: initialData?.category_id || undefined,
-        account_id: initialData?.account_id || '',
-        flow: (initialData?.flow || 'OUT') as 'IN' | 'OUT',
+        frequency,
+        schedule_mode,
+        category_id: initialData?.category_id ?? undefined,
+        account_id: initialData?.account_id ?? '',
+        flow,
     }
 }
 
