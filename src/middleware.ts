@@ -2,6 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 import { auth } from "@/lib/auth";
 
+function redirectToLogin(request: NextRequest, pathname: string) {
+  const loginUrl = new URL("/login", request.url);
+  loginUrl.searchParams.set("next", pathname);
+  return NextResponse.redirect(loginUrl);
+}
+
 export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const { pathname } = request.nextUrl;
@@ -11,9 +17,7 @@ export async function middleware(request: NextRequest) {
 
   if (!sessionCookie) {
     if (isDashboardPage) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(loginUrl);
+      return redirectToLogin(request, pathname);
     }
     return NextResponse.next();
   }
@@ -30,9 +34,7 @@ export async function middleware(request: NextRequest) {
   const isValidSession = Boolean(session?.session && session?.user);
 
   if (isDashboardPage && !isValidSession) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    return redirectToLogin(request, pathname);
   }
 
   if (isAuthPage && isValidSession) {
