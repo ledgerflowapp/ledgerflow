@@ -27,4 +27,22 @@ test.describe('Authentication Flow', () => {
         await expect(page.getByPlaceholder('John Doe')).toBeVisible();
         await expect(page.getByRole('button', { name: /Create Account/i })).toBeVisible();
     });
+
+    test('should redirect unauthenticated request to /dashboard to /login', async ({ page }) => {
+        await page.goto('/dashboard');
+        await expect(page).toHaveURL(/\/login\?next=%2Fdashboard/);
+    });
+
+    test('should redirect request with forged session cookie from /dashboard to /login', async ({ page, context }) => {
+        await context.addCookies([
+            {
+                name: 'better-auth.session_token',
+                value: 'forged_invalid_session_token_123',
+                domain: 'localhost',
+                path: '/',
+            },
+        ]);
+        await page.goto('/dashboard');
+        await expect(page).toHaveURL(/\/login\?next=%2Fdashboard/);
+    });
 });
