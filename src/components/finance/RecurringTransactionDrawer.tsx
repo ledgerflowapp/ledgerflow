@@ -27,8 +27,13 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RecurringTransaction } from '@/types'
 import { paiseToRupees } from '@/lib/currency'
 
-const recurringSchema = z.object({
-    amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
+export const recurringSchema = z.object({
+    amount: z
+        .number({ message: 'Amount is required' })
+        .or(z.nan())
+        .refine((val) => !isNaN(val) && val >= 1, {
+            message: 'Amount must be greater than 0',
+        }),
     name: z.string().min(1, 'Name is required'),
     note: z.string().optional(),
     category_id: z.string().optional(),
@@ -74,7 +79,7 @@ export function RecurringTransactionDrawer({
 
     const isEdit = !!initialData
 
-    const form = useForm({
+    const form = useForm<z.input<typeof recurringSchema>, any, z.infer<typeof recurringSchema>>({
         resolver: zodResolver(recurringSchema),
         defaultValues: getFormDefaults(initialData),
     })
@@ -166,8 +171,10 @@ export function RecurringTransactionDrawer({
                                                     type="number"
                                                     placeholder="0.00"
                                                     {...field}
-                                                    value={(field.value as number | undefined) ?? ''}
-                                                    onChange={(e) => field.onChange(e.target.value)}
+                                                    value={field.value !== undefined && !Number.isNaN(field.value) ? field.value : ''}
+                                                    onChange={(e) =>
+                                                        field.onChange(e.target.value === '' ? NaN : Number(e.target.value))
+                                                    }
                                                 />
                                             </FormControl>
                                             <FormMessage />

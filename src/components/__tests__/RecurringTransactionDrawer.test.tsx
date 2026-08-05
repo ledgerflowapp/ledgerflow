@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import React, { act } from 'react'
 import { createRoot, Root } from 'react-dom/client'
-import { getFormDefaults, RecurringTransactionDrawer } from '../finance/RecurringTransactionDrawer'
+import { getFormDefaults, recurringSchema, RecurringTransactionDrawer } from '../finance/RecurringTransactionDrawer'
 import { RecurringTransaction } from '@/types'
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true
@@ -84,6 +84,41 @@ describe('getFormDefaults', () => {
         expect(defaults.account_id).toBe('acc-1')
         expect(defaults.category_id).toBe('cat-1')
         expect(defaults.flow).toBe('OUT')
+    })
+})
+
+describe('recurringSchema amount validation', () => {
+    const validBase = {
+        name: 'Internet Bill',
+        account_id: 'acc-1',
+        start_date: new Date(),
+        frequency: 'MONTHLY' as const,
+        schedule_mode: 'CALENDAR' as const,
+        flow: 'OUT' as const,
+    }
+
+    it('rejects NaN or empty amount with error message', () => {
+        const result = recurringSchema.safeParse({ ...validBase, amount: NaN })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+            expect(result.error.issues[0].message).toBe('Amount must be greater than 0')
+        }
+    })
+
+    it('rejects amount less than 1', () => {
+        const result = recurringSchema.safeParse({ ...validBase, amount: 0 })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+            expect(result.error.issues[0].message).toBe('Amount must be greater than 0')
+        }
+    })
+
+    it('accepts valid numeric amount greater than 0', () => {
+        const result = recurringSchema.safeParse({ ...validBase, amount: 499 })
+        expect(result.success).toBe(true)
+        if (result.success) {
+            expect(result.data.amount).toBe(499)
+        }
     })
 })
 
