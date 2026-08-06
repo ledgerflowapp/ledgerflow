@@ -30,8 +30,8 @@ export function AccountsList() {
             <CardContent className="space-y-4 pt-4">
                 {isLoading ? (
                     <div className="text-sm text-muted-foreground">Loading accounts...</div>
-                ) : accounts && accounts.length > 0 ? (
-                    accounts.map((account) => {
+                ) : (accounts?.length ?? 0) > 0 ? (
+                    accounts!.map((account) => {
                         const Icon = ICONS[account.type] || CreditCard
                         return (
                             <div key={account.id} className="flex items-center justify-between">

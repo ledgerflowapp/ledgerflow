@@ -6,7 +6,7 @@ import { useContactTransactions } from '@/hooks/useContactTransactions'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Receipt, MoreVertical, Edit, Trash2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { formatTransactionDate } from '@/lib/date-utils'
+import { formatTransactionDate, filterAndSortTransactions, TimeFilter, SortOption } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import { AddPersonDrawer } from '@/components/personal/AddPersonDrawer'
 import { PersonalTransactionDrawer } from '@/components/personal/PersonalTransactionDrawer'
@@ -32,14 +32,10 @@ import {
 import { useDeleteContact } from '@/hooks/useDeleteContact'
 import { Loader2 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { startOfDay, startOfWeek, startOfMonth, startOfYear, isAfter } from 'date-fns'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 import { TransactionWithJoins } from '@/types'
 import { paiseToRupees } from "@/lib/currency";
-
-type TimeFilter = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'YEAR'
-type SortOption = 'LATEST' | 'OLDEST' | 'HIGHEST' | 'LOWEST'
 
 export default function PersonDetailsPage() {
     const params = useParams()
@@ -73,52 +69,7 @@ export default function PersonDetailsPage() {
     const contact = contacts?.find(c => c.id === contactId)
 
     const filteredTransactions = useMemo(() => {
-        if (!transactions) return []
-
-        const parsed = transactions.map(t => {
-            const parsedDate = new Date(t.date)
-            return {
-                ...t,
-                parsedDate,
-                timestamp: parsedDate.getTime()
-            }
-        })
-
-        let result = parsed
-
-        // Apply Time Filter
-        const now = new Date()
-        if (timeFilter === 'TODAY') {
-            const start = startOfDay(now)
-            result = result.filter(t => isAfter(t.parsedDate, start))
-        } else if (timeFilter === 'WEEK') {
-            const start = startOfWeek(now)
-            result = result.filter(t => isAfter(t.parsedDate, start))
-        } else if (timeFilter === 'MONTH') {
-            const start = startOfMonth(now)
-            result = result.filter(t => isAfter(t.parsedDate, start))
-        } else if (timeFilter === 'YEAR') {
-            const start = startOfYear(now)
-            result = result.filter(t => isAfter(t.parsedDate, start))
-        }
-
-        // Apply Sorting
-        result.sort((a, b) => {
-            switch (sortBy) {
-                case 'LATEST':
-                    return b.timestamp - a.timestamp
-                case 'OLDEST':
-                    return a.timestamp - b.timestamp
-                case 'HIGHEST':
-                    return b.amount - a.amount
-                case 'LOWEST':
-                    return a.amount - b.amount
-                default:
-                    return 0
-            }
-        })
-
-        return result
+        return filterAndSortTransactions(transactions, timeFilter, sortBy)
     }, [transactions, timeFilter, sortBy])
 
     if (!contact && contacts) {

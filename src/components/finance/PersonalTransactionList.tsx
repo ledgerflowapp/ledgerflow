@@ -4,14 +4,13 @@ import { useRouter } from 'next/navigation'
 import { getPersonalTransactionsAction } from '@/lib/actions/transactions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Receipt } from 'lucide-react'
-import { formatTransactionDate } from '@/lib/date-utils'
+import { formatTransactionDate, filterAndSortTransactions, TimeFilter, SortOption } from '@/lib/date-utils'
 import { TransactionDetailsDrawer } from './TransactionDetailsDrawer'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { PersonalTransactionDrawer } from '@/components/personal/PersonalTransactionDrawer'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { startOfDay, startOfWeek, startOfMonth, startOfYear, isAfter } from 'date-fns'
 import { paiseToRupees } from "@/lib/currency";
 
 interface PersonalTransaction {
@@ -65,52 +64,7 @@ export function PersonalTransactionList({ onEdit }: PersonalTransactionListProps
     })
 
     const filteredTransactions = useMemo(() => {
-        if (!transactions) return []
-
-        const parsed = transactions.map(t => {
-            const parsedDate = new Date(t.date)
-            return {
-                ...t,
-                parsedDate,
-                timestamp: parsedDate.getTime()
-            }
-        })
-
-        let result = parsed
-
-        // Apply Time Filter
-        const now = new Date()
-        if (timeFilter === 'TODAY') {
-            const start = startOfDay(now)
-            result = result.filter(t => isAfter(t.parsedDate, start))
-        } else if (timeFilter === 'WEEK') {
-            const start = startOfWeek(now)
-            result = result.filter(t => isAfter(t.parsedDate, start))
-        } else if (timeFilter === 'MONTH') {
-            const start = startOfMonth(now)
-            result = result.filter(t => isAfter(t.parsedDate, start))
-        } else if (timeFilter === 'YEAR') {
-            const start = startOfYear(now)
-            result = result.filter(t => isAfter(t.parsedDate, start))
-        }
-
-        // Apply Sorting
-        result.sort((a, b) => {
-            switch (sortBy) {
-                case 'LATEST':
-                    return b.timestamp - a.timestamp
-                case 'OLDEST':
-                    return a.timestamp - b.timestamp
-                case 'HIGHEST':
-                    return b.amount - a.amount
-                case 'LOWEST':
-                    return a.amount - b.amount
-                default:
-                    return 0
-            }
-        })
-
-        return result
+        return filterAndSortTransactions(transactions, timeFilter, sortBy)
     }, [transactions, timeFilter, sortBy])
 
     return (
