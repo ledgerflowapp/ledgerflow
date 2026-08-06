@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { validateContactMergeGuards } from "../contacts-guards";
-import { validateContactMergeGuards as validateFromContacts } from "../contacts";
 import { getSessionUser } from "@/lib/auth-session";
 
 vi.mock("@/lib/auth-session", () => ({
@@ -12,10 +11,6 @@ describe("validateContactMergeGuards", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it("should re-export validateContactMergeGuards from contacts.ts", () => {
-    expect(typeof validateFromContacts).toBe("function");
   });
 
   describe("1. Session Authentication Guard", () => {

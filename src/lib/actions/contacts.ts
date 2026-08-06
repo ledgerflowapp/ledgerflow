@@ -8,13 +8,7 @@ import { eq, and, isNull, desc, gte, or } from "drizzle-orm";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 import { Contact } from "@/types";
 import { getSessionUser } from "@/lib/auth-session";
-import { validateContactMergeGuards as validateGuards } from "./contacts-guards";
-
-export async function validateContactMergeGuards(
-  ...args: Parameters<typeof validateGuards>
-) {
-  return validateGuards(...args);
-}
+import { validateContactMergeGuards } from "./contacts-guards";
 
 async function getAuthenticatedUser(reqHeaders?: Headers) {
   const h = reqHeaders ?? (await headers());
@@ -187,7 +181,11 @@ export async function deleteContact(id: string) {
     .where(and(eq(contacts.id, id), eq(contacts.userId, user.id)))
     .returning();
 
-  return deleted?.id;
+  if (!deleted) {
+    throw new Error("Contact not found or unauthorized");
+  }
+
+  return deleted.id;
 }
 
 export async function mergeContactToUserProfile(contactId: string, targetUserId: string) {

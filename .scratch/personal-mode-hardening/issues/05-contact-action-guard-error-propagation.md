@@ -4,8 +4,8 @@
 
 **Blocked by:** None — can start immediately
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `deleteContact` throws an explicit authorization/Not Found error when a contact deletion fails or the contact is not owned by the user.
-- [ ] `validateContactMergeGuards` wrapper is replaced by direct invocation of `validateGuards` from `contacts-guards`.
-- [ ] Server action unit tests verify that unauthorized or invalid contact actions return appropriate error objects or throw expected errors.
+- [x] `deleteContact` throws an explicit authorization/Not Found error when a contact deletion fails or the contact is not owned by the user.
+- [x] `validateContactMergeGuards` wrapper is replaced by direct invocation of `validateGuards` from `contacts-guards`.
+- [x] Server action unit tests verify that unauthorized or invalid contact actions return appropriate error objects or throw expected errors.
