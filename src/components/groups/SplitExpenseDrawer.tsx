@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, DrawerClose } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,12 +36,9 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
 
     const { data: accounts } = useAccounts()
 
-    useEffect(() => {
-        if (accounts?.length && !accountId) {
-            const defaultAccount = accounts.find(a => a.is_default) || accounts[0]
-            if (defaultAccount) setAccountId(defaultAccount.id)
-        }
-    }, [accounts, accountId])
+    // Derive default account during render scope
+    const defaultAccount = accounts?.find(a => a.is_default) || accounts?.[0]
+    const activeAccountId = accountId || defaultAccount?.id || ''
 
     const numericAmount = parseFloat(amount) || 0
 
@@ -66,15 +63,20 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
 
     const { mutate: addTransaction, isPending } = useAddTransaction()
 
-    // Reset when closing
-    useEffect(() => {
-        if (!open) {
+    // Memoized O(1) lookup indexes
+    const selectedMembersSet = useMemo(() => new Set(selectedMembers), [selectedMembers])
+    const allocationsMap = useMemo(() => new Map(allocations.map(a => [a.memberId, a])), [allocations])
+    const memberMap = useMemo(() => new Map(members.map(m => [m.id, m])), [members])
+
+    const handleOpenChange = (newOpen: boolean) => {
+        setOpen(newOpen)
+        if (!newOpen) {
             setStep(1)
             setAmount('')
             setName('')
-            // We could reset split calculator too if expanded, but it resets on mount mostly.
+            setAccountId('')
         }
-    }, [open])
+    }
 
     const handleNext = () => {
         if (!numericAmount || numericAmount <= 0) {
@@ -85,7 +87,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
             toast.error('Please enter a description')
             return
         }
-        if (!accountId) {
+        if (!activeAccountId) {
             toast.error('Please select an account')
             return
         }
@@ -99,7 +101,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
         }
 
         const splitsPayload = allocations.map(a => {
-            const member = members.find(m => m.id === a.memberId)
+            const member = memberMap.get(a.memberId)
             return {
                 user_id: member?.user_id || undefined,
                 group_member_id: member?.id,
@@ -111,7 +113,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
         })
 
         // Resolve the payer's user_id from the selected group member (fallback for real users)
-        const payerMember = members.find(m => m.id === payerId)
+        const payerMember = memberMap.get(payerId)
 
         addTransaction({
             amount: numericAmount,
@@ -124,10 +126,10 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
             payer_group_member_id: payerId, // Primary: group_member.id
             split_type: splitType,
             splits: splitsPayload,
-            account_id: accountId
+            account_id: activeAccountId
         }, {
             onSuccess: () => {
-                setOpen(false)
+                handleOpenChange(false)
                 toast.success('Expense added!')
             },
             onError: (err) => {
@@ -138,31 +140,20 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
 
     // Helper to get member name
     const getMemberName = (id: string) => {
-        const m = members.find(m => m.id === id)
+        const m = memberMap.get(id)
         if (!m) return 'Unknown'
         // If it's me
         if (m.user_id === currentUserId) return 'You'
-        return m.ghost_name || 'Member' // We need to join with profile?
-        // Wait, GroupMember type in types.ts has 'ghost_name'. 
-        // It doesn't have 'profiles.full_name'.
-        // The `members` passed to this component likely come from `useGroupDetails` which usually joins profiles.
-        // But Typescript might complain if I access `.profiles`.
-        // I will trust the passed `members` object might have extra fields or I use what I have.
-        // Checking `types.ts`: `GroupMember` has `user_id`, `ghost_name`.
-        // The `useGroupDetails` returned `members`.
-        // Let's look at `GroupBalancesList` in `page.tsx`:
-        // It accesses `member.profiles?.full_name`.
-        // I should stick to `any` cast or improve type if I can`t see it.
-        // For now I'll cast or just check `(m as any).profiles?.full_name`.
+        return m.ghost_name || 'Member'
     }
 
     const getMemberAvatar = (id: string) => {
-        const m = members.find(m => m.id === id)
+        const m = memberMap.get(id)
         return (m as any)?.profiles?.avatar_url || m?.avatar_url
     }
 
     return (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={open} onOpenChange={handleOpenChange}>
             <DrawerTrigger render={children as React.ReactElement} />
             <DrawerContent className="h-[90dvh] flex flex-col">
                 {/* Header / Nav */}
@@ -219,7 +210,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
                                         </AddAccountDrawer>
                                     </div>
                                 ) : (
-                                    <Select items={accounts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} value={accountId} onValueChange={(val) => val && setAccountId(val)}>
+                                    <Select items={accounts?.map((i: any) => ({ value: i.id || i.value || String(i), label: i.name || i.label || String(i) })) || []} value={activeAccountId} onValueChange={(val) => val && setAccountId(val)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select account" />
                                         </SelectTrigger>
@@ -266,8 +257,8 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
                                         Split equally among selected members
                                     </div>
                                     {members.map(member => {
-                                        const isSelected = selectedMembers.includes(member.id)
-                                        const allocation = allocations.find(a => a.memberId === member.id)
+                                        const isSelected = selectedMembersSet.has(member.id)
+                                        const allocation = allocationsMap.get(member.id)
 
                                         return (
                                             <div key={member.id} className="flex items-center justify-between gap-3" onClick={() => toggleMemberSelection(member.id)}>
@@ -292,7 +283,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
                                         Enter exact amounts
                                     </div>
                                     {members.map(member => {
-                                        const allocation = allocations.find(a => a.memberId === member.id)
+                                        const allocation = allocationsMap.get(member.id)
                                         return (
                                             <div key={member.id} className="flex items-center justify-between gap-3">
                                                 <div className="flex items-center gap-3">

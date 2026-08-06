@@ -1,6 +1,4 @@
-'use client'
-
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -76,6 +74,8 @@ export function PersonalTransactionDrawer({
 
     const [flow, setFlow] = useState<'IN' | 'OUT'>('OUT')
 
+    const defaultAccount = accounts?.find(a => a.is_default) || accounts?.[0]
+
     const form = useForm({
         resolver: zodResolver(personalTransactionSchema),
         defaultValues: {
@@ -84,23 +84,17 @@ export function PersonalTransactionDrawer({
             note: '',
             date: new Date(),
             flow: 'OUT',
+            account_id: defaultAccount?.id,
         } as any,
     })
 
-    // Auto-select account when accounts are available and no account is set
-    useEffect(() => {
-        if (accounts && accounts.length > 0 && !form.getValues('account_id')) {
-            const defaultAcc = accounts.find(a => a.is_default) || accounts[0]
-            if (defaultAcc) {
-                form.setValue('account_id', defaultAcc.id)
-            }
-        }
-    }, [accounts, form])
+    const [prevOpen, setPrevOpen] = useState(false)
+    const [prevInitialData, setPrevInitialData] = useState(initialData)
 
-    // Effect to populate form when initialData changes or drawer opens
-    useEffect(() => {
-        if (open) {
+    const resetFormValues = (nextOpen: boolean) => {
+        if (nextOpen) {
             const defaults = getPersonalTransactionFormDefaults(initialData)
+            const resolvedDefaultAcc = accounts?.find(a => a.is_default) || accounts?.[0]
             form.reset({
                 amount: defaults.amount ?? ('' as unknown as number),
                 name: defaults.name,
@@ -109,11 +103,22 @@ export function PersonalTransactionDrawer({
                 flow: defaults.flow,
                 contact_id: defaults.contact_id,
                 category_id: defaults.category_id,
-                account_id: defaults.account_id || form.getValues('account_id'),
+                account_id: defaults.account_id || resolvedDefaultAcc?.id || '',
             })
             setFlow(defaults.flow)
         }
-    }, [open, initialData?.id, initialData?.contact_id, initialData?.category_id, initialData?.account_id, initialData?.amount, form])
+    }
+
+    if (open !== prevOpen || initialData !== prevInitialData) {
+        setPrevOpen(open)
+        setPrevInitialData(initialData)
+        resetFormValues(open)
+    }
+
+    const handleOpenChange = (nextOpen: boolean) => {
+        setOpen(nextOpen)
+        resetFormValues(nextOpen)
+    }
 
     function onSubmit(values: z.infer<typeof personalTransactionSchema>) {
         if (!values.category_id && flow === 'OUT') {
@@ -160,7 +165,7 @@ export function PersonalTransactionDrawer({
     const contactDisplayName = selectedContact?.name || initialData?.contact_name || initialData?.contact?.name
 
     return (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={open} onOpenChange={handleOpenChange}>
             {!hideTrigger && (
                 <DrawerTrigger render={<Button
                         size="icon"

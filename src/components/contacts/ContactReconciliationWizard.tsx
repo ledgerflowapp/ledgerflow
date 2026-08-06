@@ -71,42 +71,28 @@ export function ContactReconciliationWizard({
   )
   const [customName, setCustomName] = React.useState("")
 
-  // Step 2 State: Verified phone / email
+  // Step 2 State: Verified phone / email (user overrides or contact fallback)
   const selectedContact = unregisteredContacts.find((c) => c.id === selectedContactId)
-  const [phone, setPhone] = React.useState<string>(selectedContact?.phone || "")
-  const [email, setEmail] = React.useState<string>(selectedContact?.email || "")
+  const [phoneOverride, setPhoneOverride] = React.useState<string | null>(null)
+  const [emailOverride, setEmailOverride] = React.useState<string | null>(null)
 
-  // Sync phone and email when contact selection changes
-  React.useEffect(() => {
-    if (selectedContact) {
-      setPhone(selectedContact.phone || "")
-      setEmail(selectedContact.email || "")
-    }
-  }, [selectedContactId])
+  const phone = phoneOverride ?? selectedContact?.phone ?? ""
+  const email = emailOverride ?? selectedContact?.email ?? ""
 
-  // Step 3 State: Selected ghost member
-  const initialGhostKey = candidateGhostMembers[0]
+  // Step 3 State: Selected ghost member derived during render
+  const defaultGhostKey = candidateGhostMembers[0]
     ? `${candidateGhostMembers[0].groupId}:${candidateGhostMembers[0].ghostMemberId}`
     : ""
-  const [selectedGhostKey, setSelectedGhostKey] = React.useState<string>(initialGhostKey)
-
-  // Sync selectedGhostKey if candidateGhostMembers updates asynchronously
-  React.useEffect(() => {
-    if (!selectedGhostKey && candidateGhostMembers.length > 0) {
-      setSelectedGhostKey(`${candidateGhostMembers[0].groupId}:${candidateGhostMembers[0].ghostMemberId}`)
-    }
-  }, [candidateGhostMembers, selectedGhostKey])
+  const [selectedGhostKey, setSelectedGhostKey] = React.useState<string>("")
+  const activeGhostKey = selectedGhostKey || defaultGhostKey
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null)
 
   const handleContactSelect = (val: string) => {
     setSelectedContactId(val)
-    const matched = unregisteredContacts.find((c) => c.id === val)
-    if (matched) {
-      setPhone(matched.phone || "")
-      setEmail(matched.email || "")
-    }
+    setPhoneOverride(null)
+    setEmailOverride(null)
   }
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -114,7 +100,7 @@ export function ContactReconciliationWizard({
     setErrorMsg(null)
 
     const ghostTarget = candidateGhostMembers.find(
-      (g) => `${g.groupId}:${g.ghostMemberId}` === selectedGhostKey || g.ghostMemberId === selectedGhostKey
+      (g) => `${g.groupId}:${g.ghostMemberId}` === activeGhostKey || g.ghostMemberId === activeGhostKey
     ) || candidateGhostMembers[0]
 
     if (!ghostTarget) {
@@ -223,7 +209,7 @@ export function ContactReconciliationWizard({
               type="tel"
               placeholder="+1 (555) 000-0000"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhoneOverride(e.target.value)}
             />
           </div>
 
@@ -235,7 +221,7 @@ export function ContactReconciliationWizard({
               type="email"
               placeholder="user@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmailOverride(e.target.value)}
             />
           </div>
         </div>
@@ -250,7 +236,7 @@ export function ContactReconciliationWizard({
 
         {candidateGhostMembers.length > 0 ? (
           <QuestionnaireChoices
-            value={selectedGhostKey}
+            value={activeGhostKey}
             onValueChange={(val) => setSelectedGhostKey(val)}
           >
             {candidateGhostMembers.map((g) => {

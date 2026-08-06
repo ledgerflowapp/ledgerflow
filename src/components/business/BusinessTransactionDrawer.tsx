@@ -1,6 +1,4 @@
-'use client'
-
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,6 +15,7 @@ import { cn } from '@/lib/utils'
 import { Loader2, Plus } from 'lucide-react'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { paiseToRupees } from '@/lib/currency'
 
 const businessTransactionSchema = z.object({
     amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
@@ -30,8 +29,6 @@ const businessTransactionSchema = z.object({
     category_id: z.string().nullable().optional(),
     account_id: z.string().nullable().optional(),
 })
-
-import { paiseToRupees } from '@/lib/currency'
 
 export function BusinessTransactionDrawer({
     open: controlledOpen,
@@ -69,9 +66,11 @@ export function BusinessTransactionDrawer({
         } as any,
     })
 
-    // Effect to populate form when initialData changes or drawer opens
-    useEffect(() => {
-        if (open) {
+    const [prevOpen, setPrevOpen] = useState(false)
+    const [prevInitialData, setPrevInitialData] = useState(initialData)
+
+    const resetFormValues = (nextOpen: boolean) => {
+        if (nextOpen) {
             const initialAmountInRupees = initialData?.amount !== undefined && initialData?.amount !== null
                 ? paiseToRupees(initialData.amount).toNumber()
                 : ('' as unknown as number)
@@ -87,13 +86,20 @@ export function BusinessTransactionDrawer({
                 category_id: initialData?.category_id || initialData?.category?.id || null,
                 account_id: initialData?.account_id || initialData?.account?.id || null,
             })
-            if (initialData?.flow) {
-                setFlow(initialData.flow)
-            } else {
-                setFlow('OUT')
-            }
+            setFlow(initialData?.flow || 'OUT')
         }
-    }, [open, initialData?.id, initialData?.contact_id, initialData?.amount, form])
+    }
+
+    if (open !== prevOpen || initialData !== prevInitialData) {
+        setPrevOpen(open)
+        setPrevInitialData(initialData)
+        resetFormValues(open)
+    }
+
+    const handleOpenChange = (nextOpen: boolean) => {
+        setOpen(nextOpen)
+        resetFormValues(nextOpen)
+    }
 
     function onSubmit(values: z.infer<typeof businessTransactionSchema>) {
         const transactionData = {
@@ -136,7 +142,7 @@ export function BusinessTransactionDrawer({
     const contactDisplayName = selectedContact?.name || initialData?.contact_name || initialData?.contact?.name
 
     return (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={open} onOpenChange={handleOpenChange}>
             {!hideTrigger && (
                 <DrawerTrigger render={<Button
                         size="default"
