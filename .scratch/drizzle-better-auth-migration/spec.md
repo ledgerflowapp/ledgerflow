@@ -48,7 +48,7 @@ All database operations will execute server-side within Next.js Server Actions a
 - **Testing Principles**: Tests must verify external behavior (Server Action inputs/outputs, HTTP responses, database state changes) rather than internal query builder formatting or SQL string matching.
 - **Modules Tested**:
   - Server Actions (`src/lib/actions/transactions.ts`, `src/lib/actions/goals.ts`, `src/lib/actions/groups.ts`, `src/lib/actions/friends.ts`).
-  - Auth flow and session middleware (`src/lib/auth.ts`, `src/middleware.ts`).
+  - Auth flow and session proxy (`src/lib/auth.ts`, `src/proxy.ts`).
   - End-to-end user workflows via Playwright (`e2e/auth.spec.ts`, `e2e/transactions.spec.ts`).
 - **Prior Art**: Existing Vitest unit tests in `src/hooks/__tests__/` and Playwright E2E tests in `e2e/auth.spec.ts`.
 

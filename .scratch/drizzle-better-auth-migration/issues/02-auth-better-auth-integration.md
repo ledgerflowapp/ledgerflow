@@ -10,5 +10,5 @@
 - [x] Route handler at `src/app/api/auth/[...all]/route.ts` created for handling auth requests.
 - [x] Better Auth React client created in `src/lib/auth-client.ts`.
 - [x] Login and signup pages refactored to use Better Auth client hooks instead of Supabase Auth.
-- [x] Next.js middleware (`src/middleware.ts`) updated to validate HTTP-only Better Auth session cookies.
+- [x] Next.js proxy (`src/proxy.ts`) updated to validate HTTP-only Better Auth session cookies.
 - [x] User registration, sign-in, and session persistence verified end-to-end.

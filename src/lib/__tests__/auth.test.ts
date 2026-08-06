@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from 'vitest'
 import { auth } from '@/lib/auth'
 import { authClient, signIn, signUp, signOut, getSession } from '@/lib/auth-client'
-import { middleware } from '@/middleware'
+import { proxy } from '@/proxy'
 import { NextRequest } from 'next/server'
 
 describe('Better Auth Integration', () => {
@@ -19,17 +19,17 @@ describe('Better Auth Integration', () => {
         expect(getSession).toBeDefined()
     })
 
-    describe('Middleware protection', () => {
+    describe('Proxy protection', () => {
         test('redirects unauthenticated user from /dashboard to /login', async () => {
             const req = new NextRequest('http://localhost:3000/dashboard')
-            const res = await middleware(req)
+            const res = await proxy(req)
             expect(res.status).toBe(307)
             expect(res.headers.get('location')).toContain('/login')
         })
 
         test('allows unauthenticated access to /login', async () => {
             const req = new NextRequest('http://localhost:3000/login')
-            const res = await middleware(req)
+            const res = await proxy(req)
             expect(res.headers.get('location')).toBeNull()
         })
 
@@ -40,7 +40,7 @@ describe('Better Auth Integration', () => {
                     cookie: 'better-auth.session_token=forged_token_123',
                 },
             })
-            const res = await middleware(req)
+            const res = await proxy(req)
             expect(res.status).toBe(307)
             expect(res.headers.get('location')).toContain('/login')
         })
@@ -52,7 +52,7 @@ describe('Better Auth Integration', () => {
                     cookie: 'better-auth.session_token=forged_token_123',
                 },
             })
-            const res = await middleware(req)
+            const res = await proxy(req)
             expect(res.headers.get('location')).toBeNull()
         })
 
@@ -66,7 +66,7 @@ describe('Better Auth Integration', () => {
                     cookie: 'better-auth.session_token=valid_token',
                 },
             })
-            const res = await middleware(req)
+            const res = await proxy(req)
             expect(res.status).toBe(307)
             expect(res.headers.get('location')).toContain('/dashboard')
         })
@@ -81,7 +81,7 @@ describe('Better Auth Integration', () => {
                     cookie: 'better-auth.session_token=valid_token',
                 },
             })
-            const res = await middleware(req)
+            const res = await proxy(req)
             expect(res.headers.get('location')).toBeNull()
         })
     })

@@ -4,10 +4,10 @@ Category: enhancement
 Status: ready-for-agent
 
 ## Description
-`src/middleware.ts` currently verifies session presence using `getSessionCookie(request)`, which only checks cookie existence rather than validating session authenticity server-side.
+`src/proxy.ts` currently verifies session presence using `getSessionCookie(request)`, which only checks cookie existence rather than validating session authenticity server-side.
 
 ## Requirements
-- Update `src/middleware.ts` to perform session validation via `auth.api.getSession` or token verification.
+- Update `src/proxy.ts` to perform session validation via `auth.api.getSession` or token verification.
 - Ensure unauthorized or expired session tokens redirect to `/login`.
 - Maintain fast middleware response times with caching or optimized token checks.
 
