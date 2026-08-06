@@ -171,33 +171,32 @@ export async function disableCategory(params: {
 export async function getBudgets() {
   const user = await getAuthenticatedUser();
 
-  // 1. Fetch EXPENSE categories
-  const catList = await db
-    .select()
-    .from(categories)
-    .where(and(eq(categories.userId, user.id), eq(categories.type, "EXPENSE"), eq(categories.active, true)));
-
-  if (catList.length === 0) return [];
-
-  // 2. Fetch spending for current month
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  const txList = await db
-    .select({
-      categoryId: transactions.categoryId,
-      amount: transactions.amount,
-    })
-    .from(transactions)
-    .where(
-      and(
-        eq(transactions.userId, user.id),
-        eq(transactions.mode, "PERSONAL"),
-        eq(transactions.flow, "OUT"),
-        gte(transactions.date, startOfMonth)
-      )
-    );
+  const [catList, txList] = await Promise.all([
+    db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.userId, user.id), eq(categories.type, "EXPENSE"), eq(categories.active, true))),
+    db
+      .select({
+        categoryId: transactions.categoryId,
+        amount: transactions.amount,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, user.id),
+          eq(transactions.mode, "PERSONAL"),
+          eq(transactions.flow, "OUT"),
+          gte(transactions.date, startOfMonth)
+        )
+      ),
+  ]);
+
+  if (catList.length === 0) return [];
 
   const spendingMap = new Map<string, number>();
   txList.forEach((t) => {

@@ -111,23 +111,31 @@ export async function acceptInAppRequestAction(friendshipId: string) {
 
     const senderId = fRecord.initiatorId!;
 
-    await tx
+    const updateFriendshipPromise = tx
       .update(friendships)
       .set({ status: "ACCEPTED" })
       .where(eq(friendships.id, friendshipId));
 
-    const senderProfiles = await tx.select().from(profiles).where(eq(profiles.id, senderId)).limit(1);
-    const receiverProfiles = await tx.select().from(profiles).where(eq(profiles.id, uid)).limit(1);
+    const [senderProfiles, receiverProfiles, receiverContacts, senderContacts] = await Promise.all([
+      tx.select().from(profiles).where(eq(profiles.id, senderId)).limit(1),
+      tx.select().from(profiles).where(eq(profiles.id, uid)).limit(1),
+      tx
+        .select()
+        .from(contacts)
+        .where(and(eq(contacts.userId, uid), eq(contacts.linkedUserId, senderId)))
+        .limit(1),
+      tx
+        .select()
+        .from(contacts)
+        .where(and(eq(contacts.userId, senderId), eq(contacts.linkedUserId, uid)))
+        .limit(1),
+      updateFriendshipPromise,
+    ]);
+
     const senderProfile = senderProfiles[0];
     const receiverProfile = receiverProfiles[0];
 
     // Check contact for receiver
-    const receiverContacts = await tx
-      .select()
-      .from(contacts)
-      .where(and(eq(contacts.userId, uid), eq(contacts.linkedUserId, senderId)))
-      .limit(1);
-
     if (receiverContacts.length === 0) {
       if (senderProfile?.phone) {
         const phoneMatch = await tx
@@ -168,12 +176,6 @@ export async function acceptInAppRequestAction(friendshipId: string) {
     }
 
     // Check contact for sender
-    const senderContacts = await tx
-      .select()
-      .from(contacts)
-      .where(and(eq(contacts.userId, senderId), eq(contacts.linkedUserId, uid)))
-      .limit(1);
-
     if (senderContacts.length === 0) {
       await tx.insert(contacts).values({
         userId: senderId,
@@ -270,23 +272,24 @@ export async function acceptContactInviteAction(token: string) {
       throw new Error("Cannot invite yourself");
     }
 
-    const ownerProfiles = await tx
-      .select({ fullName: profiles.fullName })
-      .from(profiles)
-      .where(eq(profiles.id, contactRecord.userId))
-      .limit(1);
-    const ownerName = ownerProfiles[0]?.fullName || "";
-
-    const existing = await tx
-      .select()
-      .from(friendships)
-      .where(
-        or(
-          and(eq(friendships.userId1, contactRecord.userId), eq(friendships.userId2, uid)),
-          and(eq(friendships.userId1, uid), eq(friendships.userId2, contactRecord.userId))
+    const [ownerProfiles, existing] = await Promise.all([
+      tx
+        .select({ fullName: profiles.fullName })
+        .from(profiles)
+        .where(eq(profiles.id, contactRecord.userId))
+        .limit(1),
+      tx
+        .select()
+        .from(friendships)
+        .where(
+          or(
+            and(eq(friendships.userId1, contactRecord.userId), eq(friendships.userId2, uid)),
+            and(eq(friendships.userId1, uid), eq(friendships.userId2, contactRecord.userId))
+          )
         )
-      )
-      .limit(1);
+        .limit(1),
+    ]);
+    const ownerName = ownerProfiles[0]?.fullName || "";
 
     if (existing.length === 0) {
       const u1 = contactRecord.userId < uid ? contactRecord.userId : uid;
@@ -333,19 +336,31 @@ export async function acceptFriendInviteAction(inviteToken: string) {
       throw new Error("You cannot become friends with yourself");
     }
 
-    const currentUserProfiles = await tx.select().from(profiles).where(eq(profiles.id, uid)).limit(1);
-    const currentUserProfile = currentUserProfiles[0];
-
-    const existing = await tx
-      .select()
-      .from(friendships)
-      .where(
-        or(
-          and(eq(friendships.userId1, targetUser.id), eq(friendships.userId2, uid)),
-          and(eq(friendships.userId1, uid), eq(friendships.userId2, targetUser.id))
+    const [currentUserProfiles, existing, currentContactMatch, targetContactMatch] = await Promise.all([
+      tx.select().from(profiles).where(eq(profiles.id, uid)).limit(1),
+      tx
+        .select()
+        .from(friendships)
+        .where(
+          or(
+            and(eq(friendships.userId1, targetUser.id), eq(friendships.userId2, uid)),
+            and(eq(friendships.userId1, uid), eq(friendships.userId2, targetUser.id))
+          )
         )
-      )
-      .limit(1);
+        .limit(1),
+      tx
+        .select()
+        .from(contacts)
+        .where(and(eq(contacts.userId, uid), eq(contacts.linkedUserId, targetUser.id)))
+        .limit(1),
+      tx
+        .select()
+        .from(contacts)
+        .where(and(eq(contacts.userId, targetUser.id), eq(contacts.linkedUserId, uid)))
+        .limit(1),
+    ]);
+
+    const currentUserProfile = currentUserProfiles[0];
 
     if (existing.length === 0) {
       const u1 = targetUser.id < uid ? targetUser.id : uid;
@@ -363,12 +378,6 @@ export async function acceptFriendInviteAction(inviteToken: string) {
     }
 
     // Mutual contacts
-    const currentContactMatch = await tx
-      .select()
-      .from(contacts)
-      .where(and(eq(contacts.userId, uid), eq(contacts.linkedUserId, targetUser.id)))
-      .limit(1);
-
     if (currentContactMatch.length === 0) {
       await tx.insert(contacts).values({
         userId: uid,
@@ -378,12 +387,6 @@ export async function acceptFriendInviteAction(inviteToken: string) {
         imageUrl: targetUser.avatarUrl,
       });
     }
-
-    const targetContactMatch = await tx
-      .select()
-      .from(contacts)
-      .where(and(eq(contacts.userId, targetUser.id), eq(contacts.linkedUserId, uid)))
-      .limit(1);
 
     if (targetContactMatch.length === 0) {
       await tx.insert(contacts).values({

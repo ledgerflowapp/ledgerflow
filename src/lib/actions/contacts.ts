@@ -195,38 +195,38 @@ export async function mergeContactToUserProfile(contactId: string, targetUserId:
   }
 
   return await db.transaction(async (tx) => {
-    const contactRecords = await tx
-      .select()
-      .from(contacts)
-      .where(eq(contacts.id, contactId))
-      .limit(1);
+    const [contactRecords, targetUserRecords, profileRecords] = await Promise.all([
+      tx
+        .select()
+        .from(contacts)
+        .where(eq(contacts.id, contactId))
+        .limit(1),
+      tx
+        .select({
+          id: userTable.id,
+          emailVerified: userTable.emailVerified,
+        })
+        .from(userTable)
+        .where(eq(userTable.id, targetUserId))
+        .limit(1),
+      tx
+        .select({
+          phone: profiles.phone,
+        })
+        .from(profiles)
+        .where(eq(profiles.id, targetUserId))
+        .limit(1),
+    ]);
 
     if (contactRecords.length === 0) {
       throw new Error("Contact not found");
     }
     const contact = contactRecords[0];
 
-    const targetUserRecords = await tx
-      .select({
-        id: userTable.id,
-        emailVerified: userTable.emailVerified,
-      })
-      .from(userTable)
-      .where(eq(userTable.id, targetUserId))
-      .limit(1);
-
     if (targetUserRecords.length === 0) {
       throw new Error("Target user profile not found");
     }
     const targetUser = targetUserRecords[0];
-
-    const profileRecords = await tx
-      .select({
-        phone: profiles.phone,
-      })
-      .from(profiles)
-      .where(eq(profiles.id, targetUserId))
-      .limit(1);
 
     const targetProfile = {
       id: targetUser.id,

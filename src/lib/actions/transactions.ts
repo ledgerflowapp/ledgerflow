@@ -12,7 +12,7 @@ import {
   user,
   profiles,
 } from "@/db/schema";
-import { eq, and, desc, asc, or, isNull } from "drizzle-orm";
+import { eq, and, desc, asc, or, isNull, sql } from "drizzle-orm";
 
 export interface SplitInput {
   userId?: string | null;
@@ -110,17 +110,11 @@ export async function createTransactionAction(
     }
 
     if (input.accountId) {
-      const targetAccount = await tx.query.accounts.findFirst({
-        where: and(eq(accounts.id, input.accountId), eq(accounts.userId, currentUser.id)),
-      });
-      if (targetAccount) {
-        const currentBalance = Number(targetAccount.balance || "0");
-        const delta = input.flow === "IN" ? input.amount : -input.amount;
-        await tx
-          .update(accounts)
-          .set({ balance: String(currentBalance + delta) })
-          .where(eq(accounts.id, input.accountId));
-      }
+      const delta = input.flow === "IN" ? input.amount : -input.amount;
+      await tx
+        .update(accounts)
+        .set({ balance: sql`${accounts.balance} + ${delta}` })
+        .where(and(eq(accounts.id, input.accountId), eq(accounts.userId, currentUser.id)));
     }
 
     return { id: insertedTx.id, success: true, transaction: insertedTx };
@@ -442,44 +436,26 @@ export async function updateTransactionAction(
       const netDelta = newNet - oldNet;
 
       if (netDelta !== 0) {
-        const accountRecord = await tx.query.accounts.findFirst({
-          where: and(eq(accounts.id, oldAccountId), eq(accounts.userId, currentUser.id)),
-        });
-        if (accountRecord) {
-          const currentBalance = Number(accountRecord.balance || "0");
-          await tx
-            .update(accounts)
-            .set({ balance: String(currentBalance + netDelta) })
-            .where(eq(accounts.id, oldAccountId));
-        }
+        await tx
+          .update(accounts)
+          .set({ balance: sql`${accounts.balance} + ${netDelta}` })
+          .where(and(eq(accounts.id, oldAccountId), eq(accounts.userId, currentUser.id)));
       }
     } else {
       if (oldAccountId) {
         const revertDelta = oldFlow === "IN" ? -oldAmount : +oldAmount;
-        const oldAccountRecord = await tx.query.accounts.findFirst({
-          where: and(eq(accounts.id, oldAccountId), eq(accounts.userId, currentUser.id)),
-        });
-        if (oldAccountRecord) {
-          const currentBalance = Number(oldAccountRecord.balance || "0");
-          await tx
-            .update(accounts)
-            .set({ balance: String(currentBalance + revertDelta) })
-            .where(eq(accounts.id, oldAccountId));
-        }
+        await tx
+          .update(accounts)
+          .set({ balance: sql`${accounts.balance} + ${revertDelta}` })
+          .where(and(eq(accounts.id, oldAccountId), eq(accounts.userId, currentUser.id)));
       }
 
       if (newAccountId) {
         const applyDelta = newFlow === "IN" ? +newAmount : -newAmount;
-        const newAccountRecord = await tx.query.accounts.findFirst({
-          where: and(eq(accounts.id, newAccountId), eq(accounts.userId, currentUser.id)),
-        });
-        if (newAccountRecord) {
-          const currentBalance = Number(newAccountRecord.balance || "0");
-          await tx
-            .update(accounts)
-            .set({ balance: String(currentBalance + applyDelta) })
-            .where(eq(accounts.id, newAccountId));
-        }
+        await tx
+          .update(accounts)
+          .set({ balance: sql`${accounts.balance} + ${applyDelta}` })
+          .where(and(eq(accounts.id, newAccountId), eq(accounts.userId, currentUser.id)));
       }
     }
 
@@ -530,17 +506,10 @@ export async function deleteTransactionAction(id: string) {
     if (existing.accountId) {
       const oldAmount = Number(existing.amount);
       const revertDelta = existing.flow === "IN" ? -oldAmount : +oldAmount;
-      const accountRecord = await tx.query.accounts.findFirst({
-        where: and(eq(accounts.id, existing.accountId), eq(accounts.userId, currentUser.id)),
-      });
-
-      if (accountRecord) {
-        const currentBalance = Number(accountRecord.balance || "0");
-        await tx
-          .update(accounts)
-          .set({ balance: String(currentBalance + revertDelta) })
-          .where(eq(accounts.id, existing.accountId));
-      }
+      await tx
+        .update(accounts)
+        .set({ balance: sql`${accounts.balance} + ${revertDelta}` })
+        .where(and(eq(accounts.id, existing.accountId), eq(accounts.userId, currentUser.id)));
     }
 
     await tx
