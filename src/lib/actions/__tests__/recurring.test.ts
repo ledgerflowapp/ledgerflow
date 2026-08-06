@@ -66,8 +66,8 @@ vi.mock("@/lib/auth", () => ({
   },
 }));
 
+import { calculateNextRunDate } from "@/lib/recurring-utils";
 import {
-  calculateNextRunDate,
   processDueRecurringTransactions,
   getRecurringTransactions,
   addRecurringTransaction,
