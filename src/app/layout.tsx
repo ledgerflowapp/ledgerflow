@@ -18,8 +18,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LedgerFlow",
-  description: "Dual Persona Financial App",
+  title: {
+    default: "LedgerFlow",
+    template: "%s | LedgerFlow",
+  },
+  description: "Dual Persona Financial & Group Ledger App",
 };
 
 export default function RootLayout({

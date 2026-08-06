@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Analytics',
+  description: 'View financial insights and analytics',
+};
+
 export default function AnalyticsPage() {
     return (
         <div className="flex flex-col gap-4">

@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "LedgerFlow Privacy Policy and Data Practices",
+};
 
 export default function PrivacyPolicy() {
     return (
@@ -8,7 +14,7 @@ export default function PrivacyPolicy() {
                     <CardTitle className="text-3xl font-bold text-center">Privacy Policy</CardTitle>
                 </CardHeader>
                 <CardContent className="prose dark:prose-invert max-w-none space-y-6">
-                    <p className="text-muted-foreground text-center">Last updated: {new Date().toLocaleDateString()}</p>
+                    <p className="text-muted-foreground text-center">Last updated: August 6, 2026</p>
 
                     <section>
                         <h2 className="text-xl font-semibold mb-2">1. Introduction</h2>

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, uuid, integer, bigint } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -50,6 +50,13 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
 });
 
+export const rateLimit = pgTable("rate_limit", {
+  id: text("id").primaryKey(),
+  key: text("key"),
+  count: integer("count"),
+  lastRequest: bigint("last_request", { mode: "number" }),
+});
+
 export const profiles = pgTable("profiles", {
   id: text("id")
     .primaryKey()
@@ -71,3 +78,5 @@ export const users = user;
 export const sessions = session;
 export const accountsAuth = account;
 export const verifications = verification;
+export const rateLimits = rateLimit;
+

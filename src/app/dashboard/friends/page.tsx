@@ -3,14 +3,14 @@
 import { PeopleList } from '@/components/personal/PeopleList'
 import { usePersonalPeople } from '@/hooks/personal/usePersonalPeople'
 import { Contact } from '@/types'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GroupsList } from '@/components/groups/GroupsList'
 import { useProfile } from '@/hooks/use-profile'
 import { toast } from '@/components/ui/toast'
-import { UserPlus } from 'lucide-react'
+import { UserPlus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PendingRequestsList } from '@/components/friends/PendingRequestsList'
 
@@ -18,7 +18,7 @@ import { PendingRequestsList } from '@/components/friends/PendingRequestsList'
 type TimeFilter = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'YEAR'
 type SortOption = 'LATEST' | 'MOST_ACTIVE'
 
-export default function FriendsPage() {
+function FriendsContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const activeTab = searchParams.get('tab') || 'friends'
@@ -119,6 +119,14 @@ export default function FriendsPage() {
                 </div>
             </Tabs>
         </div>
+    )
+}
+
+export default function FriendsPage() {
+    return (
+        <Suspense fallback={<div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <FriendsContent />
+        </Suspense>
     )
 }
 

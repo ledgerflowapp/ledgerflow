@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "LedgerFlow Terms of Service and User Agreement",
+};
 
 export default function TermsOfService() {
     return (
@@ -8,7 +14,7 @@ export default function TermsOfService() {
                     <CardTitle className="text-3xl font-bold text-center">Terms of Service</CardTitle>
                 </CardHeader>
                 <CardContent className="prose dark:prose-invert max-w-none space-y-6">
-                    <p className="text-muted-foreground text-center">Last updated: {new Date().toLocaleDateString()}</p>
+                    <p className="text-muted-foreground text-center">Last updated: August 6, 2026</p>
 
                     <section>
                         <h2 className="text-xl font-semibold mb-2">1. Agreement to Terms</h2>

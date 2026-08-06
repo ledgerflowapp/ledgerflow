@@ -1,17 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { acceptContactInviteAction } from '@/lib/actions/friends'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
 
 interface PageProps {
-    params: {
+    params: Promise<{
         token: string
-    }
+    }>
 }
 
-export default function ContactInvitePage({ params }: PageProps) {
+export default function ContactInvitePage(props: PageProps) {
+    const params = use(props.params)
     const { token } = params
     const router = useRouter()
 
