@@ -37,11 +37,11 @@ function Attachment({
   return (
     <div
       data-slot="attachment"
-      data-idle={state === "idle" || undefined}
-      data-uploading={state === "uploading" || undefined}
-      data-processing={state === "processing" || undefined}
-      data-error={state === "error" || undefined}
-      data-done={state === "done" || undefined}
+      data-error={state === "error" ? true : undefined}
+      data-idle={state === "idle" ? true : undefined}
+      data-uploading={state === "uploading" ? true : undefined}
+      data-processing={state === "processing" ? true : undefined}
+      data-done={state === "done" ? true : undefined}
       data-size={size}
       data-orientation={orientation}
       className={cn(attachmentVariants({ size, orientation }), className)}
