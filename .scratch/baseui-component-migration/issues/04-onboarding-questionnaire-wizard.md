@@ -5,9 +5,9 @@ A multi-step onboarding wizard powered by `questionnaire.tsx` that guides newly 
 
 **Blocked by:** 01 — Base UI Toast Engine Expansion & Root Layout Setup
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] An `OnboardingWizard` component is created utilizing `Questionnaire`, `QuestionnaireChoices`, `QuestionnaireChoice`, `QuestionnaireNext`, and `QuestionnairePrevious`.
-- [ ] Users can select their initial Workspace Mode (Personal vs Business), which correctly sets theme/accent boundaries.
-- [ ] Step progress indicator tabular text and progress indicators dynamically update as users navigate steps.
-- [ ] Completing the wizard saves user preferences and triggers a success toast notification via Base UI `toast.success`.
+- [x] An `OnboardingWizard` component is created utilizing `Questionnaire`, `QuestionnaireChoices`, `QuestionnaireChoice`, `QuestionnaireNext`, and `QuestionnairePrevious`.
+- [x] Users can select their initial Workspace Mode (Personal vs Business), which correctly sets theme/accent boundaries.
+- [x] Step progress indicator tabular text and progress indicators dynamically update as users navigate steps.
+- [x] Completing the wizard saves user preferences and triggers a success toast notification via Base UI `toast.success`.
