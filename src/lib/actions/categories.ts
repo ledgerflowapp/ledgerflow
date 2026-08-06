@@ -5,7 +5,7 @@ import { categories, transactions } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { eq, and, asc, desc, gte, sql } from "drizzle-orm";
-import { addPaise } from "@/lib/currency";
+import { addPaise, paiseToRupees } from "@/lib/currency";
 
 async function getAuthenticatedUser(reqHeaders?: Headers) {
   const h = reqHeaders ?? (await headers());
@@ -207,13 +207,16 @@ export async function getBudgets() {
     }
   });
 
-  return catList.map((cat) => ({
-    id: cat.id,
-    name: cat.name,
-    icon: cat.icon ?? "💰",
-    budget_limit: cat.budgetLimit ? parseFloat(cat.budgetLimit) : null,
-    spent: spendingMap.get(cat.id) || 0,
-  }));
+  return catList.map((cat) => {
+    const spentPaise = spendingMap.get(cat.id) || 0;
+    return {
+      id: cat.id,
+      name: cat.name,
+      icon: cat.icon ?? "💰",
+      budget_limit: cat.budgetLimit ? parseFloat(cat.budgetLimit) : null,
+      spent: paiseToRupees(spentPaise).toNumber(),
+    };
+  });
 }
 
 export async function getMonthlyCategorySpend(month: number, year: number) {

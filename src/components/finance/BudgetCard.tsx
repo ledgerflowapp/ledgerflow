@@ -3,7 +3,6 @@
 
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { paiseToRupees } from "@/lib/currency";
 
 export interface BudgetCardProps {
     category: string
@@ -24,7 +23,7 @@ export function BudgetRow({ category, spent, limit }: BudgetCardProps) {
             <div className="flex items-center justify-between text-sm">
                 <span className="font-medium">{category}</span>
                 <span className="text-muted-foreground">
-                    ₹{paiseToRupees(spent).toNumber().toLocaleString()} {hasLimit ? `/ ₹${limit ? paiseToRupees(limit).toNumber().toLocaleString() : ''}` : ''}
+                    ₹{spent.toLocaleString()} {hasLimit ? `/ ₹${limit ? limit.toLocaleString() : ''}` : ''}
                 </span>
             </div>
             {hasLimit && <Progress value={percentage} className="h-2" indicatorClassName={statusColor} />}

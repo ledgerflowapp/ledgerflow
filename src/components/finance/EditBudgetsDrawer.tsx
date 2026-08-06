@@ -10,7 +10,6 @@ import { useUpdateCategory } from '@/hooks/useUpdateCategory'
 import { useAddCategory } from '@/hooks/useAddCategory'
 import { Loader2, Settings2, Plus, X } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { paiseToRupees } from "@/lib/currency";
 
 const PRESET_ICONS = ['🍔', '🚗', '🎬', '🛍️', '💡', '🏥', '✈️', '🏠', '📚', '🏋️', '🍕', '🍺', '🎁', '🔧']
 
@@ -113,7 +112,7 @@ export function ManageCategoriesDrawer() {
                                                 <div>
                                                     <p className="font-medium">{budget.name}</p>
                                                     <p className="text-xs text-muted-foreground">
-                                                        Spent: ₹{paiseToRupees(budget.spent).toNumber().toLocaleString()}
+                                                        Spent: ₹{budget.spent.toLocaleString()}
                                                     </p>
                                                 </div>
                                             </div>
