@@ -5,7 +5,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 import { createCategory, updateCategory } from '@/lib/actions/categories'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'

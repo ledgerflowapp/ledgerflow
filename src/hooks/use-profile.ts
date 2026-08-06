@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getSession } from '@/lib/auth-client'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 import { Profile } from '@/types'
 
 export type { Profile }

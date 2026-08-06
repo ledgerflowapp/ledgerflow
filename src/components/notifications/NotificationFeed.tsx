@@ -17,7 +17,7 @@ import { Bell, RefreshCw, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 export interface NotificationFeedProps {
   initialNotifications?: PersonalNotification[];

@@ -9,7 +9,7 @@ import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GroupsList } from '@/components/groups/GroupsList'
 import { useProfile } from '@/hooks/use-profile'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 import { UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PendingRequestsList } from '@/components/friends/PendingRequestsList'

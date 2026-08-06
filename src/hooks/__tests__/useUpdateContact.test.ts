@@ -11,7 +11,7 @@ vi.mock('@/lib/actions/contacts', () => ({
     updateContact: (params: any) => mockUpdateContact(params),
 }))
 
-vi.mock('sonner', () => ({
+vi.mock('@/components/ui/toast', () => ({
     toast: {
         success: vi.fn(),
         error: vi.fn(),

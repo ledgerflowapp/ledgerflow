@@ -7,14 +7,14 @@ import { GroupGhostMergeCard } from "../notifications/GroupGhostMergeCard";
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 import { NotificationFeed } from "../notifications/NotificationFeed";
 import { approveGroupGhostMerge, rejectGroupGhostMerge } from "@/lib/actions/groups";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 
 vi.mock("@/lib/actions/groups", () => ({
   approveGroupGhostMerge: vi.fn(),
   rejectGroupGhostMerge: vi.fn(),
 }));
 
-vi.mock("sonner", () => ({
+vi.mock("@/components/ui/toast", () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),

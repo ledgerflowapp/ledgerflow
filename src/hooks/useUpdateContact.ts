@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateContact } from '@/lib/actions/contacts'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 import { Contact } from '@/types'
 
 type UpdateContactParams = Partial<Contact> & { id: string }

@@ -31,7 +31,7 @@ vi.mock('@/hooks/useUpdateRecurringTransaction', () => ({
     }),
 }))
 
-vi.mock('sonner', () => ({
+vi.mock('@/components/ui/toast', () => ({
     toast: {
         success: vi.fn(),
         error: vi.fn(),

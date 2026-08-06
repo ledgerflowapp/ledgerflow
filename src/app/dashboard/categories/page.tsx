@@ -15,7 +15,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 export default function CategoriesPage() {
     const queryClient = useQueryClient()

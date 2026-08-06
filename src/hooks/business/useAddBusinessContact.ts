@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { addBusinessContact } from '@/lib/actions/contacts'
 import { useAppStore } from '@/store/useAppStore'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 import { Contact } from '@/types'
 
 export function useAddBusinessContact() {

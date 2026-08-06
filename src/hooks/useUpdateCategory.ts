@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateCategory } from '@/lib/actions/categories'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 interface UpdateCategoryParams {
     id: string

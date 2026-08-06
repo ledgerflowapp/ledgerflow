@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBusinesses, createBusiness } from '@/lib/actions/businesses'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 export interface Business {
     id: string

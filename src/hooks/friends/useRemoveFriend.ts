@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { removeFriendAction } from '@/lib/actions/friends'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 export function useRemoveFriend() {
     const queryClient = useQueryClient()

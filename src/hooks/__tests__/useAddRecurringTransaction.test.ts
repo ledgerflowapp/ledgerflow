@@ -30,7 +30,7 @@ vi.mock('@tanstack/react-query', () => ({
     }),
 }))
 
-vi.mock('sonner', () => ({ toast: mockToast }))
+vi.mock('@/components/ui/toast', () => ({ toast: mockToast }))
 
 import { useAddRecurringTransaction } from '../useAddRecurringTransaction'
 import { useDeleteContact } from '../useDeleteContact'

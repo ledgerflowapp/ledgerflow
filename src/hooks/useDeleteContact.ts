@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { deleteContact } from '@/lib/actions/contacts'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 export function useDeleteContact() {
     const queryClient = useQueryClient()

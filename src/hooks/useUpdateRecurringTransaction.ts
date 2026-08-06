@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateRecurringTransaction } from '@/lib/actions/recurring'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 export function useUpdateRecurringTransaction() {
     const queryClient = useQueryClient()

@@ -20,7 +20,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { signOut } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 import { useProfile } from '@/hooks/use-profile'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'

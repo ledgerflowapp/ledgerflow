@@ -8,7 +8,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Briefcase, LogOut, Menu, Wallet, Settings, Users, LayoutDashboard, PieChart, List, Bell } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 import { useProfile } from '@/hooks/use-profile'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'

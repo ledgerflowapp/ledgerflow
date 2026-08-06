@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createAccount } from '@/lib/actions/accounts'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 interface AddAccountParams {
     name: string

@@ -3,7 +3,7 @@ import { createTransactionAction } from '@/lib/actions/transactions'
 import { useAppStore } from '@/store/useAppStore'
 import { Contact, Paise } from '@/types'
 import { rupeesToPaise, addPaise } from '@/lib/currency'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 /** Input shape for a single split — amounts are raw rupee values from the UI. */
 interface SplitInput {

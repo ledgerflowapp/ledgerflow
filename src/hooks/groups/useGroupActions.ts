@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { linkGhostToFriendAction } from '@/lib/actions/groups'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 interface LinkGhostMemberParams {
     groupId: string

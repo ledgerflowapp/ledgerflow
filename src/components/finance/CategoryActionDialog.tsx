@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { getCategoryTransactionCount, getCategories, deleteCategory, disableCategory } from '@/lib/actions/categories'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 import { Loader2 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'

@@ -5,7 +5,7 @@ import { Paise, Contact } from '@/types'
 // Mocks
 // ─────────────────────────────────────────────────────────────────────────────
 
-vi.mock('sonner', () => ({
+vi.mock('@/components/ui/toast', () => ({
     toast: {
         success: vi.fn(),
         error: vi.fn(),
@@ -65,7 +65,7 @@ vi.mock('@tanstack/react-query', () => ({
 type AnyHook = Record<string, any>
 
 import { useAddTransaction } from '../useAddTransaction'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers

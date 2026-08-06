@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateTransactionAction } from '@/lib/actions/transactions'
 import { rupeesToPaise } from '@/lib/currency'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 interface UpdateTransactionParams {
     id: string

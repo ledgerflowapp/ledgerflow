@@ -5,8 +5,8 @@ import { rupeesToPaise } from '@/lib/currency'
 // Mocks
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Mock sonner
-vi.mock('sonner', () => ({
+// Mock toast
+vi.mock('@/components/ui/toast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
@@ -42,7 +42,7 @@ vi.mock('@tanstack/react-query', () => ({
 type AnyHook = Record<string, any>
 
 import { useContributeGoal } from '../useContributeGoal'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 describe('useContributeGoal', () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createGoalAction } from '@/lib/actions/goals'
 import { rupeesToPaise } from '@/lib/currency'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 
 interface AddGoalParams {
     name: string
