@@ -9,7 +9,7 @@ import {
   user as userTable,
   profiles,
 } from "@/db/schema";
-import { eq, and, or, desc } from "drizzle-orm";
+import { eq, and, or, desc, inArray } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth-session";
 import {
   acceptInAppRequestAction,
@@ -60,6 +60,106 @@ export async function getNotificationsAction(): Promise<PersonalNotification[]> 
     .where(eq(notifications.userId, sessionUser.id))
     .orderBy(desc(notifications.createdAt));
 
+  if (userNotifs.length === 0) {
+    return [];
+  }
+
+  // Collect unique IDs for batch queries
+  const groupIds = new Set<string>();
+  const ghostMemberIds = new Set<string>();
+  const userIds = new Set<string>();
+  const friendInitiatorIds = new Set<string>();
+
+  for (const notif of userNotifs) {
+    const rawData = (notif.data || {}) as Record<string, any>;
+    const type = notif.type || "GENERAL";
+
+    if (type === "GROUP_GHOST_MERGE_REQUEST") {
+      if (rawData.groupId) groupIds.add(rawData.groupId as string);
+      if (rawData.ghostMemberId) ghostMemberIds.add(rawData.ghostMemberId as string);
+      if (rawData.targetUserId) userIds.add(rawData.targetUserId as string);
+    } else if (type === "FRIEND_REQ") {
+      const initiatorId = (rawData.initiator_id || rawData.initiatorId) as string;
+      if (initiatorId) {
+        userIds.add(initiatorId);
+        friendInitiatorIds.add(initiatorId);
+      }
+    } else if (type === "GROUP_INVITE") {
+      if (rawData.groupId) groupIds.add(rawData.groupId as string);
+      if (rawData.inviterId) userIds.add(rawData.inviterId as string);
+    } else if (type === "EXPENSE_ADDED") {
+      if (rawData.groupId) groupIds.add(rawData.groupId as string);
+    }
+  }
+
+  // Execute batch queries in parallel
+  const [
+    groupRows,
+    ghostRows,
+    userRows,
+    profileRows,
+    friendshipRows,
+  ] = await Promise.all([
+    groupIds.size > 0
+      ? db
+          .select({ id: groups.id, name: groups.name })
+          .from(groups)
+          .where(inArray(groups.id, Array.from(groupIds)))
+      : Promise.resolve([]),
+    ghostMemberIds.size > 0
+      ? db
+          .select({ id: groupMembers.id, ghostName: groupMembers.ghostName })
+          .from(groupMembers)
+          .where(inArray(groupMembers.id, Array.from(ghostMemberIds)))
+      : Promise.resolve([]),
+    userIds.size > 0
+      ? db
+          .select({
+            id: userTable.id,
+            name: userTable.name,
+            email: userTable.email,
+            image: userTable.image,
+          })
+          .from(userTable)
+          .where(inArray(userTable.id, Array.from(userIds)))
+      : Promise.resolve([]),
+    userIds.size > 0
+      ? db
+          .select({
+            id: profiles.id,
+            fullName: profiles.fullName,
+            phone: profiles.phone,
+            email: profiles.email,
+            avatarUrl: profiles.avatarUrl,
+          })
+          .from(profiles)
+          .where(inArray(profiles.id, Array.from(userIds)))
+      : Promise.resolve([]),
+    friendInitiatorIds.size > 0
+      ? db
+          .select()
+          .from(friendships)
+          .where(
+            or(
+              and(
+                eq(friendships.userId1, sessionUser.id),
+                inArray(friendships.userId2, Array.from(friendInitiatorIds))
+              ),
+              and(
+                eq(friendships.userId2, sessionUser.id),
+                inArray(friendships.userId1, Array.from(friendInitiatorIds))
+              )
+            )
+          )
+      : Promise.resolve([]),
+  ]);
+
+  // Index batch query results for O(1) lookup
+  const groupsMap = new Map(groupRows.map((g) => [g.id, g]));
+  const ghostsMap = new Map(ghostRows.map((g) => [g.id, g]));
+  const usersMap = new Map(userRows.map((u) => [u.id, u]));
+  const profilesMap = new Map(profileRows.map((p) => [p.id, p]));
+
   const enrichedNotifs: PersonalNotification[] = [];
 
   for (const notif of userNotifs) {
@@ -92,56 +192,15 @@ export async function getNotificationsAction(): Promise<PersonalNotification[]> 
         continue;
       }
 
-      // Fetch group details
-      const groupRows = await db
-        .select({ id: groups.id, name: groups.name })
-        .from(groups)
-        .where(eq(groups.id, groupId))
-        .limit(1);
-      const groupName = groupRows[0]?.name || "Unknown Group";
+      const groupName = groupsMap.get(groupId)?.name || "Unknown Group";
+      const ghostName = ghostsMap.get(ghostMemberId)?.ghostName || rawData.ghostName || "Ghost Member";
+      const targetUserObj = usersMap.get(targetUserId);
+      const targetProfileObj = profilesMap.get(targetUserId);
 
-      // Fetch ghost member details
-      const ghostRows = await db
-        .select({ id: groupMembers.id, ghostName: groupMembers.ghostName })
-        .from(groupMembers)
-        .where(eq(groupMembers.id, ghostMemberId))
-        .limit(1);
-      const ghostName =
-        ghostRows[0]?.ghostName || rawData.ghostName || "Ghost Member";
-
-      // Fetch target user userTable & profile details
-      const userRows = await db
-        .select({
-          id: userTable.id,
-          name: userTable.name,
-          email: userTable.email,
-          image: userTable.image,
-        })
-        .from(userTable)
-        .where(eq(userTable.id, targetUserId))
-        .limit(1);
-
-      const profileRows = await db
-        .select({
-          id: profiles.id,
-          fullName: profiles.fullName,
-          phone: profiles.phone,
-          email: profiles.email,
-          avatarUrl: profiles.avatarUrl,
-        })
-        .from(profiles)
-        .where(eq(profiles.id, targetUserId))
-        .limit(1);
-
-      const targetUserObj = userRows[0];
-      const targetProfileObj = profileRows[0];
-
-      const name =
-        targetProfileObj?.fullName || targetUserObj?.name || "Unknown User";
+      const name = targetProfileObj?.fullName || targetUserObj?.name || "Unknown User";
       const email = targetProfileObj?.email || targetUserObj?.email || null;
       const phone = targetProfileObj?.phone || null;
-      const avatarUrl =
-        targetProfileObj?.avatarUrl || targetUserObj?.image || null;
+      const avatarUrl = targetProfileObj?.avatarUrl || targetUserObj?.image || null;
 
       enrichedNotifs.push({
         id: notif.id,
@@ -184,30 +243,8 @@ export async function getNotificationsAction(): Promise<PersonalNotification[]> 
         rawData.status || "PENDING";
 
       if (initiatorId) {
-        const uRows = await db
-          .select({
-            id: userTable.id,
-            name: userTable.name,
-            email: userTable.email,
-            image: userTable.image,
-          })
-          .from(userTable)
-          .where(eq(userTable.id, initiatorId))
-          .limit(1);
-
-        const pRows = await db
-          .select({
-            id: profiles.id,
-            fullName: profiles.fullName,
-            email: profiles.email,
-            avatarUrl: profiles.avatarUrl,
-          })
-          .from(profiles)
-          .where(eq(profiles.id, initiatorId))
-          .limit(1);
-
-        const uObj = uRows[0];
-        const pObj = pRows[0];
+        const uObj = usersMap.get(initiatorId);
+        const pObj = profilesMap.get(initiatorId);
 
         if (uObj || pObj) {
           initiatorObj = {
@@ -218,27 +255,15 @@ export async function getNotificationsAction(): Promise<PersonalNotification[]> 
           };
         }
 
-        // Query corresponding friendship
-        const friendshipRows = await db
-          .select()
-          .from(friendships)
-          .where(
-            or(
-              and(
-                eq(friendships.userId1, sessionUser.id),
-                eq(friendships.userId2, initiatorId)
-              ),
-              and(
-                eq(friendships.userId1, initiatorId),
-                eq(friendships.userId2, sessionUser.id)
-              )
-            )
-          )
-          .limit(1);
+        const friendship = friendshipRows.find(
+          (f) =>
+            (f.userId1 === sessionUser.id && f.userId2 === initiatorId) ||
+            (f.userId1 === initiatorId && f.userId2 === sessionUser.id)
+        );
 
-        if (friendshipRows.length > 0) {
-          friendshipId = friendshipRows[0].id;
-          if (friendshipRows[0].status === "ACCEPTED") {
+        if (friendship) {
+          friendshipId = friendship.id;
+          if (friendship.status === "ACCEPTED") {
             status = "ACCEPTED";
           }
         }
@@ -270,33 +295,19 @@ export async function getNotificationsAction(): Promise<PersonalNotification[]> 
         | undefined = undefined;
 
       if (groupId) {
-        const gRows = await db
-          .select({ name: groups.name })
-          .from(groups)
-          .where(eq(groups.id, groupId))
-          .limit(1);
-        if (gRows[0]?.name) {
-          groupName = gRows[0].name;
-        }
+        const gName = groupsMap.get(groupId)?.name;
+        if (gName) groupName = gName;
       }
 
       if (inviterId) {
-        const uRows = await db
-          .select({ id: userTable.id, name: userTable.name, email: userTable.email, image: userTable.image })
-          .from(userTable)
-          .where(eq(userTable.id, inviterId))
-          .limit(1);
-        const pRows = await db
-          .select({ fullName: profiles.fullName, email: profiles.email, avatarUrl: profiles.avatarUrl })
-          .from(profiles)
-          .where(eq(profiles.id, inviterId))
-          .limit(1);
-        if (uRows[0] || pRows[0]) {
+        const uObj = usersMap.get(inviterId);
+        const pObj = profilesMap.get(inviterId);
+        if (uObj || pObj) {
           inviterObj = {
             id: inviterId,
-            name: pRows[0]?.fullName || uRows[0]?.name || "Group Admin",
-            email: pRows[0]?.email || uRows[0]?.email || null,
-            avatarUrl: pRows[0]?.avatarUrl || uRows[0]?.image || null,
+            name: pObj?.fullName || uObj?.name || "Group Admin",
+            email: pObj?.email || uObj?.email || null,
+            avatarUrl: pObj?.avatarUrl || uObj?.image || null,
           };
         }
       }
@@ -324,14 +335,8 @@ export async function getNotificationsAction(): Promise<PersonalNotification[]> 
       let groupName = rawData.groupName as string | undefined;
 
       if (groupId) {
-        const gRows = await db
-          .select({ name: groups.name })
-          .from(groups)
-          .where(eq(groups.id, groupId))
-          .limit(1);
-        if (gRows[0]?.name) {
-          groupName = gRows[0].name;
-        }
+        const gName = groupsMap.get(groupId)?.name;
+        if (gName) groupName = gName;
       }
 
       enrichedNotifs.push({

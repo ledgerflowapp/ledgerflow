@@ -117,93 +117,50 @@ describe("Aggregated Personal Notification Feed Actions", () => {
       }),
     });
 
-    // Enrichment for notif-1 (FRIEND_REQ): user, profile, friendship
-    mockDb.select
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "user-2", name: "John Doe", email: "john@example.com", image: null }]),
-          }),
-        }),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "user-2", fullName: "John Doe", phone: "+12345", avatarUrl: null }]),
-          }),
-        }),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "f-123", status: "PENDING" }]),
-          }),
-        }),
-      });
-
-    // Enrichment for notif-2 (GROUP_INVITE): group, inviter user, inviter profile
-    mockDb.select
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "g-1", name: "Paris Trip 2026" }]),
-          }),
-        }),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "user-3", name: "Sarah Connor", email: "sarah@example.com", image: null }]),
-          }),
-        }),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "user-3", fullName: "Sarah Connor", phone: null, avatarUrl: null }]),
-          }),
-        }),
-      });
-
-    // Enrichment for notif-3 (EXPENSE_ADDED): group
+    // 1. Batch query for groups (groupIds: ["g-1"])
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([{ id: "g-1", name: "Paris Trip 2026" }]),
-        }),
+        where: vi.fn().mockResolvedValueOnce([{ id: "g-1", name: "Paris Trip 2026" }]),
       }),
     });
 
-    // Enrichment for notif-4 (GROUP_GHOST_MERGE_REQUEST): group, ghost, target user, target profile
-    mockDb.select
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "g-1", name: "Paris Trip 2026" }]),
-          }),
-        }),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "ghost-1", ghostName: "Ghost Alex" }]),
-          }),
-        }),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "user-4", name: "Alex R", email: "alex@example.com", image: null }]),
-          }),
-        }),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn().mockReturnValueOnce({
-          where: vi.fn().mockReturnValueOnce({
-            limit: vi.fn().mockResolvedValueOnce([{ id: "user-4", fullName: "Alex Rivera", phone: "+1555", avatarUrl: null }]),
-          }),
-        }),
-      });
+    // 2. Batch query for ghost members (ghostMemberIds: ["ghost-1"])
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([{ id: "ghost-1", ghostName: "Ghost Alex" }]),
+      }),
+    });
+
+    // 3. Batch query for users (userIds: ["user-2", "user-3", "user-4"])
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([
+          { id: "user-2", name: "John Doe", email: "john@example.com", image: null },
+          { id: "user-3", name: "Sarah Connor", email: "sarah@example.com", image: null },
+          { id: "user-4", name: "Alex R", email: "alex@example.com", image: null },
+        ]),
+      }),
+    });
+
+    // 4. Batch query for profiles (userIds: ["user-2", "user-3", "user-4"])
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([
+          { id: "user-2", fullName: "John Doe", phone: "+12345", avatarUrl: null },
+          { id: "user-3", fullName: "Sarah Connor", phone: null, avatarUrl: null },
+          { id: "user-4", fullName: "Alex Rivera", phone: "+1555", avatarUrl: null },
+        ]),
+      }),
+    });
+
+    // 5. Batch query for friendships (friendInitiatorIds: ["user-2"])
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([
+          { id: "f-123", userId1: "user-1", userId2: "user-2", status: "PENDING" },
+        ]),
+      }),
+    });
 
     const notifications = await getNotificationsAction();
 

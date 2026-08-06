@@ -75,7 +75,7 @@ describe("mergeContactToUserProfile Server Action", () => {
 
   it("throws error if contact is not found", async () => {
     mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-owner"));
-    mockTxQuerySequence([]);
+    mockTxQuerySequence([], [], []);
 
     await expect(
       mergeContactToUserProfile("non-existent-contact", "user-target")
@@ -85,9 +85,10 @@ describe("mergeContactToUserProfile Server Action", () => {
   it("throws error if target user profile is not found", async () => {
     mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-owner"));
 
-    // 1. contact query found, 2. target user query empty
+    // 1. contact query found, 2. target user query empty, 3. profile query empty
     mockTxQuerySequence(
       [{ id: "c-1", userId: "user-owner", name: "Alice", netBalance: "100.00" }],
+      [],
       []
     );
 
