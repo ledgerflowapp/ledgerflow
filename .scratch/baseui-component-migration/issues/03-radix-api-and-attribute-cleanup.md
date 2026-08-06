@@ -5,10 +5,10 @@ Complete audit and elimination of legacy Radix props (`asChild`, `onInteractOuts
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] All invalid `asChild` uses on Base UI-backed triggers (`PopoverTrigger`, `AlertDialogTrigger`, `SheetTrigger`, `DropdownMenuTrigger`) are replaced with `render={<Button ... />}` syntax across `GroupSettingsDrawer.tsx`, `MobileSidebar.tsx`, `BusinessSwitcher.tsx`, categories page, and date/time pickers.
-- [ ] `onInteractOutside` in `OnboardingModal.tsx` is replaced with Base UI `dismissible={false}` / `modal={true}` configuration.
-- [ ] Valid `asChild` uses on `vaul`-backed `Drawer*` components remain intact.
-- [ ] All UI components cleanly compile without TypeScript warnings or invalid Radix DOM attribute warnings.
-- [ ] `grep -rn "@radix-ui" src/` confirms zero `@radix-ui` imports outside `form.tsx`.
+- [x] All invalid `asChild` uses on Base UI-backed triggers (`PopoverTrigger`, `AlertDialogTrigger`, `SheetTrigger`, `DropdownMenuTrigger`) are replaced with `render={<Button ... />}` syntax across `GroupSettingsDrawer.tsx`, `MobileSidebar.tsx`, `BusinessSwitcher.tsx`, categories page, and date/time pickers.
+- [x] `onInteractOutside` in `OnboardingModal.tsx` is replaced with Base UI `disablePointerDismissal={true}` / `modal={true}` configuration.
+- [x] Valid `asChild` uses on `vaul`-backed `Drawer*` components remain intact.
+- [x] All UI components cleanly compile without TypeScript warnings or invalid Radix DOM attribute warnings.
+- [x] `grep -rn "@radix-ui" src/` confirms zero `@radix-ui` imports outside `form.tsx`.

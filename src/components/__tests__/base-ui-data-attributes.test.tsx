@@ -109,4 +109,16 @@ describe('Base UI Boolean Data-Attribute Compliance', () => {
       expect(content).not.toContain('data-[state=')
     }
   })
+
+  it('Verifies OnboardingModal uses Base UI disablePointerDismissal={true} and modal={true}', async () => {
+    const fs = await import('fs')
+    const path = await import('path')
+
+    const fullPath = path.join(process.cwd(), 'src/components/auth/OnboardingModal.tsx')
+    const content = fs.readFileSync(fullPath, 'utf-8')
+
+    expect(content).toContain('disablePointerDismissal={true}')
+    expect(content).toContain('modal={true}')
+    expect(content).not.toContain('onInteractOutside')
+  })
 })

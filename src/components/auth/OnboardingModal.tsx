@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { Loader2, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { toast } from '@/components/ui/toast'
 
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useProfile } from '@/hooks/use-profile'
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 
 const usernameSchema = z.object({
     username: z
@@ -37,14 +38,7 @@ type UsernameFormValues = z.infer<typeof usernameSchema>
 export function OnboardingModal() {
     const { profile, isLoading, updateProfile } = useProfile()
     const [isOpen, setIsOpen] = useState(false)
-
-    // Form definition
-    const form = useForm<UsernameFormValues>({
-        resolver: zodResolver(usernameSchema),
-        defaultValues: {
-            username: '',
-        },
-    })
+    const [phase, setPhase] = useState<'username' | 'wizard'>('username')
 
     // Open modal if profile loaded and username is missing
     useEffect(() => {
@@ -53,11 +47,18 @@ export function OnboardingModal() {
         }
     }, [isLoading, profile])
 
-    const onSubmit = (data: UsernameFormValues) => {
+    const form = useForm<UsernameFormValues>({
+        resolver: zodResolver(usernameSchema),
+        defaultValues: {
+            username: '',
+        },
+    })
+
+    const onUsernameSubmit = (data: UsernameFormValues) => {
         updateProfile.mutate({ username: data.username }, {
             onSuccess: () => {
-                setIsOpen(false)
                 toast.success('Username claimed successfully!')
+                setPhase('wizard')
             },
             onError: (error: any) => {
                 if (error.code === '23505') {
@@ -72,56 +73,60 @@ export function OnboardingModal() {
         })
     }
 
-    const handleClose = () => {
-        setIsOpen(false)
+    const handleSkipUsername = () => {
+        setPhase('wizard')
     }
 
     if (isLoading || !profile?.id) return null
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen} disablePointerDismissal={true}>
+        <Dialog open={isOpen} onOpenChange={setIsOpen} disablePointerDismissal={true} modal={true}>
             <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <div className="flex items-center justify-between">
-                        <DialogTitle>Choose a Username</DialogTitle>
-                    </div>
-                    <DialogDescription>
-                        Set a unique username to make it easier for others to find you on LedgerFlow.
-                    </DialogDescription>
-                </DialogHeader>
+                {phase === 'username' ? (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Choose a Username</DialogTitle>
+                            <DialogDescription>
+                                Set a unique username to make it easier for others to find you on LedgerFlow.
+                            </DialogDescription>
+                        </DialogHeader>
 
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="username"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="username"
-                                            autoComplete="off"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onUsernameSubmit)} className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="username"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="username"
+                                                    autoComplete="off"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                        <div className="flex justify-end gap-2">
-                            <Button type="button" variant="ghost" onClick={handleClose}>
-                                Skip for now
-                            </Button>
-                            <Button type="submit" disabled={updateProfile.isPending}>
-                                {updateProfile.isPending && (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                )}
-                                Claim Username
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
+                                <div className="flex justify-end gap-2">
+                                    <Button type="button" variant="ghost" onClick={handleSkipUsername}>
+                                        Skip for now
+                                    </Button>
+                                    <Button type="submit" disabled={updateProfile.isPending}>
+                                        {updateProfile.isPending && (
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        )}
+                                        Claim Username
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    </>
+                ) : (
+                    <OnboardingWizard onComplete={() => setIsOpen(false)} />
+                )}
             </DialogContent>
         </Dialog>
     )
