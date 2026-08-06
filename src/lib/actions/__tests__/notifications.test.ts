@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { mockDb } = vi.hoisted(() => {
   const mockDb = {
     select: vi.fn(),
+    update: vi.fn(),
+    insert: vi.fn(),
   };
 
   return {
@@ -18,8 +20,23 @@ vi.mock("@/lib/auth-session", () => ({
   getSessionUser: vi.fn(),
 }));
 
-import { getGroupGhostMergeNotificationsAction } from "../notifications";
+vi.mock("../friends", () => ({
+  acceptInAppRequestAction: vi.fn(),
+  rejectInAppRequestAction: vi.fn(),
+}));
+
+import {
+  getNotificationsAction,
+  getGroupGhostMergeNotificationsAction,
+  markNotificationAsReadAction,
+  markAllNotificationsAsReadAction,
+  acceptFriendRequestNotificationAction,
+  rejectFriendRequestNotificationAction,
+  acceptGroupInviteNotificationAction,
+  rejectGroupInviteNotificationAction,
+} from "../notifications";
 import { getSessionUser } from "@/lib/auth-session";
+import { acceptInAppRequestAction, rejectInAppRequestAction } from "../friends";
 
 function makeSessionUser(id: string) {
   return {
@@ -32,7 +49,7 @@ function makeSessionUser(id: string) {
   };
 }
 
-describe("Group Ghost Merge Notifications Action", () => {
+describe("Aggregated Personal Notification Feed Actions", () => {
   const mockGetSessionUser = vi.mocked(getSessionUser);
 
   beforeEach(() => {
@@ -42,37 +59,261 @@ describe("Group Ghost Merge Notifications Action", () => {
   it("throws Unauthorized if no session user is present", async () => {
     mockGetSessionUser.mockResolvedValueOnce(null);
 
-    await expect(getGroupGhostMergeNotificationsAction()).rejects.toThrow("Unauthorized");
+    await expect(getNotificationsAction()).rejects.toThrow("Unauthorized");
   });
 
-  it("fetches and enriches pending merge request notifications for group admin", async () => {
-    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("admin-1"));
+  it("queries and aggregates FRIEND_REQ, GROUP_INVITE, EXPENSE_ADDED, and GROUP_GHOST_MERGE_REQUEST notifications", async () => {
+    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-1"));
+
+    const notifRecords = [
+      {
+        id: "notif-1",
+        userId: "user-1",
+        type: "FRIEND_REQ",
+        title: "New Friend Request",
+        message: "John wants to connect with you.",
+        data: { initiator_id: "user-2" },
+        isRead: false,
+        createdAt: new Date("2026-08-05T10:00:00Z"),
+      },
+      {
+        id: "notif-2",
+        userId: "user-1",
+        type: "GROUP_INVITE",
+        title: "Group Invite",
+        message: "You've been invited to Paris Trip",
+        data: { groupId: "g-1", inviteToken: "tok-1", inviterId: "user-3" },
+        isRead: false,
+        createdAt: new Date("2026-08-05T09:00:00Z"),
+      },
+      {
+        id: "notif-3",
+        userId: "user-1",
+        type: "EXPENSE_ADDED",
+        title: "New Expense Added",
+        message: "Dinner expense added in Paris Trip",
+        data: { transactionId: "tx-1", amount: 15000, groupId: "g-1" },
+        isRead: true,
+        createdAt: new Date("2026-08-05T08:00:00Z"),
+      },
+      {
+        id: "notif-4",
+        userId: "user-1",
+        type: "GROUP_GHOST_MERGE_REQUEST",
+        title: "Merge Request",
+        message: "Request to merge ghost member",
+        data: { groupId: "g-1", ghostMemberId: "ghost-1", targetUserId: "user-4", status: "PENDING" },
+        isRead: false,
+        createdAt: new Date("2026-08-05T07:00:00Z"),
+      },
+    ];
+
+    // mock main query select notifications
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockReturnValueOnce({
+          orderBy: vi.fn().mockResolvedValueOnce(notifRecords),
+        }),
+      }),
+    });
+
+    // Enrichment for notif-1 (FRIEND_REQ): user, profile, friendship
+    mockDb.select
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-2", name: "John Doe", email: "john@example.com", image: null }]),
+          }),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-2", fullName: "John Doe", phone: "+12345", avatarUrl: null }]),
+          }),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "f-123", status: "PENDING" }]),
+          }),
+        }),
+      });
+
+    // Enrichment for notif-2 (GROUP_INVITE): group, inviter user, inviter profile
+    mockDb.select
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "g-1", name: "Paris Trip 2026" }]),
+          }),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-3", name: "Sarah Connor", email: "sarah@example.com", image: null }]),
+          }),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-3", fullName: "Sarah Connor", phone: null, avatarUrl: null }]),
+          }),
+        }),
+      });
+
+    // Enrichment for notif-3 (EXPENSE_ADDED): group
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockReturnValueOnce({
+          limit: vi.fn().mockResolvedValueOnce([{ id: "g-1", name: "Paris Trip 2026" }]),
+        }),
+      }),
+    });
+
+    // Enrichment for notif-4 (GROUP_GHOST_MERGE_REQUEST): group, ghost, target user, target profile
+    mockDb.select
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "g-1", name: "Paris Trip 2026" }]),
+          }),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "ghost-1", ghostName: "Ghost Alex" }]),
+          }),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-4", name: "Alex R", email: "alex@example.com", image: null }]),
+          }),
+        }),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn().mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            limit: vi.fn().mockResolvedValueOnce([{ id: "user-4", fullName: "Alex Rivera", phone: "+1555", avatarUrl: null }]),
+          }),
+        }),
+      });
+
+    const notifications = await getNotificationsAction();
+
+    expect(notifications).toHaveLength(4);
+
+    // Assert FRIEND_REQ
+    expect(notifications[0].type).toBe("FRIEND_REQ");
+    expect(notifications[0].data.initiator.name).toBe("John Doe");
+    expect(notifications[0].data.friendshipId).toBe("f-123");
+    expect(notifications[0].data.status).toBe("PENDING");
+
+    // Assert GROUP_INVITE
+    expect(notifications[1].type).toBe("GROUP_INVITE");
+    expect(notifications[1].data.groupName).toBe("Paris Trip 2026");
+    expect(notifications[1].data.inviter.name).toBe("Sarah Connor");
+
+    // Assert EXPENSE_ADDED
+    expect(notifications[2].type).toBe("EXPENSE_ADDED");
+    expect(notifications[2].data.amount).toBe(15000);
+    expect(notifications[2].data.groupName).toBe("Paris Trip 2026");
+
+    // Assert GROUP_GHOST_MERGE_REQUEST
+    expect(notifications[3].type).toBe("GROUP_GHOST_MERGE_REQUEST");
+    expect(notifications[3].data.groupName).toBe("Paris Trip 2026");
+    expect(notifications[3].data.ghostName).toBe("Ghost Alex");
+  });
+
+  it("marks a single notification as read", async () => {
+    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-1"));
+
+    mockDb.update.mockReturnValueOnce({
+      set: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([{ id: "notif-1" }]),
+      }),
+    });
+
+    const res = await markNotificationAsReadAction("notif-1");
+    expect(res.success).toBe(true);
+    expect(mockDb.update).toHaveBeenCalled();
+  });
+
+  it("marks all unread notifications as read for the user", async () => {
+    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-1"));
+
+    mockDb.update.mockReturnValueOnce({
+      set: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([]),
+      }),
+    });
+
+    const res = await markAllNotificationsAsReadAction();
+    expect(res.success).toBe(true);
+    expect(mockDb.update).toHaveBeenCalled();
+  });
+
+  it("handles friend request acceptance from notification", async () => {
+    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-1"));
 
     const notifRecord = {
-      id: "req-1",
-      userId: "admin-1",
-      type: "GROUP_GHOST_MERGE_REQUEST",
-      title: "Group Ghost Member Merge Request",
-      message: "Request to merge ghost member 'Ghost Alex' with user profile in 'Ski Trip 2026'.",
-      data: {
-        groupId: "g-100",
-        ghostMemberId: "ghost-55",
-        targetUserId: "user-target-1",
-        status: "PENDING",
-      },
-      isRead: false,
-      createdAt: new Date("2026-08-04T10:00:00Z"),
+      id: "notif-fr",
+      userId: "user-1",
+      type: "FRIEND_REQ",
+      data: { initiator_id: "user-2" },
     };
 
-    const groupRecord = { id: "g-100", name: "Ski Trip 2026" };
-    const ghostMemberRecord = { id: "ghost-55", ghostName: "Ghost Alex" };
-    const targetUserRecord = { id: "user-target-1", name: "Alex Rivera", email: "alex@example.com", image: null };
-    const targetProfileRecord = { id: "user-target-1", fullName: "Alex Rivera", phone: "+15550199", avatarUrl: "https://example.com/avatar.jpg" };
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockReturnValueOnce({
+          limit: vi.fn().mockResolvedValueOnce([notifRecord]),
+        }),
+      }),
+    });
+
+    // Mock search for friendship
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockReturnValueOnce({
+          limit: vi.fn().mockResolvedValueOnce([{ id: "f-100", status: "PENDING" }]),
+        }),
+      }),
+    });
+
+    // Mock update notification
+    mockDb.update.mockReturnValueOnce({
+      set: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([]),
+      }),
+    });
+
+    vi.mocked(acceptInAppRequestAction).mockResolvedValueOnce({ success: true, sender_name: "John" });
+
+    const res = await acceptFriendRequestNotificationAction("notif-fr");
+    expect(res.success).toBe(true);
+    expect(acceptInAppRequestAction).toHaveBeenCalledWith("f-100");
+  });
+
+  it("handles friend request rejection from notification", async () => {
+    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-1"));
+
+    const notifRecord = {
+      id: "notif-fr",
+      userId: "user-1",
+      type: "FRIEND_REQ",
+      data: { initiator_id: "user-2" },
+    };
 
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValueOnce({
         where: vi.fn().mockReturnValueOnce({
-          orderBy: vi.fn().mockResolvedValueOnce([notifRecord]),
+          limit: vi.fn().mockResolvedValueOnce([notifRecord]),
         }),
       }),
     });
@@ -80,61 +321,95 @@ describe("Group Ghost Merge Notifications Action", () => {
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValueOnce({
         where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([groupRecord]),
+          limit: vi.fn().mockResolvedValueOnce([{ id: "f-100", status: "PENDING" }]),
         }),
       }),
     });
+
+    mockDb.update.mockReturnValueOnce({
+      set: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([]),
+      }),
+    });
+
+    vi.mocked(rejectInAppRequestAction).mockResolvedValueOnce({ success: true } as any);
+
+    const res = await rejectFriendRequestNotificationAction("notif-fr");
+    expect(res.success).toBe(true);
+    expect(rejectInAppRequestAction).toHaveBeenCalledWith("f-100");
+  });
+
+  it("handles group invite acceptance from notification", async () => {
+    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-1"));
+
+    const notifRecord = {
+      id: "notif-gi",
+      userId: "user-1",
+      type: "GROUP_INVITE",
+      data: { groupId: "g-100", inviteToken: "tok-1" },
+    };
 
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValueOnce({
         where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([ghostMemberRecord]),
+          limit: vi.fn().mockResolvedValueOnce([notifRecord]),
         }),
       }),
     });
+
+    // Mock check for existing member (none found)
+    mockDb.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockReturnValueOnce({
+          limit: vi.fn().mockResolvedValueOnce([]),
+        }),
+      }),
+    });
+
+    // Mock insert into groupMembers
+    mockDb.insert.mockReturnValueOnce({
+      values: vi.fn().mockResolvedValueOnce([]),
+    });
+
+    // Mock update notification
+    mockDb.update.mockReturnValueOnce({
+      set: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([]),
+      }),
+    });
+
+    const res = await acceptGroupInviteNotificationAction("notif-gi");
+    expect(res.success).toBe(true);
+    expect(mockDb.insert).toHaveBeenCalled();
+  });
+
+  it("handles group invite rejection from notification", async () => {
+    mockGetSessionUser.mockResolvedValueOnce(makeSessionUser("user-1"));
+
+    const notifRecord = {
+      id: "notif-gi",
+      userId: "user-1",
+      type: "GROUP_INVITE",
+      data: { groupId: "g-100" },
+    };
 
     mockDb.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValueOnce({
         where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([targetUserRecord]),
+          limit: vi.fn().mockResolvedValueOnce([notifRecord]),
         }),
       }),
     });
 
-    mockDb.select.mockReturnValueOnce({
-      from: vi.fn().mockReturnValueOnce({
-        where: vi.fn().mockReturnValueOnce({
-          limit: vi.fn().mockResolvedValueOnce([targetProfileRecord]),
-        }),
+    mockDb.update.mockReturnValueOnce({
+      set: vi.fn().mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([]),
       }),
     });
 
-    const results = await getGroupGhostMergeNotificationsAction();
-
-    expect(results).toHaveLength(1);
-    expect(results[0]).toEqual({
-      id: "req-1",
-      userId: "admin-1",
-      type: "GROUP_GHOST_MERGE_REQUEST",
-      title: "Group Ghost Member Merge Request",
-      message: "Request to merge ghost member 'Ghost Alex' with user profile in 'Ski Trip 2026'.",
-      isRead: false,
-      createdAt: "2026-08-04T10:00:00.000Z",
-      data: {
-        groupId: "g-100",
-        groupName: "Ski Trip 2026",
-        ghostMemberId: "ghost-55",
-        ghostName: "Ghost Alex",
-        targetUserId: "user-target-1",
-        targetUser: {
-          id: "user-target-1",
-          name: "Alex Rivera",
-          email: "alex@example.com",
-          phone: "+15550199",
-          avatarUrl: "https://example.com/avatar.jpg",
-        },
-        status: "PENDING",
-      },
-    });
+    const res = await rejectGroupInviteNotificationAction("notif-gi");
+    expect(res.success).toBe(true);
+    expect(mockDb.update).toHaveBeenCalled();
   });
 });
+

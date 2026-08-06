@@ -178,14 +178,14 @@ describe("NotificationFeed Component Rendering", () => {
   it("renders empty state when initialNotifications is empty", () => {
     const html = renderToString(<NotificationFeed initialNotifications={[]} />);
 
-    expect(html).toContain("No merge requests pending");
+    expect(html).toContain("No notifications found");
   });
 
-  it("renders pending merge request cards when items exist", () => {
+  it("renders FRIEND_REQ, GROUP_INVITE, EXPENSE_ADDED, and GROUP_GHOST_MERGE_REQUEST cards", () => {
     const notifs = [
       {
         id: "req-1",
-        userId: "admin-1",
+        userId: "user-1",
         type: "GROUP_GHOST_MERGE_REQUEST" as const,
         title: "Merge Request",
         message: "Merge request message",
@@ -207,14 +207,81 @@ describe("NotificationFeed Component Rendering", () => {
           status: "PENDING" as const,
         },
       },
+      {
+        id: "req-2",
+        userId: "user-1",
+        type: "FRIEND_REQ",
+        title: "New Friend Request",
+        message: "John wants to connect with you.",
+        isRead: false,
+        createdAt: "2026-08-04T11:00:00.000Z",
+        data: {
+          initiator_id: "user-2",
+          initiator: {
+            id: "user-2",
+            name: "John Doe",
+            email: "john@example.com",
+            avatarUrl: null,
+          },
+          status: "PENDING" as const,
+        },
+      },
+      {
+        id: "req-3",
+        userId: "user-1",
+        type: "GROUP_INVITE",
+        title: "Group Invitation",
+        message: "You've been invited to Paris Trip 2026",
+        isRead: false,
+        createdAt: "2026-08-04T12:00:00.000Z",
+        data: {
+          groupId: "g-2",
+          groupName: "Paris Trip 2026",
+          inviter: {
+            id: "user-3",
+            name: "Sarah Connor",
+          },
+          status: "PENDING" as const,
+        },
+      },
+      {
+        id: "req-4",
+        userId: "user-1",
+        type: "EXPENSE_ADDED",
+        title: "New Expense Added",
+        message: "Dinner expense added in Paris Trip 2026",
+        isRead: true,
+        createdAt: "2026-08-04T13:00:00.000Z",
+        data: {
+          transactionId: "tx-100",
+          amount: 15000,
+          groupName: "Paris Trip 2026",
+        },
+      },
     ];
 
     const html = renderToString(<NotificationFeed initialNotifications={notifs} />);
 
+    // Assert GROUP_GHOST_MERGE_REQUEST
     expect(html).toContain("Beach Trip 2026");
     expect(html).toContain("Ghost:");
     expect(html).toContain("Ghost Sam");
     expect(html).toContain("Sam Taylor");
+
+    // Assert FRIEND_REQ
+    expect(html).toContain("Friend Request");
+    expect(html).toContain("John Doe");
+    expect(html).toContain("john@example.com");
+
+    // Assert GROUP_INVITE
+    expect(html).toContain("Paris Trip 2026");
+    expect(html).toContain("Group Invitation");
+
+    // Assert EXPENSE_ADDED
+    expect(html).toContain("New Expense Added");
+    expect(html).toContain("Dinner expense added in Paris Trip 2026");
+    expect(html).toContain("₹150.00");
   });
 });
+
 
