@@ -20,6 +20,24 @@ import { Loader2, Plus, AlertCircle } from 'lucide-react'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AddAccountDrawer } from '@/components/finance/AddAccountDrawer'
+import { paiseToRupees } from '@/lib/currency'
+
+export function getPersonalTransactionFormDefaults(initialData?: any) {
+    const initialAmountInRupees = initialData?.amount !== undefined && initialData?.amount !== null
+        ? paiseToRupees(initialData.amount).toNumber()
+        : undefined
+
+    return {
+        amount: initialAmountInRupees,
+        name: initialData?.name || '',
+        note: initialData?.note || '',
+        date: initialData?.date ? new Date(initialData.date) : new Date(),
+        flow: (initialData?.flow as 'IN' | 'OUT') || 'OUT',
+        contact_id: initialData?.contact_id || initialData?.contact?.id || null,
+        category_id: initialData?.category_id || initialData?.category?.id || null,
+        account_id: initialData?.account_id || initialData?.account?.id || undefined,
+    }
+}
 
 const personalTransactionSchema = z.object({
     amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
@@ -82,23 +100,20 @@ export function PersonalTransactionDrawer({
     // Effect to populate form when initialData changes or drawer opens
     useEffect(() => {
         if (open) {
+            const defaults = getPersonalTransactionFormDefaults(initialData)
             form.reset({
-                amount: initialData?.amount ?? ('' as unknown as number),
-                name: initialData?.name || '',
-                note: initialData?.note || '',
-                date: initialData?.date ? new Date(initialData.date) : new Date(),
-                flow: initialData?.flow || 'OUT',
-                contact_id: initialData?.contact_id || null,
-                category_id: initialData?.category_id || null,
-                account_id: initialData?.account_id,
+                amount: defaults.amount ?? ('' as unknown as number),
+                name: defaults.name,
+                note: defaults.note,
+                date: defaults.date,
+                flow: defaults.flow,
+                contact_id: defaults.contact_id,
+                category_id: defaults.category_id,
+                account_id: defaults.account_id || form.getValues('account_id'),
             })
-            if (initialData?.flow) {
-                setFlow(initialData.flow)
-            } else {
-                setFlow('OUT')
-            }
+            setFlow(defaults.flow)
         }
-    }, [open, initialData?.id, initialData?.contact_id, form])
+    }, [open, initialData?.id, initialData?.contact_id, initialData?.category_id, initialData?.account_id, initialData?.amount, form])
 
     function onSubmit(values: z.infer<typeof personalTransactionSchema>) {
         if (!values.category_id && flow === 'OUT') {
@@ -158,7 +173,7 @@ export function PersonalTransactionDrawer({
             <DrawerContent className="max-h-[90dvh]">
                 <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
                     <DrawerHeader className="shrink-0">
-                        <DrawerTitle>Add Expense / Income</DrawerTitle>
+                        <DrawerTitle>{initialData?.id ? 'Edit Transaction' : 'Add Expense / Income'}</DrawerTitle>
                     </DrawerHeader>
                     <div className="p-4 pb-8 overflow-y-auto flex-1 min-h-0">
                         <Tabs defaultValue="OUT" className="w-full mb-4" onValueChange={(v) => {
@@ -365,7 +380,7 @@ export function PersonalTransactionDrawer({
 
                                 <Button type="submit" className="w-full" disabled={isPending}>
                                     {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Save Transaction
+                                    {initialData?.id ? 'Update Transaction' : 'Save Transaction'}
                                 </Button>
                             </form>
                         </Form>

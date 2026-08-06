@@ -4,8 +4,8 @@
 
 **Blocked by:** 02 — Atomic Balance Adjustments on Transaction Edit & Soft-Delete
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `onEdit` callback in `PersonalTransactionList` opens `PersonalTransactionDrawer` in edit mode with pre-populated amount, date, account, category, notes, and person associations.
-- [ ] Submitting the edit drawer invokes `updateTransactionAction` and refreshes personal transaction lists and account balances in the UI.
-- [ ] UI integration tests verify that editing a transaction updates the transaction display and reflects balance changes without full page reloads.
+- [x] `onEdit` callback in `PersonalTransactionList` opens `PersonalTransactionDrawer` in edit mode with pre-populated amount, date, account, category, notes, and person associations.
+- [x] Submitting the edit drawer invokes `updateTransactionAction` and refreshes personal transaction lists and account balances in the UI.
+- [x] UI integration tests verify that editing a transaction updates the transaction display and reflects balance changes without full page reloads.

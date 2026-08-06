@@ -43,8 +43,11 @@ export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEd
     const { profile } = useProfile()
 
     const handleEdit = () => {
-        setEditOpen(true)
-        if (onEdit) onEdit(transaction)
+        if (onEdit) {
+            onEdit(transaction)
+        } else {
+            setEditOpen(true)
+        }
     }
 
     if (!transaction) return null

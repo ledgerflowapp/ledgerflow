@@ -43,9 +43,15 @@ interface PersonalTransaction {
 type TimeFilter = 'ALL' | 'TODAY' | 'WEEK' | 'MONTH' | 'YEAR'
 type SortOption = 'LATEST' | 'OLDEST' | 'HIGHEST' | 'LOWEST'
 
-export function PersonalTransactionList() {
+interface PersonalTransactionListProps {
+    onEdit?: (transaction: PersonalTransaction) => void
+}
+
+export function PersonalTransactionList({ onEdit }: PersonalTransactionListProps = {}) {
     const [selectedTransaction, setSelectedTransaction] = useState<PersonalTransaction | null>(null)
     const [detailsOpen, setDetailsOpen] = useState(false)
+    const [editingTransaction, setEditingTransaction] = useState<PersonalTransaction | null>(null)
+    const [editDrawerOpen, setEditDrawerOpen] = useState(false)
     const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL')
     const [sortBy, setSortBy] = useState<SortOption>('LATEST')
     const router = useRouter()
@@ -228,7 +234,19 @@ export function PersonalTransactionList() {
                 transaction={selectedTransaction}
                 open={detailsOpen}
                 onOpenChange={setDetailsOpen}
-                onEdit={() => { }}
+                onEdit={(tx) => {
+                    setDetailsOpen(false)
+                    setEditingTransaction(tx)
+                    setEditDrawerOpen(true)
+                    onEdit?.(tx)
+                }}
+            />
+
+            <PersonalTransactionDrawer
+                open={editDrawerOpen}
+                onOpenChange={setEditDrawerOpen}
+                initialData={editingTransaction}
+                hideTrigger={true}
             />
         </>
     )

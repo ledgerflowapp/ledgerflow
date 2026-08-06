@@ -31,6 +31,8 @@ const businessTransactionSchema = z.object({
     account_id: z.string().nullable().optional(),
 })
 
+import { paiseToRupees } from '@/lib/currency'
+
 export function BusinessTransactionDrawer({
     open: controlledOpen,
     onOpenChange: setControlledOpen,
@@ -70,16 +72,20 @@ export function BusinessTransactionDrawer({
     // Effect to populate form when initialData changes or drawer opens
     useEffect(() => {
         if (open) {
+            const initialAmountInRupees = initialData?.amount !== undefined && initialData?.amount !== null
+                ? paiseToRupees(initialData.amount).toNumber()
+                : ('' as unknown as number)
+
             form.reset({
-                amount: initialData?.amount ?? ('' as unknown as number),
+                amount: initialAmountInRupees,
                 name: initialData?.name || '',
                 note: initialData?.note || '',
                 date: initialData?.date ? new Date(initialData.date) : new Date(),
                 flow: initialData?.flow || 'OUT',
-                contact_id: initialData?.contact_id || '',
+                contact_id: initialData?.contact_id || initialData?.contact?.id || '',
                 due_date: initialData?.due_date ? new Date(initialData.due_date) : undefined,
-                category_id: initialData?.category_id,
-                account_id: initialData?.account_id,
+                category_id: initialData?.category_id || initialData?.category?.id || null,
+                account_id: initialData?.account_id || initialData?.account?.id || null,
             })
             if (initialData?.flow) {
                 setFlow(initialData.flow)
@@ -87,7 +93,7 @@ export function BusinessTransactionDrawer({
                 setFlow('OUT')
             }
         }
-    }, [open, initialData?.id, initialData?.contact_id, form])
+    }, [open, initialData?.id, initialData?.contact_id, initialData?.amount, form])
 
     function onSubmit(values: z.infer<typeof businessTransactionSchema>) {
         const transactionData = {

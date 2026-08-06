@@ -260,12 +260,14 @@ export async function getPersonalTransactionsAction(
     with: {
       category: {
         columns: {
+          id: true,
           name: true,
           icon: true,
         },
       },
       account: {
         columns: {
+          id: true,
           name: true,
           type: true,
         },
