@@ -203,7 +203,7 @@ function LoginContent() {
                                                     <FormControl>
                                                         <div className="relative">
                                                             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                            <Input className="pl-9" placeholder="m@example.com" type="email" {...field} />
+                                                            <Input className="pl-9" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -219,7 +219,7 @@ function LoginContent() {
                                                     <FormControl>
                                                         <div className="relative">
                                                             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                            <Input className="pl-9" placeholder="••••••••" type="password" {...field} />
+                                                            <Input className="pl-9" placeholder="••••••••" type="password" autoComplete="current-password" {...field} />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -244,7 +244,7 @@ function LoginContent() {
                                                     <FormControl>
                                                         <div className="relative">
                                                             <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                            <Input className="pl-9" placeholder="John Doe" {...field} />
+                                                            <Input className="pl-9" placeholder="John Doe" autoComplete="name" {...field} />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -260,7 +260,7 @@ function LoginContent() {
                                                     <FormControl>
                                                         <div className="relative">
                                                             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                            <Input className="pl-9" placeholder="m@example.com" type="email" {...field} />
+                                                            <Input className="pl-9" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -276,7 +276,7 @@ function LoginContent() {
                                                     <FormControl>
                                                         <div className="relative">
                                                             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                            <Input className="pl-9" placeholder="••••••••" type="password" {...field} />
+                                                            <Input className="pl-9" placeholder="••••••••" type="password" autoComplete="new-password" {...field} />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
