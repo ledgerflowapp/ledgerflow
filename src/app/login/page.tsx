@@ -192,7 +192,7 @@ function LoginContent() {
                             </div>
 
                             {mode === 'SIGN_IN' ? (
-                                <Form {...signInForm}>
+                                <Form key="sign-in" {...signInForm}>
                                     <form onSubmit={signInForm.handleSubmit(onSignInSubmit)} className="space-y-4">
                                         <FormField
                                             control={signInForm.control}
@@ -200,12 +200,12 @@ function LoginContent() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Email</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative">
-                                                            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                    <div className="relative">
+                                                        <Mail className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <FormControl>
                                                             <Input className="pl-9" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
-                                                        </div>
-                                                    </FormControl>
+                                                        </FormControl>
+                                                    </div>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -216,12 +216,12 @@ function LoginContent() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Password</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative">
-                                                            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                    <div className="relative">
+                                                        <Lock className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <FormControl>
                                                             <Input className="pl-9" placeholder="••••••••" type="password" autoComplete="current-password" {...field} />
-                                                        </div>
-                                                    </FormControl>
+                                                        </FormControl>
+                                                    </div>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -233,7 +233,7 @@ function LoginContent() {
                                     </form>
                                 </Form>
                             ) : (
-                                <Form {...signUpForm}>
+                                <Form key="sign-up" {...signUpForm}>
                                     <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)} className="space-y-4">
                                         <FormField
                                             control={signUpForm.control}
@@ -241,12 +241,12 @@ function LoginContent() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Full Name</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative">
-                                                            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                    <div className="relative">
+                                                        <User className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <FormControl>
                                                             <Input className="pl-9" placeholder="John Doe" autoComplete="name" {...field} />
-                                                        </div>
-                                                    </FormControl>
+                                                        </FormControl>
+                                                    </div>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -257,12 +257,12 @@ function LoginContent() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Email</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative">
-                                                            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                    <div className="relative">
+                                                        <Mail className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <FormControl>
                                                             <Input className="pl-9" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
-                                                        </div>
-                                                    </FormControl>
+                                                        </FormControl>
+                                                    </div>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -273,12 +273,12 @@ function LoginContent() {
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Password</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative">
-                                                            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                    <div className="relative">
+                                                        <Lock className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <FormControl>
                                                             <Input className="pl-9" placeholder="••••••••" type="password" autoComplete="new-password" {...field} />
-                                                        </div>
-                                                    </FormControl>
+                                                        </FormControl>
+                                                    </div>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
