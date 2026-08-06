@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -70,6 +70,16 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
 
     const { data: friends } = useFriendships()
     const { mutate: linkGhostMember, isPending: isLinking } = useLinkGhostMember()
+
+    const memberUserIdsSet = useMemo(
+        () => new Set(members.map(m => m.user_id).filter((id): id is string => Boolean(id))),
+        [members]
+    )
+
+    const availableFriends = useMemo(
+        () => friends?.filter(f => !memberUserIdsSet.has(f.profile.id)) ?? [],
+        [friends, memberUserIdsSet]
+    )
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -217,34 +227,32 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                                                                 Link to Friend
                                                             </div>
                                                             <div className="max-h-[200px] overflow-y-auto">
-                                                                {friends.filter(f => !members.some(m => m.user_id === f.profile.id)).length === 0 ? (
+                                                                 {availableFriends.length === 0 ? (
                                                                     <div className="p-4 text-sm text-center text-muted-foreground">
                                                                         No available friends to link.
                                                                     </div>
                                                                 ) : (
-                                                                    friends
-                                                                        .filter(f => !members.some(m => m.user_id === f.profile.id))
-                                                                        .map(friend => (
-                                                                            <button
-                                                                                type="button"
-                                                                                key={friend.profile.id}
-                                                                                className="w-full flex items-center gap-3 p-3 hover:bg-accent text-left transition-colors"
-                                                                                onClick={() => {
-                                                                                    linkGhostMember({
-                                                                                        groupId: group.id,
-                                                                                        ghostMemberId: member.id,
-                                                                                        friendUserId: friend.profile.id
-                                                                                    })
-                                                                                }}
-                                                                                disabled={isLinking}
-                                                                            >
-                                                                                <Avatar className="h-8 w-8">
-                                                                                    <AvatarImage src={friend.profile.avatar_url || undefined} />
-                                                                                    <AvatarFallback>{(friend.profile.full_name || '?').slice(0, 2).toUpperCase()}</AvatarFallback>
-                                                                                </Avatar>
-                                                                                <span className="text-sm font-medium flex-1 truncate">{friend.profile.full_name}</span>
-                                                                            </button>
-                                                                        ))
+                                                                    availableFriends.map(friend => (
+                                                                        <button
+                                                                            type="button"
+                                                                            key={friend.profile.id}
+                                                                            className="w-full flex items-center gap-3 p-3 hover:bg-accent text-left transition-colors"
+                                                                            onClick={() => {
+                                                                                linkGhostMember({
+                                                                                    groupId: group.id,
+                                                                                    ghostMemberId: member.id,
+                                                                                    friendUserId: friend.profile.id
+                                                                                })
+                                                                            }}
+                                                                            disabled={isLinking}
+                                                                        >
+                                                                            <Avatar className="h-8 w-8">
+                                                                                <AvatarImage src={friend.profile.avatar_url || undefined} />
+                                                                                <AvatarFallback>{(friend.profile.full_name || '?').slice(0, 2).toUpperCase()}</AvatarFallback>
+                                                                            </Avatar>
+                                                                            <span className="text-sm font-medium flex-1 truncate">{friend.profile.full_name}</span>
+                                                                        </button>
+                                                                    ))
                                                                 )}
                                                             </div>
                                                         </PopoverContent>

@@ -64,28 +64,30 @@ export function GroupsList() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-                {groups.map((group) => (
-                    <Card
-                        key={group.id}
-                        className="cursor-pointer hover:bg-muted/50 transition-colors active:scale-95 duration-200"
-                        onClick={() => router.push(`/dashboard/groups/${group.id}`)}
-                    >
-                        <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                            <Avatar className="h-12 w-12 mb-1">
-                                <AvatarImage src={group.avatar_url || undefined} />
-                                <AvatarFallback className="text-lg bg-primary/10 text-primary">
-                                    {group.name.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="space-y-1 w-full overflow-hidden">
-                                <h3 className="font-semibold truncate">{group.name}</h3>
-                                <div className="text-xs text-muted-foreground truncate capitalize">
-                                    {group.type.toLowerCase()}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                {groups && groups.length > 0
+                    ? groups.map((group) => (
+                          <Card
+                              key={group.id}
+                              className="cursor-pointer hover:bg-muted/50 transition-colors active:scale-95 duration-200"
+                              onClick={() => router.push(`/dashboard/groups/${group.id}`)}
+                          >
+                              <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                                  <Avatar className="h-12 w-12 mb-1">
+                                      <AvatarImage src={group.avatar_url || undefined} />
+                                      <AvatarFallback className="text-lg bg-primary/10 text-primary">
+                                          {group.name.slice(0, 2).toUpperCase()}
+                                      </AvatarFallback>
+                                  </Avatar>
+                                  <div className="space-y-1 w-full overflow-hidden">
+                                      <h3 className="font-semibold truncate">{group.name}</h3>
+                                      <div className="text-xs text-muted-foreground truncate capitalize">
+                                          {group.type.toLowerCase()}
+                                      </div>
+                                  </div>
+                              </CardContent>
+                          </Card>
+                      ))
+                    : null}
             </div>
         </div>
     )

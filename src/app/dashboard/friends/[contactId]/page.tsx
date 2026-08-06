@@ -75,31 +75,40 @@ export default function PersonDetailsPage() {
     const filteredTransactions = useMemo(() => {
         if (!transactions) return []
 
-        let result = [...transactions]
+        const parsed = transactions.map(t => {
+            const parsedDate = new Date(t.date)
+            return {
+                ...t,
+                parsedDate,
+                timestamp: parsedDate.getTime()
+            }
+        })
+
+        let result = parsed
 
         // Apply Time Filter
         const now = new Date()
         if (timeFilter === 'TODAY') {
             const start = startOfDay(now)
-            result = result.filter(t => isAfter(new Date(t.date), start))
+            result = result.filter(t => isAfter(t.parsedDate, start))
         } else if (timeFilter === 'WEEK') {
             const start = startOfWeek(now)
-            result = result.filter(t => isAfter(new Date(t.date), start))
+            result = result.filter(t => isAfter(t.parsedDate, start))
         } else if (timeFilter === 'MONTH') {
             const start = startOfMonth(now)
-            result = result.filter(t => isAfter(new Date(t.date), start))
+            result = result.filter(t => isAfter(t.parsedDate, start))
         } else if (timeFilter === 'YEAR') {
             const start = startOfYear(now)
-            result = result.filter(t => isAfter(new Date(t.date), start))
+            result = result.filter(t => isAfter(t.parsedDate, start))
         }
 
         // Apply Sorting
         result.sort((a, b) => {
             switch (sortBy) {
                 case 'LATEST':
-                    return new Date(b.date).getTime() - new Date(a.date).getTime()
+                    return b.timestamp - a.timestamp
                 case 'OLDEST':
-                    return new Date(a.date).getTime() - new Date(b.date).getTime()
+                    return a.timestamp - b.timestamp
                 case 'HIGHEST':
                     return b.amount - a.amount
                 case 'LOWEST':

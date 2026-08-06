@@ -30,26 +30,8 @@ export function AccountsList() {
             <CardContent className="space-y-4 pt-4">
                 {isLoading ? (
                     <div className="text-sm text-muted-foreground">Loading accounts...</div>
-                ) : accounts?.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center p-4 border border-dashed rounded-lg bg-muted/20 text-center space-y-3">
-                        <div className="p-2.5 bg-muted/50 rounded-full text-muted-foreground">
-                            <Landmark className="h-5 w-5" />
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-xs font-semibold">No accounts created</p>
-                            <p className="text-xs text-muted-foreground">
-                                Add bank accounts, cash wallets, or cards to log transactions.
-                            </p>
-                        </div>
-                        <AddAccountDrawer>
-                            <Button size="sm" variant="outline">
-                                <Plus className="mr-1.5 h-3.5 w-3.5" />
-                                Add Your First Account
-                            </Button>
-                        </AddAccountDrawer>
-                    </div>
-                ) : (
-                    accounts?.map((account) => {
+                ) : accounts && accounts.length > 0 ? (
+                    accounts.map((account) => {
                         const Icon = ICONS[account.type] || CreditCard
                         return (
                             <div key={account.id} className="flex items-center justify-between">
@@ -68,6 +50,24 @@ export function AccountsList() {
                             </div>
                         )
                     })
+                ) : (
+                    <div className="flex flex-col items-center justify-center p-4 border border-dashed rounded-lg bg-muted/20 text-center space-y-3">
+                        <div className="p-2.5 bg-muted/50 rounded-full text-muted-foreground">
+                            <Landmark className="h-5 w-5" />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-xs font-semibold">No accounts created</p>
+                            <p className="text-xs text-muted-foreground">
+                                Add bank accounts, cash wallets, or cards to log transactions.
+                            </p>
+                        </div>
+                        <AddAccountDrawer>
+                            <Button size="sm" variant="outline">
+                                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                                Add Your First Account
+                            </Button>
+                        </AddAccountDrawer>
+                    </div>
                 )}
             </CardContent>
         </Card>
