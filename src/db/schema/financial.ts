@@ -65,6 +65,7 @@ export const transactions = pgTable(
     date: timestamp("date", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     attachmentUrl: text("attachment_url"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
     accountId: uuid("account_id").references(() => accounts.id, { onDelete: "set null" }),
     dueDate: timestamp("due_date", { withTimezone: true, mode: "date" }),
     businessId: uuid("business_id").references(() => businesses.id, { onDelete: "cascade" }),
@@ -83,6 +84,7 @@ export const transactions = pgTable(
     index("transactions_account_id_idx").on(table.accountId),
     index("transactions_business_id_idx").on(table.businessId),
     index("transactions_contact_id_idx").on(table.contactId),
+    index("transactions_deleted_at_idx").on(table.deletedAt),
   ]
 );
 

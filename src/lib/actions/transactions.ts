@@ -12,7 +12,7 @@ import {
   user,
   profiles,
 } from "@/db/schema";
-import { eq, and, desc, asc, or } from "drizzle-orm";
+import { eq, and, desc, asc, or, isNull } from "drizzle-orm";
 
 export interface SplitInput {
   userId?: string | null;
@@ -109,6 +109,20 @@ export async function createTransactionAction(
       );
     }
 
+    if (input.accountId) {
+      const targetAccount = await tx.query.accounts.findFirst({
+        where: and(eq(accounts.id, input.accountId), eq(accounts.userId, currentUser.id)),
+      });
+      if (targetAccount) {
+        const currentBalance = Number(targetAccount.balance || "0");
+        const delta = input.flow === "IN" ? input.amount : -input.amount;
+        await tx
+          .update(accounts)
+          .set({ balance: String(currentBalance + delta) })
+          .where(eq(accounts.id, input.accountId));
+      }
+    }
+
     return { id: insertedTx.id, success: true, transaction: insertedTx };
   });
 }
@@ -127,7 +141,7 @@ export async function getTransactionsAction(
   const limit = filters?.limit ?? 20;
   const offset = filters?.offset ?? 0;
 
-  const whereConditions = [];
+  const whereConditions = [isNull(transactions.deletedAt)];
 
   if (filters?.contactId) {
     whereConditions.push(eq(transactions.contactId, filters.contactId));
@@ -235,7 +249,11 @@ export async function getPersonalTransactionsAction(
   const offset = filters?.offset ?? 0;
 
   const rows = await db.query.transactions.findMany({
-    where: and(eq(transactions.userId, currentUser.id), eq(transactions.mode, "PERSONAL")),
+    where: and(
+      eq(transactions.userId, currentUser.id),
+      eq(transactions.mode, "PERSONAL"),
+      isNull(transactions.deletedAt)
+    ),
     orderBy: [desc(transactions.date)],
     limit,
     offset,
@@ -303,9 +321,12 @@ export async function getUnifiedTransactionsAction(
   const offset = filters?.offset ?? 0;
 
   const rows = await db.query.transactions.findMany({
-    where: or(
-      eq(transactions.userId, currentUser.id),
-      eq(transactions.payerId, currentUser.id)
+    where: and(
+      or(
+        eq(transactions.userId, currentUser.id),
+        eq(transactions.payerId, currentUser.id)
+      ),
+      isNull(transactions.deletedAt)
     ),
     orderBy: [desc(transactions.date)],
     limit,
@@ -382,6 +403,7 @@ export async function getUnifiedTransactionsAction(
 
 /**
  * Updates an existing transaction if owned by the logged-in user.
+ * Automatically calculates monetary deltas and updates account balances atomically.
  */
 export async function updateTransactionAction(
   input: UpdateTransactionInput
@@ -391,36 +413,98 @@ export async function updateTransactionAction(
     throw new Error("Unauthorized");
   }
 
-  const existing = await db.query.transactions.findFirst({
-    where: and(eq(transactions.id, input.id), eq(transactions.userId, currentUser.id)),
+  return await db.transaction(async (tx) => {
+    const existing = await tx.query.transactions.findFirst({
+      where: and(
+        eq(transactions.id, input.id),
+        eq(transactions.userId, currentUser.id),
+        isNull(transactions.deletedAt)
+      ),
+    });
+
+    if (!existing) {
+      throw new Error("Unauthorized or transaction not found");
+    }
+
+    const oldAccountId = existing.accountId;
+    const oldAmount = Number(existing.amount);
+    const oldFlow = existing.flow as "IN" | "OUT";
+
+    const newAccountId = input.accountId || null;
+    const newAmount = input.amount;
+    const newFlow = input.flow;
+
+    if (oldAccountId && oldAccountId === newAccountId) {
+      const oldNet = oldFlow === "IN" ? oldAmount : -oldAmount;
+      const newNet = newFlow === "IN" ? newAmount : -newAmount;
+      const netDelta = newNet - oldNet;
+
+      if (netDelta !== 0) {
+        const accountRecord = await tx.query.accounts.findFirst({
+          where: and(eq(accounts.id, oldAccountId), eq(accounts.userId, currentUser.id)),
+        });
+        if (accountRecord) {
+          const currentBalance = Number(accountRecord.balance || "0");
+          await tx
+            .update(accounts)
+            .set({ balance: String(currentBalance + netDelta) })
+            .where(eq(accounts.id, oldAccountId));
+        }
+      }
+    } else {
+      if (oldAccountId) {
+        const revertDelta = oldFlow === "IN" ? -oldAmount : +oldAmount;
+        const oldAccountRecord = await tx.query.accounts.findFirst({
+          where: and(eq(accounts.id, oldAccountId), eq(accounts.userId, currentUser.id)),
+        });
+        if (oldAccountRecord) {
+          const currentBalance = Number(oldAccountRecord.balance || "0");
+          await tx
+            .update(accounts)
+            .set({ balance: String(currentBalance + revertDelta) })
+            .where(eq(accounts.id, oldAccountId));
+        }
+      }
+
+      if (newAccountId) {
+        const applyDelta = newFlow === "IN" ? +newAmount : -newAmount;
+        const newAccountRecord = await tx.query.accounts.findFirst({
+          where: and(eq(accounts.id, newAccountId), eq(accounts.userId, currentUser.id)),
+        });
+        if (newAccountRecord) {
+          const currentBalance = Number(newAccountRecord.balance || "0");
+          await tx
+            .update(accounts)
+            .set({ balance: String(currentBalance + applyDelta) })
+            .where(eq(accounts.id, newAccountId));
+        }
+      }
+    }
+
+    const [updated] = await tx
+      .update(transactions)
+      .set({
+        amount: String(input.amount),
+        flow: input.flow,
+        mode: input.mode,
+        name: input.name,
+        note: input.note || null,
+        date: new Date(input.date),
+        dueDate: input.dueDate ? new Date(input.dueDate) : null,
+        contactId: input.contactId || null,
+        categoryId: input.categoryId || null,
+        accountId: input.accountId || null,
+      })
+      .where(and(eq(transactions.id, input.id), eq(transactions.userId, currentUser.id)))
+      .returning();
+
+    return updated;
   });
-
-  if (!existing) {
-    throw new Error("Unauthorized or transaction not found");
-  }
-
-  const [updated] = await db
-    .update(transactions)
-    .set({
-      amount: String(input.amount),
-      flow: input.flow,
-      mode: input.mode,
-      name: input.name,
-      note: input.note || null,
-      date: new Date(input.date),
-      dueDate: input.dueDate ? new Date(input.dueDate) : null,
-      contactId: input.contactId || null,
-      categoryId: input.categoryId || null,
-      accountId: input.accountId || null,
-    })
-    .where(and(eq(transactions.id, input.id), eq(transactions.userId, currentUser.id)))
-    .returning();
-
-  return updated;
 }
 
 /**
- * Deletes a transaction by ID if owned by the logged-in user.
+ * Soft-deletes a transaction by ID if owned by the logged-in user.
+ * Automatically restores or deducts transaction amount to associated account balance atomically.
  */
 export async function deleteTransactionAction(id: string) {
   const currentUser = await getSessionUser();
@@ -428,17 +512,40 @@ export async function deleteTransactionAction(id: string) {
     throw new Error("Unauthorized");
   }
 
-  const existing = await db.query.transactions.findFirst({
-    where: and(eq(transactions.id, id), eq(transactions.userId, currentUser.id)),
+  return await db.transaction(async (tx) => {
+    const existing = await tx.query.transactions.findFirst({
+      where: and(
+        eq(transactions.id, id),
+        eq(transactions.userId, currentUser.id),
+        isNull(transactions.deletedAt)
+      ),
+    });
+
+    if (!existing) {
+      throw new Error("Unauthorized or transaction not found");
+    }
+
+    if (existing.accountId) {
+      const oldAmount = Number(existing.amount);
+      const revertDelta = existing.flow === "IN" ? -oldAmount : +oldAmount;
+      const accountRecord = await tx.query.accounts.findFirst({
+        where: and(eq(accounts.id, existing.accountId), eq(accounts.userId, currentUser.id)),
+      });
+
+      if (accountRecord) {
+        const currentBalance = Number(accountRecord.balance || "0");
+        await tx
+          .update(accounts)
+          .set({ balance: String(currentBalance + revertDelta) })
+          .where(eq(accounts.id, existing.accountId));
+      }
+    }
+
+    await tx
+      .update(transactions)
+      .set({ deletedAt: new Date() })
+      .where(and(eq(transactions.id, id), eq(transactions.userId, currentUser.id)));
+
+    return { success: true };
   });
-
-  if (!existing) {
-    throw new Error("Unauthorized or transaction not found");
-  }
-
-  await db
-    .delete(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.userId, currentUser.id)));
-
-  return { success: true };
 }

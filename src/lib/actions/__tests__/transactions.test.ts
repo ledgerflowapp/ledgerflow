@@ -8,20 +8,32 @@ const { mockInsertValues, mockReturning, mockUpdateSet, mockDeleteWhere, mockTx,
     const mockUpdateSet = vi.fn();
     const mockDeleteWhere = vi.fn();
 
+    const mockQuery = {
+      transactions: {
+        findMany: vi.fn(),
+        findFirst: vi.fn(),
+      },
+      accounts: {
+        findFirst: vi.fn(),
+      },
+    };
+
     const mockTx = {
       insert: vi.fn(() => ({
         values: mockInsertValues,
       })),
+      update: vi.fn(() => ({
+        set: mockUpdateSet,
+      })),
+      delete: vi.fn(() => ({
+        where: mockDeleteWhere,
+      })),
+      query: mockQuery,
     };
 
     const mockDb = {
       transaction: vi.fn(async (cb: any) => cb(mockTx)),
-      query: {
-        transactions: {
-          findMany: vi.fn(),
-          findFirst: vi.fn(),
-        },
-      },
+      query: mockQuery,
       update: vi.fn(() => ({
         set: mockUpdateSet,
       })),
@@ -111,6 +123,34 @@ describe("Transactions Server Actions", () => {
         transaction: mockCreatedTx,
       });
       expect(mockTx.insert).toHaveBeenCalledTimes(2);
+    });
+
+    it("deducts expense amount from account balance when accountId is specified", async () => {
+      const mockCreatedTx = { id: "tx-123", name: "Groceries", amount: "3000", accountId: "acc-1" };
+      mockInsertValues.mockReturnValueOnce({
+        returning: vi.fn().mockResolvedValue([mockCreatedTx]),
+      });
+
+      mockDb.query.accounts.findFirst.mockResolvedValueOnce({
+        id: "acc-1",
+        userId: "user-1",
+        balance: "10000",
+      });
+
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce([]),
+      });
+
+      await createTransactionAction({
+        amount: 3000,
+        flow: "OUT",
+        mode: "PERSONAL",
+        name: "Groceries",
+        date: new Date(),
+        accountId: "acc-1",
+      });
+
+      expect(mockUpdateSet).toHaveBeenCalledWith({ balance: "7000" });
     });
   });
 
@@ -217,10 +257,13 @@ describe("Transactions Server Actions", () => {
       ).rejects.toThrow("Unauthorized or transaction not found");
     });
 
-    it("updates transaction if owned by user", async () => {
+    it("updates transaction without account balance adjustment if no account linked", async () => {
       mockDb.query.transactions.findFirst.mockResolvedValueOnce({
         id: "tx-1",
         userId: "user-1",
+        amount: "1000",
+        flow: "OUT",
+        accountId: null,
       });
 
       const updatedRow = { id: "tx-1", name: "Updated Name" };
@@ -241,6 +284,124 @@ describe("Transactions Server Actions", () => {
 
       expect(result).toEqual(updatedRow);
     });
+
+    it("calculates balance delta and updates account for expense amount increase", async () => {
+      mockDb.query.transactions.findFirst.mockResolvedValueOnce({
+        id: "tx-1",
+        userId: "user-1",
+        amount: "2000",
+        flow: "OUT",
+        accountId: "acc-1",
+      });
+
+      mockDb.query.accounts.findFirst.mockResolvedValueOnce({
+        id: "acc-1",
+        userId: "user-1",
+        balance: "10000",
+      });
+
+      const updatedRow = { id: "tx-1", amount: "3000" };
+      mockUpdateSet
+        .mockReturnValueOnce({ where: vi.fn().mockResolvedValueOnce([]) }) // account update
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            returning: vi.fn().mockResolvedValueOnce([updatedRow]),
+          }),
+        }); // transaction update
+
+      const result = await updateTransactionAction({
+        id: "tx-1",
+        amount: 3000,
+        flow: "OUT",
+        mode: "PERSONAL",
+        name: "Dinner",
+        date: new Date(),
+        accountId: "acc-1",
+      });
+
+      // Old expense was 2000 (-2000), new expense is 3000 (-3000), net delta = -1000.
+      // 10000 + (-1000) = 9000
+      expect(mockUpdateSet).toHaveBeenNthCalledWith(1, { balance: "9000" });
+      expect(result).toEqual(updatedRow);
+    });
+
+    it("calculates balance delta and updates account when switching flow from OUT to IN", async () => {
+      mockDb.query.transactions.findFirst.mockResolvedValueOnce({
+        id: "tx-1",
+        userId: "user-1",
+        amount: "2000",
+        flow: "OUT",
+        accountId: "acc-1",
+      });
+
+      mockDb.query.accounts.findFirst.mockResolvedValueOnce({
+        id: "acc-1",
+        userId: "user-1",
+        balance: "10000",
+      });
+
+      const updatedRow = { id: "tx-1", flow: "IN", amount: "2000" };
+      mockUpdateSet
+        .mockReturnValueOnce({ where: vi.fn().mockResolvedValueOnce([]) })
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            returning: vi.fn().mockResolvedValueOnce([updatedRow]),
+          }),
+        });
+
+      await updateTransactionAction({
+        id: "tx-1",
+        amount: 2000,
+        flow: "IN",
+        mode: "PERSONAL",
+        name: "Refund",
+        date: new Date(),
+        accountId: "acc-1",
+      });
+
+      // Old: OUT 2000 (-2000), New: IN 2000 (+2000). net delta = +4000.
+      // 10000 + 4000 = 14000
+      expect(mockUpdateSet).toHaveBeenNthCalledWith(1, { balance: "14000" });
+    });
+
+    it("reverts old account balance and updates new account balance when account is changed", async () => {
+      mockDb.query.transactions.findFirst.mockResolvedValueOnce({
+        id: "tx-1",
+        userId: "user-1",
+        amount: "2000",
+        flow: "OUT",
+        accountId: "acc-old",
+      });
+
+      mockDb.query.accounts.findFirst
+        .mockResolvedValueOnce({ id: "acc-old", userId: "user-1", balance: "5000" })
+        .mockResolvedValueOnce({ id: "acc-new", userId: "user-1", balance: "10000" });
+
+      const updatedRow = { id: "tx-1", accountId: "acc-new", amount: "2000" };
+      mockUpdateSet
+        .mockReturnValueOnce({ where: vi.fn().mockResolvedValueOnce([]) }) // old account update
+        .mockReturnValueOnce({ where: vi.fn().mockResolvedValueOnce([]) }) // new account update
+        .mockReturnValueOnce({
+          where: vi.fn().mockReturnValueOnce({
+            returning: vi.fn().mockResolvedValueOnce([updatedRow]),
+          }),
+        }); // transaction update
+
+      await updateTransactionAction({
+        id: "tx-1",
+        amount: 2000,
+        flow: "OUT",
+        mode: "PERSONAL",
+        name: "Moved expense",
+        date: new Date(),
+        accountId: "acc-new",
+      });
+
+      // Revert old OUT 2000: 5000 + 2000 = 7000
+      expect(mockUpdateSet).toHaveBeenNthCalledWith(1, { balance: "7000" });
+      // Apply new OUT 2000: 10000 - 2000 = 8000
+      expect(mockUpdateSet).toHaveBeenNthCalledWith(2, { balance: "8000" });
+    });
   });
 
   describe("deleteTransactionAction", () => {
@@ -252,16 +413,63 @@ describe("Transactions Server Actions", () => {
       );
     });
 
-    it("deletes transaction if owned by user", async () => {
+    it("soft-deletes transaction record using deleted_at and restores expense amount to account balance", async () => {
       mockDb.query.transactions.findFirst.mockResolvedValueOnce({
         id: "tx-1",
         userId: "user-1",
+        amount: "2000",
+        flow: "OUT",
+        accountId: "acc-1",
       });
 
-      mockDeleteWhere.mockResolvedValueOnce(undefined);
+      mockDb.query.accounts.findFirst.mockResolvedValueOnce({
+        id: "acc-1",
+        userId: "user-1",
+        balance: "8000",
+      });
+
+      mockUpdateSet
+        .mockReturnValueOnce({ where: vi.fn().mockResolvedValueOnce([]) }) // account balance update
+        .mockReturnValueOnce({ where: vi.fn().mockResolvedValueOnce([]) }); // soft-delete transaction update
 
       const result = await deleteTransactionAction("tx-1");
+
       expect(result).toEqual({ success: true });
+      // Restores expense OUT 2000: 8000 + 2000 = 10000
+      expect(mockUpdateSet).toHaveBeenNthCalledWith(1, { balance: "10000" });
+      // Soft deletes by setting deletedAt
+      expect(mockUpdateSet).toHaveBeenNthCalledWith(2, expect.objectContaining({
+        deletedAt: expect.any(Date),
+      }));
+    });
+
+    it("soft-deletes transaction record using deleted_at and deducts income amount from account balance", async () => {
+      mockDb.query.transactions.findFirst.mockResolvedValueOnce({
+        id: "tx-2",
+        userId: "user-1",
+        amount: "5000",
+        flow: "IN",
+        accountId: "acc-1",
+      });
+
+      mockDb.query.accounts.findFirst.mockResolvedValueOnce({
+        id: "acc-1",
+        userId: "user-1",
+        balance: "15000",
+      });
+
+      mockUpdateSet
+        .mockReturnValueOnce({ where: vi.fn().mockResolvedValueOnce([]) })
+        .mockReturnValueOnce({ where: vi.fn().mockResolvedValueOnce([]) });
+
+      const result = await deleteTransactionAction("tx-2");
+
+      expect(result).toEqual({ success: true });
+      // Deducts income IN 5000: 15000 - 5000 = 10000
+      expect(mockUpdateSet).toHaveBeenNthCalledWith(1, { balance: "10000" });
+      expect(mockUpdateSet).toHaveBeenNthCalledWith(2, expect.objectContaining({
+        deletedAt: expect.any(Date),
+      }));
     });
   });
 });
