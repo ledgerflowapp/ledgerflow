@@ -5,8 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BusinessContactList } from '@/components/business/BusinessContactList'
 import { BusinessTransactionDrawer } from '@/components/business/BusinessTransactionDrawer'
 import { PersonalTransactionDrawer } from '@/components/personal/PersonalTransactionDrawer'
-import { AnalyticsDashboard } from '@/components/finance/AnalyticsDashboard'
+import dynamic from 'next/dynamic'
+import { AnalyticsDashboardSkeleton } from '@/components/finance/AnalyticsDashboardSkeleton'
 import { BudgetRow } from '@/components/finance/BudgetCard'
+
+const AnalyticsDashboard = dynamic(
+    () => import('@/components/finance/AnalyticsDashboard').then((mod) => mod.AnalyticsDashboard),
+    {
+        ssr: false,
+        loading: () => <AnalyticsDashboardSkeleton />,
+    }
+)
 import { GoalCard } from '@/components/finance/GoalCard'
 import { useBudgets } from '@/hooks/useBudgets'
 import { useGoals } from '@/hooks/useGoals'

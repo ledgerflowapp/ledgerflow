@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { Loader2 } from 'lucide-react'
 import { paiseToRupees } from "@/lib/currency";
+import { AnalyticsDashboardSkeleton } from './AnalyticsDashboardSkeleton'
+
+export { AnalyticsDashboardSkeleton }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
