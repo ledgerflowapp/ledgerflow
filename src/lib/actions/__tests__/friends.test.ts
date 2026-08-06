@@ -212,11 +212,7 @@ describe("Friends Server Actions", () => {
           }),
         }),
       });
-      // 2. update status
-      mockUpdateSet.mockReturnValueOnce({
-        where: vi.fn().mockResolvedValueOnce(undefined),
-      });
-      // 3. sender profile
+      // 2. sender profile
       mockTx.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
           where: vi.fn().mockReturnValueOnce({
@@ -224,7 +220,7 @@ describe("Friends Server Actions", () => {
           }),
         }),
       });
-      // 4. receiver profile
+      // 3. receiver profile
       mockTx.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
           where: vi.fn().mockReturnValueOnce({
@@ -232,7 +228,7 @@ describe("Friends Server Actions", () => {
           }),
         }),
       });
-      // 5. receiver contacts check
+      // 4. receiver contacts check
       mockTx.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
           where: vi.fn().mockReturnValueOnce({
@@ -240,13 +236,17 @@ describe("Friends Server Actions", () => {
           }),
         }),
       });
-      // 6. sender contacts check
+      // 5. sender contacts check
       mockTx.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValueOnce({
           where: vi.fn().mockReturnValueOnce({
             limit: vi.fn().mockResolvedValueOnce([{ id: "c2" }]),
           }),
         }),
+      });
+      // 6. update status
+      mockUpdateSet.mockReturnValueOnce({
+        where: vi.fn().mockResolvedValueOnce(undefined),
       });
 
       const res = await acceptInAppRequestAction("f1");

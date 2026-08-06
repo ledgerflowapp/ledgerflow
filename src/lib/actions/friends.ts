@@ -88,6 +88,22 @@ export async function sendFriendRequestAction(
   });
 }
 
+/**
+ * Helper to query a contact by owner userId and linkedUserId.
+ * Eliminates duplicate contact lookups across friend acceptance actions.
+ */
+function findContactByLinkedUser(
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  userId: string,
+  linkedUserId: string
+) {
+  return tx
+    .select()
+    .from(contacts)
+    .where(and(eq(contacts.userId, userId), eq(contacts.linkedUserId, linkedUserId)))
+    .limit(1);
+}
+
 export async function acceptInAppRequestAction(friendshipId: string) {
   const sessionUser = await getSessionUser();
   if (!sessionUser) throw new Error("Unauthorized");
@@ -111,26 +127,17 @@ export async function acceptInAppRequestAction(friendshipId: string) {
 
     const senderId = fRecord.initiatorId!;
 
-    const updateFriendshipPromise = tx
-      .update(friendships)
-      .set({ status: "ACCEPTED" })
-      .where(eq(friendships.id, friendshipId));
-
     const [senderProfiles, receiverProfiles, receiverContacts, senderContacts] = await Promise.all([
       tx.select().from(profiles).where(eq(profiles.id, senderId)).limit(1),
       tx.select().from(profiles).where(eq(profiles.id, uid)).limit(1),
-      tx
-        .select()
-        .from(contacts)
-        .where(and(eq(contacts.userId, uid), eq(contacts.linkedUserId, senderId)))
-        .limit(1),
-      tx
-        .select()
-        .from(contacts)
-        .where(and(eq(contacts.userId, senderId), eq(contacts.linkedUserId, uid)))
-        .limit(1),
-      updateFriendshipPromise,
+      findContactByLinkedUser(tx, uid, senderId),
+      findContactByLinkedUser(tx, senderId, uid),
     ]);
+
+    await tx
+      .update(friendships)
+      .set({ status: "ACCEPTED" })
+      .where(eq(friendships.id, friendshipId));
 
     const senderProfile = senderProfiles[0];
     const receiverProfile = receiverProfiles[0];
@@ -348,16 +355,8 @@ export async function acceptFriendInviteAction(inviteToken: string) {
           )
         )
         .limit(1),
-      tx
-        .select()
-        .from(contacts)
-        .where(and(eq(contacts.userId, uid), eq(contacts.linkedUserId, targetUser.id)))
-        .limit(1),
-      tx
-        .select()
-        .from(contacts)
-        .where(and(eq(contacts.userId, targetUser.id), eq(contacts.linkedUserId, uid)))
-        .limit(1),
+      findContactByLinkedUser(tx, uid, targetUser.id),
+      findContactByLinkedUser(tx, targetUser.id, uid),
     ]);
 
     const currentUserProfile = currentUserProfiles[0];

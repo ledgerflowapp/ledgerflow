@@ -64,6 +64,24 @@ export interface GetTransactionsFilters {
   offset?: number;
 }
 
+/**
+ * Updates an account balance atomically using explicit string formatting for monetary delta.
+ * Solves primitive obsession / float arithmetic issues on Postgres numeric balance columns.
+ */
+async function updateAccountBalance(
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  accountId: string,
+  userId: string,
+  delta: number
+) {
+  if (delta === 0) return;
+  const formattedDelta = String(delta);
+  await tx
+    .update(accounts)
+    .set({ balance: sql`${accounts.balance} + ${formattedDelta}` })
+    .where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)));
+}
+
 export async function createTransactionAction(
   input: CreateTransactionInput
 ) {
@@ -111,10 +129,7 @@ export async function createTransactionAction(
 
     if (input.accountId) {
       const delta = input.flow === "IN" ? input.amount : -input.amount;
-      await tx
-        .update(accounts)
-        .set({ balance: sql`${accounts.balance} + ${delta}` })
-        .where(and(eq(accounts.id, input.accountId), eq(accounts.userId, currentUser.id)));
+      await updateAccountBalance(tx, input.accountId, currentUser.id, delta);
     }
 
     return { id: insertedTx.id, success: true, transaction: insertedTx };
@@ -434,28 +449,16 @@ export async function updateTransactionAction(
       const oldNet = oldFlow === "IN" ? oldAmount : -oldAmount;
       const newNet = newFlow === "IN" ? newAmount : -newAmount;
       const netDelta = newNet - oldNet;
-
-      if (netDelta !== 0) {
-        await tx
-          .update(accounts)
-          .set({ balance: sql`${accounts.balance} + ${netDelta}` })
-          .where(and(eq(accounts.id, oldAccountId), eq(accounts.userId, currentUser.id)));
-      }
+      await updateAccountBalance(tx, oldAccountId, currentUser.id, netDelta);
     } else {
       if (oldAccountId) {
         const revertDelta = oldFlow === "IN" ? -oldAmount : +oldAmount;
-        await tx
-          .update(accounts)
-          .set({ balance: sql`${accounts.balance} + ${revertDelta}` })
-          .where(and(eq(accounts.id, oldAccountId), eq(accounts.userId, currentUser.id)));
+        await updateAccountBalance(tx, oldAccountId, currentUser.id, revertDelta);
       }
 
       if (newAccountId) {
         const applyDelta = newFlow === "IN" ? +newAmount : -newAmount;
-        await tx
-          .update(accounts)
-          .set({ balance: sql`${accounts.balance} + ${applyDelta}` })
-          .where(and(eq(accounts.id, newAccountId), eq(accounts.userId, currentUser.id)));
+        await updateAccountBalance(tx, newAccountId, currentUser.id, applyDelta);
       }
     }
 
@@ -506,10 +509,7 @@ export async function deleteTransactionAction(id: string) {
     if (existing.accountId) {
       const oldAmount = Number(existing.amount);
       const revertDelta = existing.flow === "IN" ? -oldAmount : +oldAmount;
-      await tx
-        .update(accounts)
-        .set({ balance: sql`${accounts.balance} + ${revertDelta}` })
-        .where(and(eq(accounts.id, existing.accountId), eq(accounts.userId, currentUser.id)));
+      await updateAccountBalance(tx, existing.accountId, currentUser.id, revertDelta);
     }
 
     await tx
