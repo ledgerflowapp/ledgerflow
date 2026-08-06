@@ -90,6 +90,13 @@ export function ContactReconciliationWizard({
     : ""
   const [selectedGhostKey, setSelectedGhostKey] = React.useState<string>(initialGhostKey)
 
+  // Sync selectedGhostKey if candidateGhostMembers updates asynchronously
+  React.useEffect(() => {
+    if (!selectedGhostKey && candidateGhostMembers.length > 0) {
+      setSelectedGhostKey(`${candidateGhostMembers[0].groupId}:${candidateGhostMembers[0].ghostMemberId}`)
+    }
+  }, [candidateGhostMembers, selectedGhostKey])
+
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null)
 
