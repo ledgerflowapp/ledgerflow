@@ -72,19 +72,20 @@ export function ContactReconciliationWizard({
   const [customName, setCustomName] = React.useState("")
 
   // Step 2 State: Verified phone / email (user overrides or contact fallback)
-  const selectedContact = unregisteredContacts.find((c) => c.id === selectedContactId)
+  const activeContactId = selectedContactId || unregisteredContacts[0]?.id || ""
+  const selectedContact = unregisteredContacts.find((c) => c.id === activeContactId)
   const [phoneOverride, setPhoneOverride] = React.useState<string | null>(null)
   const [emailOverride, setEmailOverride] = React.useState<string | null>(null)
 
   const phone = phoneOverride ?? selectedContact?.phone ?? ""
   const email = emailOverride ?? selectedContact?.email ?? ""
 
-  // Step 3 State: Selected ghost member derived during render
+  // Step 3 State: Candidate ghost member selection & override
   const defaultGhostKey = candidateGhostMembers[0]
     ? `${candidateGhostMembers[0].groupId}:${candidateGhostMembers[0].ghostMemberId}`
     : ""
-  const [selectedGhostKey, setSelectedGhostKey] = React.useState<string>("")
-  const activeGhostKey = selectedGhostKey || defaultGhostKey
+  const [ghostKeyOverride, setGhostKeyOverride] = React.useState<string>("")
+  const activeGhostKey = ghostKeyOverride || defaultGhostKey
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null)
@@ -93,6 +94,7 @@ export function ContactReconciliationWizard({
     setSelectedContactId(val)
     setPhoneOverride(null)
     setEmailOverride(null)
+    setGhostKeyOverride("")
   }
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -237,7 +239,7 @@ export function ContactReconciliationWizard({
         {candidateGhostMembers.length > 0 ? (
           <QuestionnaireChoices
             value={activeGhostKey}
-            onValueChange={(val) => setSelectedGhostKey(val)}
+            onValueChange={(val) => setGhostKeyOverride(val)}
           >
             {candidateGhostMembers.map((g) => {
               const key = `${g.groupId}:${g.ghostMemberId}`

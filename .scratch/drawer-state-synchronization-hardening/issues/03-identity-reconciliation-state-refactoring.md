@@ -4,8 +4,8 @@
 
 **Blocked by:** 01 — Event-Driven Form Resets in Transaction Drawers
 
-**Status:** ready-for-agent
+**Status: completed**
 
-- [ ] Rename `selectedGhostKey` state variable and handler in `ContactReconciliationWizard.tsx` to `ghostKeyOverride`.
-- [ ] Clean up redundant prop-copying effects in `ContactReconciliationWizard.tsx`.
-- [ ] Ensure state derivation for ghost key reconciliation is pure and readable.
+- [x] Rename `selectedGhostKey` state variable and handler in `ContactReconciliationWizard.tsx` to `ghostKeyOverride`.
+- [x] Clean up redundant prop-copying effects in `ContactReconciliationWizard.tsx`.
+- [x] Ensure state derivation for ghost key reconciliation is pure and readable.
