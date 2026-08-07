@@ -72,24 +72,25 @@ export function PersonalTransactionDrawer({
     const open = controlledOpen ?? internalOpen
     const setOpen = setControlledOpen ?? setInternalOpen
 
-    const [flow, setFlow] = useState<'IN' | 'OUT'>('OUT')
+    const defaultValues = getPersonalTransactionFormDefaults(initialData)
+    const [flow, setFlow] = useState<'IN' | 'OUT'>(defaultValues.flow)
 
     const defaultAccount = accounts?.find(a => a.is_default) || accounts?.[0]
+    const resolvedDefaultAcc = accounts?.find(a => a.is_default) || accounts?.[0]
 
     const form = useForm({
         resolver: zodResolver(personalTransactionSchema),
         defaultValues: {
-            amount: '' as any,
-            name: '',
-            note: '',
-            date: new Date(),
-            flow: 'OUT',
-            account_id: defaultAccount?.id,
+            amount: defaultValues.amount ?? ('' as unknown as number),
+            name: defaultValues.name,
+            note: defaultValues.note,
+            date: defaultValues.date,
+            flow: defaultValues.flow,
+            contact_id: defaultValues.contact_id,
+            category_id: defaultValues.category_id,
+            account_id: defaultValues.account_id || resolvedDefaultAcc?.id || '',
         } as any,
     })
-
-    const [prevOpen, setPrevOpen] = useState(false)
-    const [prevInitialData, setPrevInitialData] = useState(initialData)
 
     const resetFormValues = (nextOpen: boolean) => {
         if (nextOpen) {
@@ -107,12 +108,6 @@ export function PersonalTransactionDrawer({
             })
             setFlow(defaults.flow)
         }
-    }
-
-    if (open !== prevOpen || initialData !== prevInitialData) {
-        setPrevOpen(open)
-        setPrevInitialData(initialData)
-        resetFormValues(open)
     }
 
     const handleOpenChange = (nextOpen: boolean) => {

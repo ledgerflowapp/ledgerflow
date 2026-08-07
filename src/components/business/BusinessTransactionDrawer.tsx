@@ -52,22 +52,26 @@ export function BusinessTransactionDrawer({
     const open = controlledOpen ?? internalOpen
     const setOpen = setControlledOpen ?? setInternalOpen
 
-    const [flow, setFlow] = useState<'IN' | 'OUT'>('OUT')
+    const [flow, setFlow] = useState<'IN' | 'OUT'>(initialData?.flow || 'OUT')
+
+    const initialAmountInRupees = initialData?.amount !== undefined && initialData?.amount !== null
+        ? paiseToRupees(initialData.amount).toNumber()
+        : ('' as unknown as number)
 
     const form = useForm({
         resolver: zodResolver(businessTransactionSchema),
         defaultValues: {
-            amount: '' as any,
-            name: '',
-            note: '',
-            date: new Date(),
-            flow: 'OUT',
-            contact_id: '',
+            amount: initialAmountInRupees,
+            name: initialData?.name || '',
+            note: initialData?.note || '',
+            date: initialData?.date ? new Date(initialData.date) : new Date(),
+            flow: initialData?.flow || 'OUT',
+            contact_id: initialData?.contact_id || initialData?.contact?.id || '',
+            due_date: initialData?.due_date ? new Date(initialData.due_date) : undefined,
+            category_id: initialData?.category_id || initialData?.category?.id || null,
+            account_id: initialData?.account_id || initialData?.account?.id || null,
         } as any,
     })
-
-    const [prevOpen, setPrevOpen] = useState(false)
-    const [prevInitialData, setPrevInitialData] = useState(initialData)
 
     const resetFormValues = (nextOpen: boolean) => {
         if (nextOpen) {
@@ -88,12 +92,6 @@ export function BusinessTransactionDrawer({
             })
             setFlow(initialData?.flow || 'OUT')
         }
-    }
-
-    if (open !== prevOpen || initialData !== prevInitialData) {
-        setPrevOpen(open)
-        setPrevInitialData(initialData)
-        resetFormValues(open)
     }
 
     const handleOpenChange = (nextOpen: boolean) => {
