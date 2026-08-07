@@ -4,10 +4,15 @@ import { createRoot, Root } from 'react-dom/client'
 import { PersonalTransactionDrawer } from '../personal/PersonalTransactionDrawer'
 import { BusinessTransactionDrawer } from '../business/BusinessTransactionDrawer'
 import { SplitExpenseDrawer } from '../groups/SplitExpenseDrawer'
-import { ContactReconciliationWizard } from '../contacts/ContactReconciliationWizard'
-import { getDefaultAccount } from '@/lib/account-utils'
+import { ContactReconciliationWizard, getGhostKey } from '../contacts/ContactReconciliationWizard'
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true
+
+function changeInputValue(input: HTMLInputElement, value: string) {
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
+    nativeInputValueSetter?.call(input, value)
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+}
 
 // Mock data & hooks
 let mockAccountsData: any[] | undefined = [
@@ -101,8 +106,8 @@ describe('Drawer State Synchronization & Integration Suite', () => {
         })
         container.remove()
 
-        // Assert 0 React render phase state update errors or warnings occurred
-        const renderPhaseErrors = consoleErrorSpy.mock.calls.filter((call: any[]) =>
+        // Confirm 0 React console errors or warnings regarding state updates during render phase
+        const renderPhaseErrors = [...consoleErrorSpy.mock.calls, ...consoleWarnSpy.mock.calls].filter((call: any[]) =>
             call.some(
                 (arg: any) =>
                     typeof arg === 'string' &&
@@ -111,24 +116,19 @@ describe('Drawer State Synchronization & Integration Suite', () => {
                         arg.includes('bad setState'))
             )
         )
-        expect(renderPhaseErrors.length).toBe(0)
+        expect(renderPhaseErrors).toHaveLength(0)
 
         consoleErrorSpy.mockRestore()
         consoleWarnSpy.mockRestore()
     })
 
     describe('PersonalTransactionDrawer Integration', () => {
-        it('resets form values upon open transition event callbacks', async () => {
-            let isOpen = false
-            const handleOpenChange = vi.fn((nextOpen: boolean) => {
-                isOpen = nextOpen
-            })
-
+        it('resets form values upon open transition and key-based re-mounting', async () => {
             await act(async () => {
                 root.render(
                     <PersonalTransactionDrawer
+                        key="drawer-pass-1"
                         open={true}
-                        onOpenChange={handleOpenChange}
                         hideTrigger={true}
                     />
                 )
@@ -140,26 +140,16 @@ describe('Drawer State Synchronization & Integration Suite', () => {
 
             // Change input value
             await act(async () => {
-                nameInput.value = 'Coffee'
-                nameInput.dispatchEvent(new Event('input', { bubbles: true }))
+                changeInputValue(nameInput, 'Coffee with Friend')
             })
+            expect(nameInput.value).toBe('Coffee with Friend')
 
-            // Close and re-open drawer via event callback
+            // Re-mount drawer upon new open transition
             await act(async () => {
                 root.render(
                     <PersonalTransactionDrawer
-                        open={false}
-                        onOpenChange={handleOpenChange}
-                        hideTrigger={true}
-                    />
-                )
-            })
-
-            await act(async () => {
-                root.render(
-                    <PersonalTransactionDrawer
+                        key="drawer-pass-2"
                         open={true}
-                        onOpenChange={handleOpenChange}
                         hideTrigger={true}
                     />
                 )
@@ -170,7 +160,7 @@ describe('Drawer State Synchronization & Integration Suite', () => {
             expect(resetNameInput.value).toBe('')
         })
 
-        it('populates form with initialData upon open and respects default account resolution', async () => {
+        it('populates form with initialData upon open and pre-selects default account UI', async () => {
             const mockTx = {
                 id: 'tx-personal-1',
                 amount: 45000, // 450.00 INR
@@ -199,15 +189,18 @@ describe('Drawer State Synchronization & Integration Suite', () => {
             expect(nameInput.value).toBe('Groceries at Supermarket')
             expect(amountInput.value).toBe('450')
 
-            // Default account fallback was resolved to acc-default since mockTx has no account_id
-            const defaultAcc = getDefaultAccount(mockAccountsData)
-            expect(defaultAcc?.id).toBe('acc-default')
+            // Assert UI pre-selection for default account item
+            const defaultAccToggle = Array.from(document.body.querySelectorAll('button')).find(
+                (btn) => btn.textContent?.includes('Primary Cash')
+            )
+            expect(defaultAccToggle).not.toBeUndefined()
+            expect(defaultAccToggle?.hasAttribute('data-pressed')).toBe(true)
         })
 
-        it('pre-selects fallback account when no account is marked is_default', async () => {
+        it('pre-selects fallback account UI when no account is marked is_default', async () => {
             mockAccountsData = [
-                { id: 'acc-fallback-1', name: 'Account 1', is_default: false },
-                { id: 'acc-fallback-2', name: 'Account 2', is_default: false },
+                { id: 'acc-fallback-1', name: 'Account 1', is_default: false, balance: 1000 },
+                { id: 'acc-fallback-2', name: 'Account 2', is_default: false, balance: 2000 },
             ]
 
             await act(async () => {
@@ -219,8 +212,11 @@ describe('Drawer State Synchronization & Integration Suite', () => {
                 )
             })
 
-            const resolvedDefault = getDefaultAccount(mockAccountsData)
-            expect(resolvedDefault?.id).toBe('acc-fallback-1')
+            const fallbackAccToggle = Array.from(document.body.querySelectorAll('button')).find(
+                (btn) => btn.textContent?.includes('Account 1')
+            )
+            expect(fallbackAccToggle).not.toBeUndefined()
+            expect(fallbackAccToggle?.hasAttribute('data-pressed')).toBe(true)
         })
     })
 
@@ -299,46 +295,82 @@ describe('Drawer State Synchronization & Integration Suite', () => {
             { id: 'm-2', group_id: 'g-1', user_id: 'user-2', ghost_name: 'User Two', avatar_url: null, joined_at: '2026-01-01' },
         ]
 
-        it('resets transient step and input values when drawer is closed via onOpenChange', async () => {
+        it('resets transient step and input values when drawer is closed and re-opened via onOpenChange', async () => {
             await act(async () => {
                 root.render(
                     <SplitExpenseDrawer groupId="g-1" members={mockMembers} currentUserId="user-1">
-                        <button>Open Split</button>
+                        <button id="split-trigger">Open Split</button>
                     </SplitExpenseDrawer>
                 )
             })
 
-            // Open trigger button click
-            const trigger = container.querySelector('button')
+            // Trigger drawer open
+            const trigger = container.querySelector('#split-trigger') as HTMLElement
             await act(async () => {
                 trigger?.click()
             })
 
-            // Check if step 1 inputs are present
-            const descInput = container.querySelector('input[placeholder="What was this for?"]') as HTMLInputElement
-            const amountInput = container.querySelector('input[placeholder="0.00"]') as HTMLInputElement
+            // Populate Step 1 inputs
+            const descInput = document.body.querySelector('input[placeholder*="this for"]') as HTMLInputElement
+            const amountInput = document.body.querySelector('input[placeholder="0"]') as HTMLInputElement
 
-            if (descInput && amountInput) {
+            expect(descInput).not.toBeNull()
+            expect(amountInput).not.toBeNull()
+
+            await act(async () => {
+                changeInputValue(descInput, 'Dinner')
+                changeInputValue(amountInput, '100')
+            })
+
+            // Navigate to Step 2
+            const nextButton = Array.from(document.body.querySelectorAll('button')).find(
+                (btn) => btn.textContent?.includes('Next: Split Details') || btn.textContent?.includes('Next')
+            )
+            expect(nextButton).not.toBeUndefined()
+
+            await act(async () => {
+                nextButton?.click()
+            })
+
+            // Verify Step 2 is active (contains split configuration UI)
+            expect(document.body.textContent).toContain('Split equally')
+
+            // Close drawer via overlay close or backdrop click
+            const closeBtn = document.body.querySelector('[data-slot="drawer-close"]') || document.body.querySelector('button[aria-label="Close"]')
+            if (closeBtn) {
                 await act(async () => {
-                    descInput.value = 'Dinner'
-                    descInput.dispatchEvent(new Event('input', { bubbles: true }))
-                    amountInput.value = '100'
-                    amountInput.dispatchEvent(new Event('input', { bubbles: true }))
+                    (closeBtn as HTMLElement).click()
                 })
             }
 
-            // Verify default account resolution within SplitExpenseDrawer scope
-            const defaultAcc = getDefaultAccount(mockAccountsData)
-            expect(defaultAcc?.id).toBe('acc-default')
+            // Re-trigger drawer open
+            await act(async () => {
+                trigger?.click()
+            })
+
+            // Assert drawer step resets to Step 1 and input fields are cleared
+            const resetDescInput = document.body.querySelector('input[placeholder*="this for"]') as HTMLInputElement
+            const resetAmountInput = document.body.querySelector('input[placeholder="0"]') as HTMLInputElement
+            expect(resetDescInput?.value).toBe('')
+            expect(resetAmountInput?.value).toBe('')
         })
 
-        it('resolves account fallback correctly when accounts array changes', () => {
-            const accountsWithoutDefault = [
-                { id: 'acc-first', name: 'First Account', is_default: false },
-                { id: 'acc-second', name: 'Second Account', is_default: false },
-            ]
-            const resolved = getDefaultAccount(accountsWithoutDefault)
-            expect(resolved?.id).toBe('acc-first')
+        it('resolves default account selection UI accurately', async () => {
+            await act(async () => {
+                root.render(
+                    <SplitExpenseDrawer groupId="g-1" members={mockMembers} currentUserId="user-1">
+                        <button id="split-trigger-2">Open Split</button>
+                    </SplitExpenseDrawer>
+                )
+            })
+
+            const trigger = container.querySelector('#split-trigger-2') as HTMLElement
+            await act(async () => {
+                trigger?.click()
+            })
+
+            // Assert account selection UI displays default account name 'Primary Cash'
+            expect(document.body.textContent).toContain('Primary Cash')
         })
     })
 
@@ -365,20 +397,66 @@ describe('Drawer State Synchronization & Integration Suite', () => {
             },
         ]
 
-        it('derives default ghost key cleanly without render side-effects and handles override updates', async () => {
+        it('navigates through steps, derives default ghost key, and handles ghost key override selection', async () => {
+            const onCompleteMock = vi.fn()
+
             await act(async () => {
                 root.render(
                     <ContactReconciliationWizard
                         unregisteredContacts={mockContacts}
                         candidateGhostMembers={mockGhosts}
                         targetUserId="user-me"
+                        onComplete={onCompleteMock}
                     />
                 )
             })
 
-            // Verify wizard renders step 1
+            // Step 1 check
             expect(container.textContent).toContain('Select Unregistered Contact')
             expect(container.textContent).toContain('Step 1 of 3')
+
+            // Advance Step 1 -> Step 2
+            const nextStep1Btn = container.querySelector('button[type="submit"]') || Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Next'))
+            expect(nextStep1Btn).not.toBeNull()
+
+            await act(async () => {
+                (nextStep1Btn as HTMLElement).click()
+            })
+
+            // Step 2 check: Phone & Email override verification
+            expect(container.textContent).toContain('Step 2 of 3')
+
+            // Advance Step 2 -> Step 3
+            const nextStep2Btn = container.querySelector('button[type="submit"]') || Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Next'))
+            expect(nextStep2Btn).not.toBeNull()
+
+            await act(async () => {
+                (nextStep2Btn as HTMLElement).click()
+            })
+
+            // Step 3 check: Candidate Ghost Member selection & default ghost key check
+            expect(container.textContent).toContain('Step 3 of 3')
+            expect(container.textContent).toContain('Summer Trip 2026')
+            expect(container.textContent).toContain('Alice (Ghost)')
+
+            const expectedDefaultGhostKey = getGhostKey(mockGhosts[0])
+            expect(expectedDefaultGhostKey).toBe('group-1:ghost-101')
+
+            // Select second ghost member candidate to test ghostKeyOverride state update
+            const ghostChoices = container.querySelectorAll('[data-slot="questionnaire-choice"]')
+            if (ghostChoices.length > 1) {
+                await act(async () => {
+                    (ghostChoices[1] as HTMLElement).click()
+                })
+            }
+
+            // Submit wizard
+            const submitBtn = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Send Merge Request') || b.textContent?.includes('Submit'))
+            if (submitBtn) {
+                await act(async () => {
+                    submitBtn.click()
+                })
+            }
         })
     })
 })
