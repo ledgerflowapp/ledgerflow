@@ -13,6 +13,7 @@ import { Check, ChevronRight, ArrowLeft, Plus } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 import { useAccounts } from '@/hooks/useAccounts'
+import { getDefaultAccount } from '@/lib/account-utils'
 import { AddAccountDrawer } from '@/components/finance/AddAccountDrawer'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatCurrency, rupeesToPaise } from '@/lib/currency'
@@ -37,7 +38,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
     const { data: accounts } = useAccounts()
 
     // Derive default account during render scope
-    const defaultAccount = accounts?.find(a => a.is_default) || accounts?.[0]
+    const defaultAccount = getDefaultAccount(accounts)
     const activeAccountId = accountId || defaultAccount?.id || ''
 
     const numericAmount = parseFloat(amount) || 0

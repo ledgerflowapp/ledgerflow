@@ -9,6 +9,7 @@ import { useUpdateTransaction } from '@/hooks/useUpdateTransaction'
 import { usePersonalPeople } from '@/hooks/personal/usePersonalPeople'
 import { useBudgets } from '@/hooks/useBudgets'
 import { useAccounts } from '@/hooks/useAccounts'
+import { getDefaultAccount } from '@/lib/account-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -75,8 +76,7 @@ export function PersonalTransactionDrawer({
     const defaultValues = getPersonalTransactionFormDefaults(initialData)
     const [flow, setFlow] = useState<'IN' | 'OUT'>(defaultValues.flow)
 
-    const defaultAccount = accounts?.find(a => a.is_default) || accounts?.[0]
-    const resolvedDefaultAcc = accounts?.find(a => a.is_default) || accounts?.[0]
+    const defaultAccount = getDefaultAccount(accounts)
 
     const form = useForm({
         resolver: zodResolver(personalTransactionSchema),
@@ -88,14 +88,14 @@ export function PersonalTransactionDrawer({
             flow: defaultValues.flow,
             contact_id: defaultValues.contact_id,
             category_id: defaultValues.category_id,
-            account_id: defaultValues.account_id || resolvedDefaultAcc?.id || '',
+            account_id: defaultValues.account_id || defaultAccount?.id || '',
         } as any,
     })
 
     const resetFormValues = (nextOpen: boolean) => {
         if (nextOpen) {
             const defaults = getPersonalTransactionFormDefaults(initialData)
-            const resolvedDefaultAcc = accounts?.find(a => a.is_default) || accounts?.[0]
+            const defAcc = getDefaultAccount(accounts)
             form.reset({
                 amount: defaults.amount ?? ('' as unknown as number),
                 name: defaults.name,
@@ -104,7 +104,7 @@ export function PersonalTransactionDrawer({
                 flow: defaults.flow,
                 contact_id: defaults.contact_id,
                 category_id: defaults.category_id,
-                account_id: defaults.account_id || resolvedDefaultAcc?.id || '',
+                account_id: defaults.account_id || defAcc?.id || '',
             })
             setFlow(defaults.flow)
         }

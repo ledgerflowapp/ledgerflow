@@ -4,8 +4,8 @@
 
 **Blocked by:** 01 — Event-Driven Form Resets in Transaction Drawers
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Extract default account resolution logic into a reusable helper function.
-- [ ] Refactor `PersonalTransactionDrawer.tsx`, `BusinessTransactionDrawer.tsx`, and `SplitExpenseDrawer.tsx` to consume the unified default account resolution helper.
-- [ ] Ensure default account resolution is evaluated purely within render scope.
+- [x] Extract default account resolution logic into a reusable helper function.
+- [x] Refactor `PersonalTransactionDrawer.tsx`, `BusinessTransactionDrawer.tsx`, and `SplitExpenseDrawer.tsx` to consume the unified default account resolution helper.
+- [x] Ensure default account resolution is evaluated purely within render scope.

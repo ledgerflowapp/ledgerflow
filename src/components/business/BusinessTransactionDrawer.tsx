@@ -30,6 +30,24 @@ const businessTransactionSchema = z.object({
     account_id: z.string().nullable().optional(),
 })
 
+export function getBusinessTransactionFormDefaults(initialData?: any) {
+    const initialAmountInRupees = initialData?.amount !== undefined && initialData?.amount !== null
+        ? paiseToRupees(initialData.amount).toNumber()
+        : ('' as unknown as number)
+
+    return {
+        amount: initialAmountInRupees,
+        name: initialData?.name || '',
+        note: initialData?.note || '',
+        date: initialData?.date ? new Date(initialData.date) : new Date(),
+        flow: (initialData?.flow as 'IN' | 'OUT') || 'OUT',
+        contact_id: initialData?.contact_id || initialData?.contact?.id || '',
+        due_date: initialData?.due_date ? new Date(initialData.due_date) : undefined,
+        category_id: initialData?.category_id || initialData?.category?.id || null,
+        account_id: initialData?.account_id || initialData?.account?.id || null,
+    }
+}
+
 export function BusinessTransactionDrawer({
     open: controlledOpen,
     onOpenChange: setControlledOpen,
@@ -52,45 +70,19 @@ export function BusinessTransactionDrawer({
     const open = controlledOpen ?? internalOpen
     const setOpen = setControlledOpen ?? setInternalOpen
 
-    const [flow, setFlow] = useState<'IN' | 'OUT'>(initialData?.flow || 'OUT')
-
-    const initialAmountInRupees = initialData?.amount !== undefined && initialData?.amount !== null
-        ? paiseToRupees(initialData.amount).toNumber()
-        : ('' as unknown as number)
+    const defaultValues = getBusinessTransactionFormDefaults(initialData)
+    const [flow, setFlow] = useState<'IN' | 'OUT'>(defaultValues.flow)
 
     const form = useForm({
         resolver: zodResolver(businessTransactionSchema),
-        defaultValues: {
-            amount: initialAmountInRupees,
-            name: initialData?.name || '',
-            note: initialData?.note || '',
-            date: initialData?.date ? new Date(initialData.date) : new Date(),
-            flow: initialData?.flow || 'OUT',
-            contact_id: initialData?.contact_id || initialData?.contact?.id || '',
-            due_date: initialData?.due_date ? new Date(initialData.due_date) : undefined,
-            category_id: initialData?.category_id || initialData?.category?.id || null,
-            account_id: initialData?.account_id || initialData?.account?.id || null,
-        } as any,
+        defaultValues: defaultValues as any,
     })
 
     const resetFormValues = (nextOpen: boolean) => {
         if (nextOpen) {
-            const initialAmountInRupees = initialData?.amount !== undefined && initialData?.amount !== null
-                ? paiseToRupees(initialData.amount).toNumber()
-                : ('' as unknown as number)
-
-            form.reset({
-                amount: initialAmountInRupees,
-                name: initialData?.name || '',
-                note: initialData?.note || '',
-                date: initialData?.date ? new Date(initialData.date) : new Date(),
-                flow: initialData?.flow || 'OUT',
-                contact_id: initialData?.contact_id || initialData?.contact?.id || '',
-                due_date: initialData?.due_date ? new Date(initialData.due_date) : undefined,
-                category_id: initialData?.category_id || initialData?.category?.id || null,
-                account_id: initialData?.account_id || initialData?.account?.id || null,
-            })
-            setFlow(initialData?.flow || 'OUT')
+            const defaults = getBusinessTransactionFormDefaults(initialData)
+            form.reset(defaults as any)
+            setFlow(defaults.flow)
         }
     }
 
