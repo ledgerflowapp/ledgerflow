@@ -4,8 +4,8 @@
 
 **Blocked by:** 01 — Event-Driven Form Resets in Transaction Drawers, 02 — Shared Default Account & Form State Helpers, 03 — Identity Reconciliation State Refactoring
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Add integration tests in `src/components/__tests__/` covering drawer form reset behavior upon open transitions.
-- [ ] Verify default account fallback resolution in drawer components via React Testing Library assertions.
-- [ ] Confirm 0 console errors or warnings regarding state updates during render phase across the entire drawer test suite.
+- [x] Add integration tests in `src/components/__tests__/` covering drawer form reset behavior upon open transitions.
+- [x] Verify default account fallback resolution in drawer components via React Testing Library assertions.
+- [x] Confirm 0 console errors or warnings regarding state updates during render phase across the entire drawer test suite.
