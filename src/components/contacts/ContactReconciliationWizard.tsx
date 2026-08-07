@@ -2,6 +2,13 @@
 
 import * as React from "react"
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import {
   Questionnaire,
   QuestionnaireProgress,
   QuestionnaireItem,
@@ -18,6 +25,10 @@ import {
 } from "@/components/ui/questionnaire"
 import { toast } from "@/components/ui/toast"
 import { requestGroupGhostMerge } from "@/lib/actions/groups"
+
+export function getGhostKey(g: CandidateGhostMember): string {
+  return `${g.groupId}:${g.ghostMemberId}`
+}
 
 export interface UnregisteredContact {
   id: string
@@ -82,7 +93,7 @@ export function ContactReconciliationWizard({
 
   // Step 3 State: Candidate ghost member selection & override
   const defaultGhostKey = candidateGhostMembers[0]
-    ? `${candidateGhostMembers[0].groupId}:${candidateGhostMembers[0].ghostMemberId}`
+    ? getGhostKey(candidateGhostMembers[0])
     : ""
   const [ghostKeyOverride, setGhostKeyOverride] = React.useState<string>("")
   const activeGhostKey = ghostKeyOverride || defaultGhostKey
@@ -97,13 +108,17 @@ export function ContactReconciliationWizard({
     setGhostKeyOverride("")
   }
 
+  const handleGhostKeyOverrideSelect = (val: string) => {
+    setGhostKeyOverride(val)
+  }
+
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     setErrorMsg(null)
 
     const ghostTarget = candidateGhostMembers.find(
-      (g) => `${g.groupId}:${g.ghostMemberId}` === activeGhostKey || g.ghostMemberId === activeGhostKey
-    ) || candidateGhostMembers[0]
+      (g) => getGhostKey(g) === activeGhostKey || g.ghostMemberId === activeGhostKey
+    )
 
     if (!ghostTarget) {
       const err = "Please select a ghost member record to claim."
@@ -239,10 +254,10 @@ export function ContactReconciliationWizard({
         {candidateGhostMembers.length > 0 ? (
           <QuestionnaireChoices
             value={activeGhostKey}
-            onValueChange={(val) => setGhostKeyOverride(val)}
+            onValueChange={handleGhostKeyOverrideSelect}
           >
             {candidateGhostMembers.map((g) => {
-              const key = `${g.groupId}:${g.ghostMemberId}`
+              const key = getGhostKey(g)
               return (
                 <QuestionnaireChoice key={key} value={key}>
                   <span className="font-medium">{g.ghostName}</span>
@@ -276,14 +291,6 @@ export function ContactReconciliationWizard({
     </Questionnaire>
   )
 }
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog"
 
 export interface ReconcileContactsDialogProps extends ContactReconciliationWizardProps {
   open?: boolean
