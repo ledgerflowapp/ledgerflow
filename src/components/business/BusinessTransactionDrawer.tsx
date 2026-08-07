@@ -16,6 +16,7 @@ import { Loader2, Plus } from 'lucide-react'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { paiseToRupees } from '@/lib/currency'
+import { getDefaultAccount } from '@/lib/account-utils'
 
 const businessTransactionSchema = z.object({
     amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
@@ -30,10 +31,12 @@ const businessTransactionSchema = z.object({
     account_id: z.string().nullable().optional(),
 })
 
-export function getBusinessTransactionFormDefaults(initialData?: any) {
+export function getBusinessTransactionFormDefaults(initialData?: any, accounts?: any[] | null) {
     const initialAmountInRupees = initialData?.amount !== undefined && initialData?.amount !== null
         ? paiseToRupees(initialData.amount).toNumber()
         : ('' as unknown as number)
+
+    const defaultAcc = getDefaultAccount(accounts)
 
     return {
         amount: initialAmountInRupees,
@@ -44,7 +47,7 @@ export function getBusinessTransactionFormDefaults(initialData?: any) {
         contact_id: initialData?.contact_id || initialData?.contact?.id || '',
         due_date: initialData?.due_date ? new Date(initialData.due_date) : undefined,
         category_id: initialData?.category_id || initialData?.category?.id || null,
-        account_id: initialData?.account_id || initialData?.account?.id || null,
+        account_id: initialData?.account_id || initialData?.account?.id || defaultAcc?.id || null,
     }
 }
 

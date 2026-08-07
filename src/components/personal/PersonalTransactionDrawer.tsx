@@ -95,7 +95,6 @@ export function PersonalTransactionDrawer({
     const resetFormValues = (nextOpen: boolean) => {
         if (nextOpen) {
             const defaults = getPersonalTransactionFormDefaults(initialData)
-            const defAcc = getDefaultAccount(accounts)
             form.reset({
                 amount: defaults.amount ?? ('' as unknown as number),
                 name: defaults.name,
@@ -104,7 +103,7 @@ export function PersonalTransactionDrawer({
                 flow: defaults.flow,
                 contact_id: defaults.contact_id,
                 category_id: defaults.category_id,
-                account_id: defaults.account_id || defAcc?.id || '',
+                account_id: defaults.account_id || defaultAccount?.id || '',
             })
             setFlow(defaults.flow)
         }
