@@ -329,11 +329,36 @@ Temporary Items
 
 # Built Visual Studio Code Extensions
 *.vsix
-# Playwright testing
+# Testing & Test Reports
+# Playwright
 test-results/
 playwright-report/
 playwright/.cache/
+.playwright/
+.local-browsers/
 blob-report/
+playwright.env
+
+# Vitest & Jest & Coverage
+coverage/
+*.lcov
+.nyc_output/
+.vitest/
+.vitest-cache/
+
+# Cypress
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+
+# Storybook
+storybook-static/
+.storybook-out/
+
+# Allure & Reporting
+allure-results/
+allure-report/
+
 
 
 # Local documentation
