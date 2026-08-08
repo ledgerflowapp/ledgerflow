@@ -9,7 +9,17 @@ function redirectToLogin(request: NextRequest, pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
-  const sessionCookie = getSessionCookie(request);
+  const cookiePrefix = auth.options.advanced?.cookiePrefix;
+  const candidateKeys = [
+    ...(cookiePrefix ? [`${cookiePrefix}.session_token`, `__Secure-${cookiePrefix}.session_token`] : []),
+    "better-auth.session_token",
+    "__Secure-better-auth.session_token",
+  ];
+
+  const sessionCookie =
+    getSessionCookie(request, cookiePrefix ? { cookiePrefix } : undefined) ||
+    candidateKeys.map((key) => request.cookies.get(key)?.value).find(Boolean);
+
   const { pathname } = request.nextUrl;
 
   const isAuthPage = pathname.startsWith("/login");
