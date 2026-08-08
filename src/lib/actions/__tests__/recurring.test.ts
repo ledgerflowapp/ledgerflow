@@ -250,6 +250,64 @@ describe("Recurring Transactions Actions & Generator", () => {
     });
   });
 
+  describe("getRecurringTransactions", () => {
+    it("fetches recurring transactions and logs warning on catch-up failure without throwing", async () => {
+      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      // Mock db.select for processDueRecurringTransactions which fails
+      mockSelectFrom.mockImplementationOnce(() => {
+        throw new Error("Catch-up DB error");
+      });
+
+      // Mock db.select for getRecurringTransactions query
+      const mockOrderBy = vi.fn().mockResolvedValueOnce([
+        {
+          rec: {
+            id: "rec-1",
+            userId: "user-1",
+            name: "Netflix",
+            amount: "19900",
+            flow: "OUT",
+            frequency: "MONTHLY",
+            scheduleMode: "CALENDAR",
+            failureCount: 0,
+            lastFailureReason: null,
+            startDate: new Date("2026-01-01T00:00:00Z"),
+            nextRunDate: new Date("2026-02-01T00:00:00Z"),
+            lastRunDate: null,
+            categoryId: "cat-1",
+            accountId: "acc-1",
+            active: true,
+            createdAt: new Date("2026-01-01T00:00:00Z"),
+            note: "Subscription",
+          },
+          catName: "Entertainment",
+          catIcon: "🎬",
+          accName: "HDFC Bank",
+          accType: "BANK",
+        },
+      ]);
+      const mockWhere = vi.fn().mockReturnValue({ orderBy: mockOrderBy });
+      const mockLeftJoin2 = vi.fn().mockReturnValue({ where: mockWhere });
+      const mockLeftJoin1 = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin2 });
+      const mockFrom = vi.fn().mockReturnValue({ leftJoin: mockLeftJoin1 });
+
+      mockSelectFrom.mockReturnValueOnce({ leftJoin: mockLeftJoin1 });
+
+      const res = await getRecurringTransactions();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        "[Recurring Catch-up Error]:",
+        expect.any(Error)
+      );
+      expect(res).toHaveLength(1);
+      expect(res[0].name).toBe("Netflix");
+      expect(res[0].amount).toBe(19900);
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
   describe("CRUD Server Actions", () => {
     it("addRecurringTransaction sets default scheduleMode CALENDAR", async () => {
       const insertedRow = {

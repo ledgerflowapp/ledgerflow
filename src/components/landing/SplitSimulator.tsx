@@ -11,11 +11,12 @@ import { useSplitCalculator, SplitType } from '@/hooks/finance/useSplitCalculato
 import { GroupMember } from '@/types';
 import { cn } from '@/lib/utils';
 
-// Mock group members to use for landing page simulation
-const MOCK_MEMBERS: GroupMember[] = [
-  { id: '1', name: 'Alice', user_id: 'alice_id', ghost_name: 'Alice', created_at: new Date() },
-  { id: '2', name: 'Bob', user_id: 'bob_id', ghost_name: 'Bob', created_at: new Date() },
-  { id: '3', name: 'Charlie', user_id: 'charlie_id', ghost_name: 'Charlie', created_at: new Date() },
+type MockMember = GroupMember & { name: string };
+
+const MOCK_MEMBERS: MockMember[] = [
+  { id: '1', name: 'Alice', group_id: 'g1', user_id: 'alice_id', ghost_name: 'Alice', avatar_url: null, joined_at: new Date().toISOString() },
+  { id: '2', name: 'Bob', group_id: 'g1', user_id: 'bob_id', ghost_name: 'Bob', avatar_url: null, joined_at: new Date().toISOString() },
+  { id: '3', name: 'Charlie', group_id: 'g1', user_id: 'charlie_id', ghost_name: 'Charlie', avatar_url: null, joined_at: new Date().toISOString() },
 ];
 
 export function SplitSimulator() {
