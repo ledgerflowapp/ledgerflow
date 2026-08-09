@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processDueRecurringTransactions } from "@/lib/actions/recurring";
+import { env } from "@/env";
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
-  const cronSecret = process.env.CRON_SECRET;
+  const cronSecret = env.CRON_SECRET;
 
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -8,6 +8,13 @@
       "when": 1785407275311,
       "tag": "0000_abnormal_ricochet",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786173117782,
+      "tag": "0001_magical_the_renegades",
+      "breakpoints": true
     }
   ]
 }

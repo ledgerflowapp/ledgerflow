@@ -2,16 +2,17 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
+import { env } from "@/env";
 
 // Environmental origins setup
-const rawTrustedOrigins = process.env.BETTER_AUTH_TRUSTED_ORIGINS;
+const rawTrustedOrigins = env.BETTER_AUTH_TRUSTED_ORIGINS;
 const trustedOriginsList = rawTrustedOrigins
   ? rawTrustedOrigins.split(",").map((o) => o.trim())
-  : [process.env.BETTER_AUTH_URL || "http://localhost:3000"];
+  : [env.BETTER_AUTH_URL];
 
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  secret: env.BETTER_AUTH_SECRET,
+  baseURL: env.BETTER_AUTH_URL,
   trustedOrigins: trustedOriginsList,
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -50,12 +51,12 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: env.GOOGLE_CLIENT_ID || "",
+      clientSecret: env.GOOGLE_CLIENT_SECRET || "",
     },
   },
   advanced: {
-    useSecureCookies: process.env.NODE_ENV === "production",
+    useSecureCookies: env.NODE_ENV === "production",
     cookiePrefix: "ledgerflow",
     defaultCookieAttributes: {
       sameSite: "lax",

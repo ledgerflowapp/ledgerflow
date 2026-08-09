@@ -2,7 +2,9 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-const connectionString = process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/ledgerflow";
+import { env } from "@/env";
+
+const connectionString = env.DATABASE_URL;
 
 // Disable prefetch in serverless/Next.js environments
 export const client = postgres(connectionString, { prepare: false });

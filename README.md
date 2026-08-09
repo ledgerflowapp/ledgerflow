@@ -112,58 +112,62 @@ Clone the project from GitHub to your computer and enter the project folder.
 
 ### Step 2: Configure Environment Variables
 
-Environment variables store configuration secrets like database credentials and authentication keys so they are not exposed in the codebase.
+Environment variables store configuration secrets like database credentials and authentication keys.
 
-Create a file named `.env.local` in the root folder of the project.
+LedgerFlow uses **Zod** to strictly validate all environment variables at application startup via `@/env` (`src/env.ts`). If any vital environment variable is missing or formatted incorrectly, the app will log a detailed error message and halt startup immediately to prevent runtime errors.
 
-- **Windows (Command Prompt)**:
+Copy the provided `.env.example` file to create your `.env.local` configuration file:
+
+- **Windows (Command Prompt / PowerShell)**:
   ```cmd
-  type nul > .env.local
+  copy .env.example .env.local
   ```
 - **macOS & Linux (Terminal)**:
   ```bash
-  touch .env.local
+  cp .env.example .env.local
   ```
 
-Open `.env.local` in a text editor (such as VS Code or Notepad) and add the following lines:
+Open `.env.local` in a text editor (such as VS Code) and populate the values:
 
 ```env
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/ledgerflow
-BETTER_AUTH_SECRET=a_random_32_character_secret_key_here
-BETTER_AUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ledgerflow"
+BETTER_AUTH_SECRET="a_random_32_character_secret_key_here"
+BETTER_AUTH_URL="http://localhost:3000"
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
 ```
 
-#### Explanation of Environment Variables
+#### Environment Variables Reference
 
-1. **`DATABASE_URL`**
-   - **Why it is needed**: Specifies how LedgerFlow connects to your PostgreSQL database to save user accounts, transactions, contacts, and business ledgers.
-   - **Where to obtain it**:
-     - **Local Database**: Install PostgreSQL on your computer and set the connection string using your database username, password, host, port, and database name (for example: `postgres://postgres:postgres@localhost:5432/ledgerflow`).
-     - **Cloud Database**: Sign up for a free PostgreSQL database on platforms like [Supabase](https://supabase.com/), [Neon](https://neon.tech/), or [Railway](https://railway.app/) and copy the connection string from your project settings.
+1. **`DATABASE_URL`** *(Required)*
+   - **Why it is needed**: Specifies how LedgerFlow connects to your PostgreSQL database (Supabase, Neon, or local Postgres).
+   - **Validation**: Must be a non-empty Postgres connection URL. The app will fail to start if this is missing.
 
-2. **`BETTER_AUTH_SECRET`**
-   - **Why it is needed**: A secret encryption key used by Better Auth to encrypt user sessions and secure cookies.
-   - **Where to obtain it**: Create any random string of at least 32 characters. On macOS/Linux Terminal, you can generate one using:
+2. **`BETTER_AUTH_SECRET`** *(Required)*
+   - **Why it is needed**: Secret key used by Better Auth to sign session cookies and tokens.
+   - **Where to obtain it**: Generate a secure 32+ character random key:
      ```bash
-     openssl rand -base64 32
+     openssl rand -hex 32
      ```
-     On Windows, you can generate a random string manually or use any secure random text generator.
+   - **Validation**: Must be a non-empty string. The app will fail to start if this is missing.
 
-3. **`BETTER_AUTH_URL`**
-   - **Why it is needed**: The base Web URL of your application required by the authentication library for callback redirects.
-   - **Where to obtain it**: Set this to `http://localhost:3000` when running the application on your computer.
+3. **`BETTER_AUTH_URL`** *(Required)*
+   - **Why it is needed**: Base Web URL of your application required for auth callbacks.
+   - **Validation**: Must be a valid URL. The app will fail to start if this is missing.
 
-4. **`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`** *(Optional for Google Sign-In)*
-   - **Why it is needed**: Enables users to log into LedgerFlow using their Google account credentials.
-   - **Where to obtain it**:
-     1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-     2. Create a new project and go to **APIs & Services > Credentials**.
-     3. Click **Create Credentials** and select **OAuth client ID**.
-     4. Choose **Web application** as the application type.
-     5. Add `http://localhost:3000/api/auth/callback/google` under **Authorized redirect URIs**.
-     6. Copy the **Client ID** and **Client Secret** into your `.env.local` file.
+4. **`CRON_SECRET`** *(Optional)*
+   - **Why it is needed**: Secret Bearer token to authorize automated recurring transaction cron endpoints (`/api/cron/recurring`).
+
+5. **`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`** *(Optional for Google Sign-In)*
+   - **Why it is needed**: Enables Google OAuth 2.0 social sign-in.
+   - **Where to obtain it**: Google Cloud Console > APIs & Services > Credentials.
+
+6. **`NEXT_PUBLIC_SITE_URL`** *(Optional)*
+   - **Why it is needed**: Canonical website URL exposed to the frontend for metadata and absolute links.
+
+#### Test Environment (`.env.test`)
+
+When running automated tests (e.g., `pnpm test`), LedgerFlow requires a `.env.test` file to provide necessary variables such as `DATABASE_URL` (for a test database), `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL`. No hardcoded fallbacks are provided to ensure tests run against explicit configurations.
 
 ---
 
