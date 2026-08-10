@@ -8,7 +8,6 @@ const PORT = env.PORT || 3005;
 export default defineConfig({
     testDir: './e2e',
     globalSetup: './src/test-global-setup.ts',
-    globalTeardown: './src/test-global-teardown.ts',
     fullyParallel: true,
     forbidOnly: !!env.CI,
     retries: env.CI ? 2 : 0,

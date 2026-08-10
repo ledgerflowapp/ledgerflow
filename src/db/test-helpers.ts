@@ -4,6 +4,47 @@ import postgres from "postgres";
 import * as schema from "./schema";
 import { env } from "@/env";
 import { sql } from "drizzle-orm";
+import * as fs from "fs";
+import * as path from "path";
+
+/**
+ * Encapsulates inter-process communication for test environment schemas.
+ * (e.g., passing dynamic schemas from global setup hooks to worker threads)
+ */
+export const TestEnv = {
+  get path() {
+    return path.join(process.cwd(), ".test-env");
+  },
+  writeSchema(schemaName: string) {
+    fs.writeFileSync(this.path, `DB_SCHEMA=${schemaName}`);
+  },
+  readSchema(): string | undefined {
+    if (fs.existsSync(this.path)) {
+      const content = fs.readFileSync(this.path, "utf-8");
+      const match = content.match(/DB_SCHEMA=(.+)/);
+      return match ? match[1].trim() : undefined;
+    }
+    return undefined;
+  },
+  clean() {
+    if (fs.existsSync(this.path)) {
+      fs.unlinkSync(this.path);
+    }
+  },
+};
+
+/**
+ * Instantiates a scoped Postgres client targeting a specific schema.
+ */
+function getScopedClient(schemaName: string) {
+  return postgres(env.DATABASE_URL, {
+    max: 1,
+    onnotice: () => {},
+    onconnect: async (s: any) => {
+      await s.unsafe(`SET search_path TO "${schemaName}", public`);
+    },
+  } as any);
+}
 
 /**
  * Creates a dynamic schema, runs migrations against it, and returns the schema name.
@@ -17,13 +58,7 @@ export async function setupTestDatabase(schemaName: string) {
   await db.execute(sql.raw(`CREATE SCHEMA IF NOT EXISTS "${schemaName}";`));
 
   // Now connect WITH the schema in the search path to run migrations
-  const scopedClient = postgres(env.DATABASE_URL, {
-    max: 1,
-    onnotice: () => {},
-    onconnect: async (s: any) => {
-      await s.unsafe(`SET search_path TO "${schemaName}", public`);
-    },
-  } as any);
+  const scopedClient = getScopedClient(schemaName);
   const scopedDb = drizzle(scopedClient);
 
   console.log(`[Test DB] Running migrations on schema: ${schemaName}...`);
@@ -40,13 +75,7 @@ export async function setupTestDatabase(schemaName: string) {
  * Seeds baseline fixtures required for tests to run (e.g., system roles, default settings).
  */
 export async function seedTestFixtures(schemaName: string) {
-  const seedClient = postgres(env.DATABASE_URL, {
-    max: 1,
-    onnotice: () => {},
-    onconnect: async (s: any) => {
-      await s.unsafe(`SET search_path TO "${schemaName}", public`);
-    },
-  } as any);
+  const seedClient = getScopedClient(schemaName);
   const db = drizzle(seedClient, { schema });
 
   console.log(`[Test DB] Seeding fixtures on schema: ${schemaName}...`);
