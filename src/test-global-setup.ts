@@ -22,3 +22,18 @@ export default async function globalSetup() {
   await setupTestDatabase(schemaName);
   await seedTestFixtures(schemaName);
 }
+
+export async function teardown() {
+  const schemaName = process.env.DB_SCHEMA;
+  if (schemaName) {
+    const { teardownTestDatabase } = await import("./db/test-helpers");
+    await teardownTestDatabase(schemaName);
+  }
+
+  const fs = await import("fs");
+  const path = await import("path");
+  const tempFile = path.join(process.cwd(), ".test-env");
+  if (fs.existsSync(tempFile)) {
+    fs.unlinkSync(tempFile);
+  }
+}

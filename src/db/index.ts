@@ -9,11 +9,13 @@ const connectionString = env.DATABASE_URL;
 const isTest = process.env.NODE_ENV === "test";
 const schemaName = env.DB_SCHEMA;
 
-const postgresOptions: postgres.Options<{}> = { prepare: false };
+const postgresOptions: postgres.Options<any> = { prepare: false };
 
 if (isTest && schemaName) {
   postgresOptions.onnotice = () => {};
-  postgresOptions.options = `-c search_path="${schemaName}",public`;
+  (postgresOptions as any).onconnect = async (sql: any) => {
+    await sql.unsafe(`SET search_path TO "${schemaName}", public`);
+  };
 }
 
 // Disable prefetch in serverless/Next.js environments

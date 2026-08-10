@@ -11,7 +11,6 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     globalSetup: ['./src/test-global-setup.ts'],
-    globalTeardown: ['./src/test-global-teardown.ts'],
     setupFiles: ['./src/test-setup.ts'],
     exclude: ['**/e2e/**', '**/node_modules/**'],
     coverage: {

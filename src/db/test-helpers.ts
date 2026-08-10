@@ -20,8 +20,10 @@ export async function setupTestDatabase(schemaName: string) {
   const scopedClient = postgres(env.DATABASE_URL, {
     max: 1,
     onnotice: () => {},
-    options: `-c search_path="${schemaName}",public`,
-  });
+    onconnect: async (s: any) => {
+      await s.unsafe(`SET search_path TO "${schemaName}", public`);
+    },
+  } as any);
   const scopedDb = drizzle(scopedClient);
 
   console.log(`[Test DB] Running migrations on schema: ${schemaName}...`);
@@ -41,8 +43,10 @@ export async function seedTestFixtures(schemaName: string) {
   const seedClient = postgres(env.DATABASE_URL, {
     max: 1,
     onnotice: () => {},
-    options: `-c search_path="${schemaName}",public`,
-  });
+    onconnect: async (s: any) => {
+      await s.unsafe(`SET search_path TO "${schemaName}", public`);
+    },
+  } as any);
   const db = drizzle(seedClient, { schema });
 
   console.log(`[Test DB] Seeding fixtures on schema: ${schemaName}...`);
