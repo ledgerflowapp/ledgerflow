@@ -41,6 +41,7 @@ export const serverSchema = z.object({
   CRON_SECRET: optionalString(),
   PORT: optionalString(),
   CI: optionalString(),
+  DB_SCHEMA: optionalString(),
 });
 
 /**
