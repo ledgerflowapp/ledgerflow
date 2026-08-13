@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './helpers/test-fixtures';
 
 test.describe('Redesigned Landing Page E2E Suite', () => {
   test('should render all custom marketing, features, and pricing sections accurately', async ({ page }) => {

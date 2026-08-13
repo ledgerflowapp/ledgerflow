@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './helpers/test-fixtures';
 
 test.describe('Authentication Flow', () => {
     test('should render login page correctly with email and Google options', async ({ page }) => {

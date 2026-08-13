@@ -1,20 +1,20 @@
 import { defineConfig, devices } from '@playwright/test';
 import { loadEnvConfig } from '@next/env';
 loadEnvConfig(process.cwd());
+process.env.E2E_TEST = 'true';
 import { env } from './src/env';
 
-const PORT = env.PORT || 3005;
+const workers = process.env.CI ? 2 : 2;
 
 export default defineConfig({
     testDir: './e2e',
-    globalSetup: './src/test-global-setup.ts',
+    globalSetup: require.resolve('./e2e/global-setup.ts'),
     fullyParallel: true,
     forbidOnly: !!env.CI,
     retries: env.CI ? 2 : 0,
-    workers: env.CI ? 1 : undefined,
+    workers: workers,
     reporter: 'html',
     use: {
-        baseURL: `http://localhost:${PORT}`,
         trace: 'on-first-retry',
     },
     projects: [
@@ -23,9 +23,14 @@ export default defineConfig({
             use: { ...devices['Desktop Chrome'] },
         },
     ],
-    webServer: {
-        command: `PORT=${PORT} pnpm run dev`,
-        url: `http://localhost:${PORT}`,
+    webServer: Array.from({ length: workers }).map((_, index) => ({
+        command: `pnpm start --port 300${index}`,
+        url: `http://127.0.0.1:300${index}`,
         reuseExistingServer: false,
-    },
+        env: {
+            E2E_TEST: 'true',
+            TEST_PARALLEL_INDEX: `${index}`,
+            BETTER_AUTH_URL: `http://127.0.0.1:300${index}`,
+        },
+    })),
 });

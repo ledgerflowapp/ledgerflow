@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './helpers/test-fixtures';
 
 test.describe('Identity Reconciliation Wizard Flow', () => {
     test('renders wizard components when accessed or mounted', async ({ page }) => {

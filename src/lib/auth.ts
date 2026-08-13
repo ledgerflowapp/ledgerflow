@@ -56,7 +56,7 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    useSecureCookies: env.NODE_ENV === "production",
+    useSecureCookies: env.NODE_ENV === "production" && process.env.E2E_TEST !== "true",
     cookiePrefix: "ledgerflow",
     defaultCookieAttributes: {
       sameSite: "lax",

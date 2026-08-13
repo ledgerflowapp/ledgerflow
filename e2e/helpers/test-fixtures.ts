@@ -10,18 +10,7 @@ import { auth } from '@/lib/auth';
 import { eq, inArray, like, or } from 'drizzle-orm';
 import crypto from 'crypto';
 
-// Global tracker for created test entities to allow targeted teardown
-export const testDataTracker = {
-  users: new Set<string>(),
-  contacts: new Set<string>(),
-  groups: new Set<string>(),
-  accounts: new Set<string>(),
-  ledgers: new Set<string>(),
-  categories: new Set<string>(),
-  businesses: new Set<string>(),
-  transactions: new Set<string>(),
-  sessions: new Set<string>(),
-};
+// Removed global tracker as databases are ephemeral per worker
 
 /**
  * Generate a safe unique prefix for test entities
@@ -47,6 +36,7 @@ export interface SeededUserResult {
   };
   password: string;
   sessionToken?: string;
+  cookies?: Array<{ name: string; value: string }>;
 }
 
 /**
@@ -66,34 +56,42 @@ export async function seedRegisteredUser(options: SeedUserOptions = {}): Promise
         password,
         name,
       },
+      asResponse: true,
     });
 
-    if (res && res.user) {
-      testDataTracker.users.add(res.user.id);
-      const sessionToken = (res as any).token || (res as any).session?.token;
-      if (sessionToken) {
-        testDataTracker.sessions.add(sessionToken);
-      }
+    if (res && res.ok) {
+      const data = await res.json() as any;
+      const setCookies = res.headers.getSetCookie ? res.headers.getSetCookie() : [];
+      const parsedCookies = setCookies.map(cookieStr => {
+        const parts = cookieStr.split(';');
+        const [nameValue] = parts;
+        const eqIdx = nameValue.indexOf('=');
+        const name = nameValue.substring(0, eqIdx);
+        const value = nameValue.substring(eqIdx + 1);
+        return { name: name.trim(), value: value.trim() };
+      });
 
       // Ensure profile username is set if requested
       if (options.username) {
         await db
           .update(profiles)
           .set({ username: options.username })
-          .where(eq(profiles.id, res.user.id));
+          .where(eq(profiles.id, data.user.id));
       }
 
       return {
         user: {
-          id: res.user.id,
-          name: res.user.name,
-          email: res.user.email,
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
         },
         password,
-        sessionToken,
+        sessionToken: data.token || data.session?.token,
+        cookies: parsedCookies,
       };
     }
-  } catch {
+  } catch (err) {
+    console.error('[Test Setup] signUpEmail failed:', err);
     // Fallback: direct database insertion if auth endpoint rate limited or errors out
   }
 
@@ -128,8 +126,7 @@ export async function seedRegisteredUser(options: SeedUserOptions = {}): Promise
     updatedAt: now,
   });
 
-  testDataTracker.users.add(userId);
-  testDataTracker.sessions.add(sessionToken);
+
 
   return {
     user: {
@@ -173,7 +170,7 @@ export async function seedUnregisteredContact(
   };
 
   const [inserted] = await db.insert(contacts).values(contactData).returning();
-  testDataTracker.contacts.add(inserted.id);
+
   return inserted;
 }
 
@@ -231,7 +228,7 @@ export async function seedBankAccount(
   };
 
   const [inserted] = await db.insert(accounts).values(accountData).returning();
-  testDataTracker.accounts.add(inserted.id);
+
   return inserted;
 }
 
@@ -262,7 +259,7 @@ export async function seedGroupLedger(
     type: options.type || 'GENERAL',
   }).returning();
 
-  testDataTracker.groups.add(groupId);
+
 
   // Add Creator as member
   const membersList = [];
@@ -306,7 +303,7 @@ export async function seedGroupLedger(
     description: `Group ledger for ${groupName}`,
   }).returning();
 
-  testDataTracker.ledgers.add(ledgerId);
+
 
   return {
     group,
@@ -320,144 +317,39 @@ export async function seedGroupLedger(
  */
 export async function authenticateContext(
   context: BrowserContext,
-  sessionToken: string,
-  baseURL = 'http://localhost:3005'
+  sessionToken: string | undefined,
+  baseURL = 'http://127.0.0.1:3000',
+  cookies?: Array<{ name: string; value: string }>
 ) {
   const url = new URL(baseURL);
-  await context.addCookies([
-    {
-      name: 'ledgerflow.session_token',
-      value: sessionToken,
+  
+  if (cookies && cookies.length > 0) {
+    const playwrightCookies = cookies.map(c => ({
+      name: c.name,
+      value: c.value,
       domain: url.hostname,
       path: '/',
-    },
-    {
-      name: 'better-auth.session_token',
-      value: sessionToken,
-      domain: url.hostname,
-      path: '/',
-    },
-  ]);
-}
-
-/**
- * Automated post-execution teardown utility to reliably wipe test entities
- */
-export async function cleanupTestData() {
-  try {
-    const trackedUserIds = Array.from(testDataTracker.users);
-    const trackedContactIds = Array.from(testDataTracker.contacts);
-    const trackedGroupIds = Array.from(testDataTracker.groups);
-    const trackedAccountIds = Array.from(testDataTracker.accounts);
-    const trackedLedgerIds = Array.from(testDataTracker.ledgers);
-    const trackedCategoryIds = Array.from(testDataTracker.categories);
-    const trackedBusinessIds = Array.from(testDataTracker.businesses);
-    const trackedTransactionIds = Array.from(testDataTracker.transactions);
-    const trackedSessionTokens = Array.from(testDataTracker.sessions);
-
-    // 1. Clean up transaction splits & transactions
-    if (trackedTransactionIds.length > 0) {
-      await db.delete(transactionSplits).where(inArray(transactionSplits.transactionId, trackedTransactionIds));
-      await db.delete(transactions).where(inArray(transactions.id, trackedTransactionIds));
-    }
-    // Fallback: wipe transactions created by e2e test users
-    if (trackedUserIds.length > 0) {
-      await db.delete(transactions).where(inArray(transactions.userId, trackedUserIds));
-    }
-
-    // Deletes transactions matching e2e test pattern
-    await db.delete(transactions).where(like(transactions.name, 'e2e_test_%'));
-
-    // 2. Clean up Group members and Groups
-    if (trackedGroupIds.length > 0) {
-      await db.delete(groupMembers).where(inArray(groupMembers.groupId, trackedGroupIds));
-      await db.delete(groups).where(inArray(groups.id, trackedGroupIds));
-    }
-    await db.delete(groups).where(like(groups.name, 'e2e_test_%'));
-
-    // 3. Clean up Ledgers
-    if (trackedLedgerIds.length > 0) {
-      await db.delete(personalLedgers).where(inArray(personalLedgers.ledgerId, trackedLedgerIds));
-      await db.delete(friendLedgers).where(inArray(friendLedgers.ledgerId, trackedLedgerIds));
-      await db.delete(ledgers).where(inArray(ledgers.id, trackedLedgerIds));
-    }
-    if (trackedUserIds.length > 0) {
-      await db.delete(ledgers).where(inArray(ledgers.userId, trackedUserIds));
-    }
-    await db.delete(ledgers).where(like(ledgers.name, 'e2e_test_%'));
-
-    // 4. Clean up Contacts
-    if (trackedContactIds.length > 0) {
-      await db.delete(contacts).where(inArray(contacts.id, trackedContactIds));
-    }
-    if (trackedUserIds.length > 0) {
-      await db.delete(contacts).where(inArray(contacts.userId, trackedUserIds));
-    }
-    await db.delete(contacts).where(like(contacts.name, 'e2e_test_%'));
-
-    // 5. Clean up Bank Accounts
-    if (trackedAccountIds.length > 0) {
-      await db.delete(accounts).where(inArray(accounts.id, trackedAccountIds));
-    }
-    if (trackedUserIds.length > 0) {
-      await db.delete(accounts).where(inArray(accounts.userId, trackedUserIds));
-    }
-    await db.delete(accounts).where(like(accounts.name, 'e2e_test_%'));
-
-    // 6. Clean up Categories & Businesses
-    if (trackedCategoryIds.length > 0) {
-      await db.delete(categories).where(inArray(categories.id, trackedCategoryIds));
-    }
-    if (trackedBusinessIds.length > 0) {
-      await db.delete(businesses).where(inArray(businesses.id, trackedBusinessIds));
-    }
-
-    // 7. Clean up Friendships & Notifications
-    if (trackedUserIds.length > 0) {
-      await db.delete(friendships).where(
-        or(
-          inArray(friendships.userId1, trackedUserIds),
-          inArray(friendships.userId2, trackedUserIds)
-        )
-      );
-      await db.delete(notifications).where(inArray(notifications.userId, trackedUserIds));
-    }
-
-    // 8. Clean up Auth tables for test users
-    if (trackedSessionTokens.length > 0) {
-      await db.delete(session).where(inArray(session.token, trackedSessionTokens));
-    }
-
-    if (trackedUserIds.length > 0) {
-      await db.delete(session).where(inArray(session.userId, trackedUserIds));
-      await db.delete(account).where(inArray(account.userId, trackedUserIds));
-      await db.delete(profiles).where(inArray(profiles.id, trackedUserIds));
-      await db.delete(user).where(inArray(user.id, trackedUserIds));
-    }
-
-    // Fallback: Delete any lingering user matching e2e prefix
-    await db.delete(user).where(like(user.email, '%e2e_test_%'));
-    await db.delete(user).where(like(user.id, '%e2e_test_%'));
-
-    // Clear trackers
-    testDataTracker.users.clear();
-    testDataTracker.contacts.clear();
-    testDataTracker.groups.clear();
-    testDataTracker.accounts.clear();
-    testDataTracker.ledgers.clear();
-    testDataTracker.categories.clear();
-    testDataTracker.businesses.clear();
-    testDataTracker.transactions.clear();
-    testDataTracker.sessions.clear();
-  } catch (err) {
-    console.error('Error during cleanupTestData:', err);
+    }));
+    await context.addCookies(playwrightCookies);
+  } else if (sessionToken) {
+    await context.addCookies([
+      {
+        name: 'ledgerflow.session_token',
+        value: sessionToken,
+        domain: url.hostname,
+        path: '/',
+      },
+    ]);
   }
 }
+
+
 
 /**
  * Custom Playwright fixture definitions extending @playwright/test
  */
 export interface CustomTestFixtures {
+  baseURL: string;
   userAContext: BrowserContext;
   userBContext: BrowserContext;
   userAPage: Page;
@@ -465,6 +357,11 @@ export interface CustomTestFixtures {
 }
 
 export const test = baseTest.extend<CustomTestFixtures>({
+  baseURL: async ({}, use, testInfo) => {
+    const url = `http://127.0.0.1:300${testInfo.parallelIndex}`;
+    process.env.BETTER_AUTH_URL = url;
+    await use(url);
+  },
   userAContext: async ({ browser }, use) => {
     const context = await browser.newContext();
     await use(context);

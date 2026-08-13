@@ -7,13 +7,9 @@ import {
   seedGroupLedger,
   seedGhostMember,
   authenticateContext,
-  cleanupTestData,
 } from './test-fixtures';
 
 test.describe('E2E Test Infrastructure & Multi-Browser Helper Suite', () => {
-  test.afterEach(async () => {
-    await cleanupTestData();
-  });
 
   test('should provide isolated userAContext and userBContext fixtures', async ({
     userAContext,
@@ -39,6 +35,7 @@ test.describe('E2E Test Infrastructure & Multi-Browser Helper Suite', () => {
   test('should dynamically seed registered user, bank account, and authenticate browser session', async ({
     userAContext,
     userAPage,
+    baseURL,
   }) => {
     // 1. Seed user & bank account
     const userA = await seedRegisteredUser({ name: 'Alice Test' });
@@ -50,8 +47,8 @@ test.describe('E2E Test Infrastructure & Multi-Browser Helper Suite', () => {
     expect(bankAcc.name).toBe('E2E Savings Account');
 
     // 2. Authenticate session in userAContext
-    if (userA.sessionToken) {
-      await authenticateContext(userAContext, userA.sessionToken);
+    if (userA.cookies || userA.sessionToken) {
+      await authenticateContext(userAContext, userA.sessionToken, baseURL, userA.cookies);
     }
 
     // 3. Navigate userAPage to dashboard
