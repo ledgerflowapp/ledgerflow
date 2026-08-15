@@ -1,5 +1,7 @@
 import { test, expect } from '../helpers/test-fixtures';
 
+const PROTECTED_ROUTES = ['/dashboard', '/transactions', '/friends', '/groups'];
+
 test.describe('Session Guarding & Security', () => {
     test('unauthenticated navigation to /dashboard should redirect to /login with next param', async ({ page }) => {
         await page.goto('/dashboard');
@@ -9,32 +11,27 @@ test.describe('Session Guarding & Security', () => {
     });
 
     test('unauthenticated navigation to protected transaction and group routes', async ({ page }) => {
-        // We test /transactions, /friends, /groups as requested by the issue
-        const protectedRoutes = ['/transactions', '/friends', '/groups'];
-        
-        for (const route of protectedRoutes) {
+        for (const route of PROTECTED_ROUTES.filter(r => r !== '/dashboard')) {
             await page.goto(route);
             const encodedRoute = encodeURIComponent(route);
-            await expect(page).toHaveURL(new RegExp(`\/login\\?next=${encodedRoute}`));
+            await expect(page).toHaveURL(new RegExp(`^/login\\?next=${encodedRoute}`));
         }
     });
 
     test('forged/invalid session cookie injection should be rejected and redirect to login', async ({ page, baseURL }) => {
-        // Set a forged session cookie
-        await page.context().addCookies([
-            {
-                name: 'ledgerflow.session_token',
-                value: 'forged_invalid_session_token_123',
-                url: baseURL,
-            }
-        ]);
+        for (const route of PROTECTED_ROUTES) {
+            // Set a forged session cookie
+            await page.context().addCookies([
+                {
+                    name: 'ledgerflow.session_token',
+                    value: 'forged_invalid_session_token_123',
+                    url: baseURL,
+                }
+            ]);
 
-        const protectedRoutes = ['/dashboard', '/transactions', '/friends', '/groups'];
-        
-        for (const route of protectedRoutes) {
             await page.goto(route);
             const encodedRoute = encodeURIComponent(route);
-            await expect(page).toHaveURL(new RegExp(`\\/login\\?next=${encodedRoute}`));
+            await expect(page).toHaveURL(new RegExp(`^/login\\?next=${encodedRoute}`));
         }
     });
 });
