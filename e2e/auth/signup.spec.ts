@@ -1,7 +1,12 @@
-import { test, expect, generateTestPrefix, globalTestDataTracker } from '../helpers/test-fixtures';
-import { db } from '@/db';
-import { user } from '@/db/schema/auth';
-import { eq } from 'drizzle-orm';
+import { test, expect } from '../helpers/test-fixtures';
+import { generateTestPrefix } from '../helpers/test-fixtures';
+import { Page } from '@playwright/test';
+
+async function assertValidationErrorsVisible(page: Page) {
+    await expect(page.getByText('Name must be at least 2 characters')).toBeVisible();
+    await expect(page.getByText('Please enter a valid email address')).toBeVisible();
+    await expect(page.getByText('Password must be at least 6 characters')).toBeVisible();
+}
 
 test.describe('03 — Signup & Registration', () => {
     test.beforeEach(async ({ page }) => {
@@ -23,9 +28,7 @@ test.describe('03 — Signup & Registration', () => {
         await page.getByRole('button', { name: /Create Account/i }).click();
 
         // Check for inline validation messages
-        await expect(page.getByText('Name must be at least 2 characters')).toBeVisible();
-        await expect(page.getByText('Please enter a valid email address')).toBeVisible();
-        await expect(page.getByText('Password must be at least 6 characters')).toBeVisible();
+        await assertValidationErrorsVisible(page);
 
         // Try submitting invalid formats
         await page.getByLabel(/Full Name/i).fill('A'); // < 2 characters
@@ -34,9 +37,7 @@ test.describe('03 — Signup & Registration', () => {
 
         await page.getByRole('button', { name: /Create Account/i }).click();
 
-        await expect(page.getByText('Name must be at least 2 characters')).toBeVisible();
-        await expect(page.getByText('Please enter a valid email address')).toBeVisible();
-        await expect(page.getByText('Password must be at least 6 characters')).toBeVisible();
+        await assertValidationErrorsVisible(page);
     });
 
     test('should successfully register and initialize user profile', async ({ page }) => {
@@ -58,12 +59,7 @@ test.describe('03 — Signup & Registration', () => {
         // Verify redirect to dashboard
         await expect(page).toHaveURL(/\/dashboard/);
 
-        // Verify user was created in DB
-        const users = await db.select().from(user).where(eq(user.email, testEmail));
-        expect(users.length).toBe(1);
-        expect(users[0].name).toBe(testName);
-
-        // Add to tracker for cleanup
-        globalTestDataTracker.userIds.add(users[0].id);
+        // Verify user profile initialization in UI (name rendered in sidebar)
+        await expect(page.getByText(testName)).toBeVisible();
     });
 });

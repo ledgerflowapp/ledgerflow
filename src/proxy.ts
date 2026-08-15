@@ -23,10 +23,14 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAuthPage = pathname.startsWith("/login");
-  const isDashboardPage = pathname.startsWith("/dashboard");
+  const isProtectedPage = 
+    pathname.startsWith("/dashboard") || 
+    pathname.startsWith("/transactions") || 
+    pathname.startsWith("/friends") || 
+    pathname.startsWith("/groups");
 
   if (!sessionCookie) {
-    if (isDashboardPage) {
+    if (isProtectedPage) {
       return redirectToLogin(request, pathname);
     }
     return NextResponse.next();
@@ -43,7 +47,7 @@ export async function proxy(request: NextRequest) {
 
   const isValidSession = Boolean(session?.session && session?.user);
 
-  if (isDashboardPage && !isValidSession) {
+  if (isProtectedPage && !isValidSession) {
     return redirectToLogin(request, pathname);
   }
 
@@ -55,5 +59,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: [
+    "/dashboard/:path*", 
+    "/transactions/:path*", 
+    "/friends/:path*", 
+    "/groups/:path*", 
+    "/login"
+  ],
 };
