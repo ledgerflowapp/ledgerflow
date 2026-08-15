@@ -23,11 +23,13 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAuthPage = pathname.startsWith("/login");
-  const isProtectedPage = 
-    pathname.startsWith("/dashboard") || 
-    pathname.startsWith("/transactions") || 
-    pathname.startsWith("/friends") || 
-    pathname.startsWith("/groups");
+  const PROTECTED_ROUTES = [
+    "/dashboard",
+    "/transactions",
+    "/friends",
+    "/groups"
+  ];
+  const isProtectedPage = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
   if (!sessionCookie) {
     if (isProtectedPage) {

@@ -19,20 +19,22 @@ test.describe('Session Guarding & Security', () => {
         }
     });
 
-    test('forged/invalid session cookie injection should be rejected and redirect to login', async ({ page }) => {
+    test('forged/invalid session cookie injection should be rejected and redirect to login', async ({ page, baseURL }) => {
         // Set a forged session cookie
         await page.context().addCookies([
             {
                 name: 'ledgerflow.session_token',
                 value: 'forged_invalid_session_token_123',
-                domain: 'localhost',
-                path: '/',
+                url: baseURL,
             }
         ]);
 
-        await page.goto('/dashboard');
+        const protectedRoutes = ['/dashboard', '/transactions', '/friends', '/groups'];
         
-        // Since the session is invalid, it should be rejected and redirect to login
-        await expect(page).toHaveURL(/\/login\?next=%2Fdashboard/);
+        for (const route of protectedRoutes) {
+            await page.goto(route);
+            const encodedRoute = encodeURIComponent(route);
+            await expect(page).toHaveURL(new RegExp(`\\/login\\?next=${encodedRoute}`));
+        }
     });
 });
