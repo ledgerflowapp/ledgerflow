@@ -14,7 +14,7 @@ test.describe('Session Guarding & Security', () => {
         for (const route of PROTECTED_ROUTES.filter(r => r !== '/dashboard')) {
             await page.goto(route);
             const encodedRoute = encodeURIComponent(route);
-            await expect(page).toHaveURL(new RegExp(`^/login\\?next=${encodedRoute}`));
+            await expect(page).toHaveURL(new RegExp(`\/login\\?next=${encodedRoute}`));
         }
     });
 
@@ -31,7 +31,7 @@ test.describe('Session Guarding & Security', () => {
 
             await page.goto(route);
             const encodedRoute = encodeURIComponent(route);
-            await expect(page).toHaveURL(new RegExp(`^/login\\?next=${encodedRoute}`));
+            await expect(page).toHaveURL(new RegExp(`\/login\\?next=${encodedRoute}`));
         }
     });
 });

@@ -16,8 +16,8 @@ import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Contact } from '@/types'
 
 const contactSchema = z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    phone: z.string().optional(),
+    name: z.string().min(1, 'Please enter a name for this contact.').min(2, 'Name must be at least 2 characters.'),
+    phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number (e.g., +919876543210).').or(z.literal('')).optional(),
     type: z.enum(['CUSTOMER', 'SUPPLIER', 'OTHER']),
     image_url: z.string().optional(),
 })

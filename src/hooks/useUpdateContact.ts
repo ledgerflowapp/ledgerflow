@@ -20,7 +20,7 @@ export function useUpdateContact() {
             toast.success('Contact updated successfully')
         },
         onError: (error) => {
-            toast.error(`Failed to update contact: ${error.message}`)
+            toast.error(error.message)
         },
     })
 }

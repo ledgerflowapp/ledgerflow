@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { contacts, friendships, notifications, profiles, user as userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { eq, and, isNull, desc, gte, or } from "drizzle-orm";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 import { Contact } from "@/types";
@@ -103,18 +104,35 @@ export async function addBusinessContact(params: {
 }) {
   const user = await getAuthenticatedUser();
 
-  const [inserted] = await db
-    .insert(contacts)
-    .values({
-      userId: user.id,
-      name: params.name,
-      phone: params.phone,
-      type: params.type,
-      imageUrl: params.image_url,
-      businessId: params.businessId,
-    })
-    .returning();
+  const inserted = await db.transaction(async (tx) => {
+    const existing = await tx.query.contacts.findFirst({
+      where: and(
+        eq(contacts.userId, user.id),
+        eq(contacts.name, params.name),
+        eq(contacts.businessId, params.businessId)
+      ),
+    });
 
+    if (existing) {
+      throw new Error(`A contact named "${params.name}" already exists in this ledger.`);
+    }
+
+    const [insertedContact] = await tx
+      .insert(contacts)
+      .values({
+        userId: user.id,
+        name: params.name,
+        phone: params.phone,
+        type: params.type,
+        imageUrl: params.image_url,
+        businessId: params.businessId,
+      })
+      .returning();
+
+    return insertedContact;
+  });
+
+  revalidatePath('/dashboard/ledger');
   return mapContact(inserted);
 }
 
@@ -125,18 +143,35 @@ export async function addPersonalPerson(params: {
 }) {
   const user = await getAuthenticatedUser();
 
-  const [inserted] = await db
-    .insert(contacts)
-    .values({
-      userId: user.id,
-      name: params.name,
-      phone: params.phone,
-      type: "OTHER",
-      imageUrl: params.image_url,
-      businessId: null,
-    })
-    .returning();
+  const inserted = await db.transaction(async (tx) => {
+    const existing = await tx.query.contacts.findFirst({
+      where: and(
+        eq(contacts.userId, user.id),
+        eq(contacts.name, params.name),
+        isNull(contacts.businessId)
+      ),
+    });
 
+    if (existing) {
+      throw new Error(`You already have a person named "${params.name}" in your friends list.`);
+    }
+
+    const [insertedContact] = await tx
+      .insert(contacts)
+      .values({
+        userId: user.id,
+        name: params.name,
+        phone: params.phone,
+        type: "OTHER",
+        imageUrl: params.image_url,
+        businessId: null,
+      })
+      .returning();
+
+    return insertedContact;
+  });
+
+  revalidatePath('/dashboard/friends');
   return mapContact(inserted);
 }
 

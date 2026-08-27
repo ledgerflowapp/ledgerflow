@@ -19,10 +19,10 @@ import { paiseToRupees } from '@/lib/currency'
 import { getDefaultAccount } from '@/lib/account-utils'
 
 const businessTransactionSchema = z.object({
-    amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
-    name: z.string().min(1, 'Name is required'),
+    amount: z.coerce.number({ message: 'Please enter a valid amount' }).min(1, 'Amount must be greater than zero'),
+    name: z.string().min(1, 'Please provide a title for this transaction'),
     note: z.string().optional(),
-    contact_id: z.string().min(1, 'Contact is required'),
+    contact_id: z.string({ message: 'Please select a contact' }).min(1, 'Please select a contact'),
     date: z.coerce.date(),
     due_date: z.coerce.date().optional(),
     flow: z.enum(['IN', 'OUT']),

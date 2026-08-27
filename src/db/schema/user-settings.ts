@@ -9,6 +9,7 @@ export const userSettings = pgTable("user_settings", {
   personalTheme: text("personal_theme").default("dark"),
   businessAccent: text("business_accent").default("blue"),
   personalAccent: text("personal_accent").default("green"),
+  defaultWorkspaceMode: text("default_workspace_mode").default("personal"),
   syncThemes: boolean("sync_themes").default(false),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow(),

@@ -14,7 +14,7 @@ export function useAddPerson() {
             toast.success('Person added')
         },
         onError: (error) => {
-            toast.error(`Failed to add person: ${error.message}`)
+            toast.error(error.message)
         },
     })
 }

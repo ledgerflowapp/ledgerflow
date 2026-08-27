@@ -71,6 +71,8 @@ export const profiles = pgTable("profiles", {
   discoverableByPhone: boolean("discoverable_by_phone").default(true),
   discoverableByUsername: boolean("discoverable_by_username").default(true),
   friendInviteToken: uuid("friend_invite_token").defaultRandom().unique(),
+  onboardingStep: integer("onboarding_step").default(1),
+  onboardingCompleted: boolean("onboarding_completed").default(false),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow(),
 });
 

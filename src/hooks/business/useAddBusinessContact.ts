@@ -22,7 +22,7 @@ export function useAddBusinessContact() {
             toast.success('Contact added')
         },
         onError: (error) => {
-            toast.error(`Failed to add contact: ${error.message}`)
+            toast.error(error.message)
         },
     })
 }

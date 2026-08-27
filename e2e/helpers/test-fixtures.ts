@@ -108,13 +108,24 @@ export async function seedRegisteredUser(options: SeedUserOptions = {}): Promise
     return { name: cookieName.trim(), value: value.trim() };
   });
 
-  // Ensure profile username is set if requested
-  if (options.username) {
-    await db
-      .update(profiles)
-      .set({ username: options.username })
-      .where(eq(profiles.id, data.user.id));
-  }
+  // Ensure profile is onboarded and username is set if requested
+  await db
+    .insert(profiles)
+    .values({
+      id: data.user.id,
+      email: data.user.email,
+      onboardingCompleted: true,
+      onboardingStep: 4,
+      ...(options.username ? { username: options.username } : {}),
+    })
+    .onConflictDoUpdate({
+      target: profiles.id,
+      set: {
+        onboardingCompleted: true,
+        onboardingStep: 4,
+        ...(options.username ? { username: options.username } : {}),
+      },
+    });
 
   globalTestDataTracker.userIds.add(data.user.id);
 

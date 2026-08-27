@@ -39,8 +39,8 @@ export function getPersonalTransactionFormDefaults(initialData?: any) {
 }
 
 const personalTransactionSchema = z.object({
-    amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
-    name: z.string().min(1, 'Name is required'),
+    amount: z.coerce.number({ message: 'Please enter a valid amount' }).min(1, 'Amount must be greater than zero'),
+    name: z.string().min(1, 'Please provide a title for this transaction'),
     note: z.string().optional(),
     contact_id: z.string().nullable().optional(),
     category_id: z.string().nullable().optional(), // validated manually based on flow
@@ -116,7 +116,7 @@ export function PersonalTransactionDrawer({
 
     function onSubmit(values: z.infer<typeof personalTransactionSchema>) {
         if (!values.category_id && flow === 'OUT') {
-            toast.error('Please select a category')
+            toast.error('Please select a category for this expense')
             return
         }
 
