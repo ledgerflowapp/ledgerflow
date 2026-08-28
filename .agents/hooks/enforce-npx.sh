@@ -1,15 +1,15 @@
 #!/bin/bash
-input_json=\$(cat)
+input_json=$(cat)
 
 if [ -x /usr/bin/jq ]; then
-  command_line=\$(echo "\$input_json" | /usr/bin/jq -r '.toolCall.args.CommandLine')
+  command_line=$(echo "$input_json" | /usr/bin/jq -r '.toolCall.args.CommandLine')
 elif command -v jq >/dev/null 2>&1; then
-  command_line=\$(echo "\$input_json" | jq -r '.toolCall.args.CommandLine')
+  command_line=$(echo "$input_json" | jq -r '.toolCall.args.CommandLine')
 else
-  command_line=\$(echo "\$input_json" | grep -oE '"CommandLine"\s*:\s*"[^"]*"' | head -n 1 | cut -d'"' -f4)
+  command_line=$(echo "$input_json" | grep -oE '"CommandLine"\s*:\s*"[^"]*"' | head -n 1 | cut -d'"' -f4)
 fi
 
-if echo "\$command_line" | grep -qE '\bnpx\b'; then
+if echo "$command_line" | grep -qE '\bnpx\b'; then
   cat <<JSON_OUT
 {
   "allow_tool": false,
@@ -25,3 +25,4 @@ cat <<JSON_OUT
 }
 JSON_OUT
 exit 0
+
