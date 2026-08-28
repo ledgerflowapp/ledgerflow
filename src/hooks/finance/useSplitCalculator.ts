@@ -121,7 +121,8 @@ export function useSplitCalculator({ totalAmount, members, currentUserId }: UseS
             // But let's handle JS math quirks.
             remainder = Math.round(remainder * 100) / 100
 
-            isValid = Math.abs(remainder) < 0.01
+            const hasNegative = Object.values(shares).some(val => (val || 0) < 0);
+            isValid = !hasNegative && Math.abs(remainder) < 0.01
 
             allocations = members.map(member => {
                 const amount = shares[member.id] || 0
@@ -133,10 +134,11 @@ export function useSplitCalculator({ totalAmount, members, currentUserId }: UseS
             })
 
         } else if (splitType === 'BY_PERCENTAGE') {
+            const hasNegative = Object.values(shares).some(val => (val || 0) < 0)
             const totalPercent = Object.values(shares).reduce((sum, val) => sum + (val || 0), 0)
 
-            // Valid if total percent is 100
-            isValid = Math.abs(totalPercent - 100) < 0.01
+            // Valid if total percent is 100 and no negative values
+            isValid = !hasNegative && Math.abs(totalPercent - 100) < 0.01
             remainder = 100 - totalPercent // Remainder in percent
 
             allocations = members.map(member => {

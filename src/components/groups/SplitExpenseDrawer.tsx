@@ -97,7 +97,18 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
 
     const handleSubmit = () => {
         if (!isValid) {
-            toast.error('Please fix the split amounts')
+            const hasNegative = Object.values(shares).some(val => (val || 0) < 0)
+            if (hasNegative) {
+                toast.error('Split amounts cannot be negative', { id: 'split-validation-error' })
+                return
+            }
+            if (splitType === 'BY_AMOUNT') {
+                toast.error('Custom amounts must sum to the total expense amount', { id: 'split-validation-error' })
+            } else if (splitType === 'BY_PERCENTAGE') {
+                toast.error('Percentages must add up to exactly 100%', { id: 'split-validation-error' })
+            } else {
+                toast.error('Please fix the split amounts', { id: 'split-validation-error' })
+            }
             return
         }
 
@@ -355,7 +366,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
                             <ChevronRight className="ml-2 h-4 w-4" />
                         </Button>
                     ) : (
-                        <Button onClick={handleSubmit} disabled={!isValid || isPending} className="w-full">
+                        <Button onClick={handleSubmit} disabled={isPending} className="w-full">
                             {isPending ? 'Saving...' : 'Send Request'}
                         </Button>
                     )}
