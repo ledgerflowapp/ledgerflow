@@ -1,25 +1,11 @@
 import type { NextConfig } from "next";
 import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
-import { env } from "./src/env";
-
-const supabaseHostname = env.NEXT_PUBLIC_SUPABASE_URL
-  ? new URL(env.NEXT_PUBLIC_SUPABASE_URL).hostname
-  : "*.supabase.co";
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: supabaseHostname.includes("*") ? supabaseHostname : supabaseHostname,
-        pathname: "/storage/v1/object/public/**",
-      },
-      {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/storage/v1/object/public/**",
-      },
+      // Add any new storage remote patterns here
     ],
   },
   async headers() {

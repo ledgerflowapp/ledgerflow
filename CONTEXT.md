@@ -45,3 +45,11 @@ The process of linking one or more `Unregistered Contact` entries (1:1 context) 
   - *Direct Token Claim*: Claiming via an explicit group invite token immediately converts the Ghost Member to a linked Registered Profile in the group.
   - *Phone/Email Match*: Matching via phone/email notifies the group creator/admin for approval before re-assigning historical group transaction splits.
 - **Friendship Auto-Creation**: Merging automatically establishes a mutual `Friend` relationship between the inviter and the newly linked Registered Profile.
+
+## 4. Domain Services
+
+### Onboarding Service
+Centralizes the multi-domain initialization of a newly registered user, decoupling the `auth` lifecycle from the provisioning of default profiles, preferences, businesses, accounts, and budget categories.
+
+### Notification Service
+Centralizes the composition and fan-out of activity notifications (e.g., deleted transactions) to relevant contacts and group members, keeping transaction actions focused solely on state changes.

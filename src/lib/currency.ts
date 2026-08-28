@@ -43,3 +43,12 @@ export function isValidAmount(value: string): boolean {
     return false
   }
 }
+
+/** 
+ * Returns the signed delta for a transaction based on its flow.
+ * OUT = positive (giving money, owed increases)
+ * IN  = negative (getting money, owed decreases)
+ */
+export function getSignedFlowDelta(flow: "IN" | "OUT", amount: number): number {
+  return flow === "OUT" ? amount : -amount;
+}

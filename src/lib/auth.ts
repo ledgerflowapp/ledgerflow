@@ -3,6 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { env } from "@/env";
+import { initializeNewUser } from "@/lib/domain/onboarding";
 
 // Environmental origins setup
 const rawTrustedOrigins = env.BETTER_AUTH_TRUSTED_ORIGINS;
@@ -66,16 +67,7 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
-          await db
-            .insert(schema.profiles)
-            .values({
-              id: user.id,
-              fullName: user.name,
-              email: user.email,
-              avatarUrl: user.image,
-            })
-            .onConflictDoNothing();
-          console.log(`[AUDIT] Created profile for new user: ${user.id}`);
+          await initializeNewUser(user);
         },
       },
       update: {

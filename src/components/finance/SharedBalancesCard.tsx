@@ -117,7 +117,7 @@ export function SharedBalancesCard() {
                                                 {contact.net_balance !== 0 ? (
                                                     <span className={`text-sm font-medium ${contact.net_balance > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                                         {contact.net_balance > 0 ? 'Owes you ' : 'You owe '}
-                                                        ₹{paiseToRupees(paiseToRupees(Math.abs(contact.net_balance)).toNumber()).toNumber().toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                                        ₹{paiseToRupees(Math.abs(contact.net_balance)).toNumber().toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                                     </span>
                                                 ) : (
                                                     <span className="text-sm font-medium text-muted-foreground">Settled up</span>

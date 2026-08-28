@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/db";
+import * as schema from "@/db/schema";
 import { getSessionUser } from "@/lib/auth-session";
 import {
   transactions,
@@ -11,8 +12,11 @@ import {
   groups,
   user,
   profiles,
+  notifications,
 } from "@/db/schema";
-import { eq, and, desc, asc, or, isNull, sql } from "drizzle-orm";
+import { eq, and, desc, or, isNull, sql } from "drizzle-orm";
+import { getSignedFlowDelta } from "@/lib/currency";
+import { notifyTransactionDeleted } from "@/lib/domain/notifications";
 
 export interface SplitInput {
   userId?: string | null;
@@ -82,6 +86,27 @@ async function updateAccountBalance(
     .where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)));
 }
 
+async function updateContactStats(
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  contactId: string,
+  userId: string,
+  delta: number,
+  countDelta: number,
+  transactionDate?: Date
+) {
+  const updateData: any = {
+    netBalance: sql`COALESCE(${contacts.netBalance}, 0) + ${String(delta)}`,
+    transactionCount: sql`COALESCE(${contacts.transactionCount}, 0) + ${String(countDelta)}`,
+  };
+  if (transactionDate) {
+    updateData.lastTransactionAt = transactionDate;
+  }
+  await tx
+    .update(contacts)
+    .set(updateData)
+    .where(and(eq(contacts.id, contactId), eq(contacts.userId, userId)));
+}
+
 export async function createTransactionAction(
   input: CreateTransactionInput
 ) {
@@ -128,8 +153,12 @@ export async function createTransactionAction(
     }
 
     if (input.accountId) {
-      const delta = input.flow === "IN" ? input.amount : -input.amount;
+      const delta = -getSignedFlowDelta(input.flow, input.amount);
       await updateAccountBalance(tx, input.accountId, currentUser.id, delta);
+    }
+    if (input.contactId) {
+      const contactDelta = getSignedFlowDelta(input.flow, input.amount);
+      await updateContactStats(tx, input.contactId, currentUser.id, contactDelta, 1, new Date(input.date));
     }
 
     return { id: insertedTx.id, success: true, transaction: insertedTx };
@@ -446,19 +475,38 @@ export async function updateTransactionAction(
     const newFlow = input.flow;
 
     if (oldAccountId && oldAccountId === newAccountId) {
-      const oldNet = oldFlow === "IN" ? oldAmount : -oldAmount;
-      const newNet = newFlow === "IN" ? newAmount : -newAmount;
+      const oldNet = -getSignedFlowDelta(oldFlow, oldAmount);
+      const newNet = -getSignedFlowDelta(newFlow, newAmount);
       const netDelta = newNet - oldNet;
       await updateAccountBalance(tx, oldAccountId, currentUser.id, netDelta);
     } else {
       if (oldAccountId) {
-        const revertDelta = oldFlow === "IN" ? -oldAmount : +oldAmount;
+        const revertDelta = getSignedFlowDelta(oldFlow, oldAmount);
         await updateAccountBalance(tx, oldAccountId, currentUser.id, revertDelta);
       }
 
       if (newAccountId) {
-        const applyDelta = newFlow === "IN" ? +newAmount : -newAmount;
+        const applyDelta = -getSignedFlowDelta(newFlow, newAmount);
         await updateAccountBalance(tx, newAccountId, currentUser.id, applyDelta);
+      }
+    }
+
+    const oldContactId = existing.contactId;
+    const newContactId = input.contactId || null;
+    
+    if (oldContactId && oldContactId === newContactId) {
+      const oldNet = getSignedFlowDelta(oldFlow, oldAmount);
+      const newNet = getSignedFlowDelta(newFlow, newAmount);
+      const netDelta = newNet - oldNet;
+      await updateContactStats(tx, oldContactId, currentUser.id, netDelta, 0, new Date(input.date));
+    } else {
+      if (oldContactId) {
+        const revertDelta = -getSignedFlowDelta(oldFlow, oldAmount);
+        await updateContactStats(tx, oldContactId, currentUser.id, revertDelta, -1);
+      }
+      if (newContactId) {
+        const applyDelta = getSignedFlowDelta(newFlow, newAmount);
+        await updateContactStats(tx, newContactId, currentUser.id, applyDelta, 1, new Date(input.date));
       }
     }
 
@@ -508,8 +556,18 @@ export async function deleteTransactionAction(id: string) {
 
     if (existing.accountId) {
       const oldAmount = Number(existing.amount);
-      const revertDelta = existing.flow === "IN" ? -oldAmount : +oldAmount;
+      const revertDelta = getSignedFlowDelta(existing.flow as "IN" | "OUT", oldAmount);
       await updateAccountBalance(tx, existing.accountId, currentUser.id, revertDelta);
+    }
+
+    if (existing.contactId) {
+      const oldAmount = Number(existing.amount);
+      const revertDelta = -getSignedFlowDelta(existing.flow as "IN" | "OUT", oldAmount);
+      await updateContactStats(tx, existing.contactId, currentUser.id, revertDelta, -1);
+
+      await notifyTransactionDeleted(tx, existing, currentUser);
+    } else if (existing.groupId) {
+      await notifyTransactionDeleted(tx, existing, currentUser);
     }
 
     await tx

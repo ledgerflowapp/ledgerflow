@@ -140,7 +140,7 @@ GOOGLE_CLIENT_SECRET="your_google_client_secret"
 #### Environment Variables Reference
 
 1. **`DATABASE_URL`** *(Required)*
-   - **Why it is needed**: Specifies how LedgerFlow connects to your PostgreSQL database (Supabase, Neon, or local Postgres).
+   - **Why it is needed**: Specifies how LedgerFlow connects to your PostgreSQL database (e.g. Neon, or local Postgres).
    - **Validation**: Must be a non-empty Postgres connection URL. The app will fail to start if this is missing.
 
 2. **`BETTER_AUTH_SECRET`** *(Required)*

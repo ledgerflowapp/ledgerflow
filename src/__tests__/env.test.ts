@@ -26,8 +26,6 @@ describe("env validation", () => {
       GOOGLE_CLIENT_SECRET: "google-secret-456",
       CRON_SECRET: "cron-secret-789",
       NEXT_PUBLIC_SITE_URL: "https://ledgerflow.example.com",
-      NEXT_PUBLIC_SUPABASE_URL: "https://xyz.supabase.co",
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-key-123",
     };
 
     const result = validateEnv(fullEnv, { isServer: true });
@@ -89,12 +87,10 @@ describe("env validation", () => {
   it("validates client environment variables separately when isServer is false", () => {
     const clientEnv = {
       NEXT_PUBLIC_SITE_URL: "https://ledgerflow.example.com",
-      NEXT_PUBLIC_SUPABASE_URL: "https://xyz.supabase.co",
     };
 
     const result = validateEnv(clientEnv, { isServer: false });
     expect(result.NEXT_PUBLIC_SITE_URL).toBe("https://ledgerflow.example.com");
-    expect(result.NEXT_PUBLIC_SUPABASE_URL).toBe("https://xyz.supabase.co");
   });
 
   it("formats env errors correctly with formatEnvErrors", () => {

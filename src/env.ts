@@ -51,8 +51,6 @@ export const serverSchema = z.object({
 export const clientSchema = z.object({
   NEXT_PUBLIC_SITE_URL: optionalUrl("NEXT_PUBLIC_SITE_URL must be a valid URL"),
   NEXT_PUBLIC_VERCEL_URL: optionalString(),
-  NEXT_PUBLIC_SUPABASE_URL: optionalUrl("NEXT_PUBLIC_SUPABASE_URL must be a valid URL"),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalString(),
 });
 
 export const envSchema = serverSchema.extend(clientSchema.shape);

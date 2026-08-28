@@ -55,8 +55,8 @@ test.describe('03 — Signup & Registration', () => {
         // Verify success toast
         await expect(page.getByText('Account created successfully!')).toBeVisible();
 
-        // Verify redirect to dashboard
-        await expect(page).toHaveURL(/\/dashboard/);
+        // Verify redirect to onboarding (dashboard layout redirects new users to onboarding)
+        await expect(page).toHaveURL(/\/onboarding/);
 
         // Verify user was created in DB
         const users = await db.select().from(user).where(eq(user.email, testEmail));

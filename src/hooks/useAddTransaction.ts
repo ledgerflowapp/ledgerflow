@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createTransactionAction } from '@/lib/actions/transactions'
 import { useAppStore } from '@/store/useAppStore'
 import { Contact, Paise } from '@/types'
-import { rupeesToPaise, addPaise } from '@/lib/currency'
+import { rupeesToPaise, addPaise, getSignedFlowDelta } from '@/lib/currency'
 import { toast } from '@/components/ui/toast'
 
 /** Input shape for a single split — amounts are raw rupee values from the UI. */
@@ -97,14 +97,13 @@ export function useAddTransaction() {
             // Snapshot the previous values for rollback
             const previousTransactions = queryClient.getQueryData(optimisticQueryKey)
             const previousContacts = queryClient.getQueryData(['contacts'])
+            const previousPersonalPeople = queryClient.getQueryData(['personal-people'])
 
             // Optimistically prepend a fake transaction to the first page of the infinite query
             queryClient.setQueryData(optimisticQueryKey, (old: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                 const optimisticTransaction = {
                     id: `temp-${Date.now()}`,
                     ...newTransaction,
-                    // amount is already in Paise from useAddTransaction's mutationFn conversion.
-                    // For the optimistic entry we must store the Paise value, not the raw rupee input.
                     date: newTransaction.date.toISOString(),
                     contacts: null,
                     payer: null,
@@ -118,19 +117,15 @@ export function useAddTransaction() {
                 return { ...old, pages: newPages }
             })
 
-            // Optimistically update the contact's net_balance in the contacts list cache.
-            // All values here are Paise — use addPaise from currency.ts.
-            if (newTransaction.contact_id && newTransaction.mode === 'BUSINESS') {
-                queryClient.setQueryData(['contacts'], (old: Contact[] | undefined) => {
+            // Optimistically update the contact's net_balance in the list cache.
+            if (newTransaction.contact_id) {
+                const delta = getSignedFlowDelta(newTransaction.flow, newTransaction.amount)
+                
+                const updateContactFn = (old: Contact[] | undefined) => {
                     if (!old) return []
                     return old
                         .map((contact) => {
                             if (contact.id !== newTransaction.contact_id) return contact
-                            // OUT = you gave = owed to you increases (+)
-                            // IN  = you got  = owed to you decreases (-)
-                            const delta = newTransaction.flow === 'OUT'
-                                ? newTransaction.amount   // already Paise
-                                : -newTransaction.amount
                             return {
                                 ...contact,
                                 net_balance: addPaise(contact.net_balance, delta) as Paise,
@@ -142,19 +137,29 @@ export function useAddTransaction() {
                                 new Date(b.last_transaction_at ?? 0).getTime() -
                                 new Date(a.last_transaction_at ?? 0).getTime()
                         )
-                })
+                }
+
+                if (newTransaction.mode === 'BUSINESS') {
+                    queryClient.setQueryData(['contacts'], updateContactFn)
+                } else if (newTransaction.mode === 'PERSONAL') {
+                    // Update all query variations of personal-people
+                    queryClient.setQueriesData({ queryKey: ['personal-people'] }, updateContactFn)
+                }
             }
 
             // Return context for rollback in onError
-            return { previousTransactions, previousContacts, optimisticQueryKey }
+            return { previousTransactions, previousContacts, previousPersonalPeople, optimisticQueryKey }
         },
         onError: (_err, _newTransaction, context) => {
-            // Roll back to the snapshot values using the same corrected key
+            // Roll back to the snapshot values
             if (context?.previousTransactions !== undefined) {
                 queryClient.setQueryData(context.optimisticQueryKey, context.previousTransactions)
             }
             if (context?.previousContacts !== undefined) {
                 queryClient.setQueryData(['contacts'], context.previousContacts)
+            }
+            if (context?.previousPersonalPeople !== undefined) {
+                queryClient.setQueryData(['personal-people'], context.previousPersonalPeople)
             }
             toast.error('Failed to save transaction. Please check your connection and try again.')
         },
