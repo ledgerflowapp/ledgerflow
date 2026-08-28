@@ -6,20 +6,28 @@ test.describe('Session Guarding & Security', () => {
     test('unauthenticated navigation to /dashboard should redirect to /login with next param', async ({ page }) => {
         await page.goto('/dashboard');
         
-        // Next.js middleware should redirect us to /login?next=%2Fdashboard
+        // Next.js proxy should redirect us to /login?next=%2Fdashboard
         await expect(page).toHaveURL(/\/login\?next=%2Fdashboard/);
     });
 
-    test('unauthenticated navigation to protected transaction and group routes', async ({ page }) => {
-        for (const route of PROTECTED_ROUTES.filter(r => r !== '/dashboard')) {
+    test('unauthenticated navigation should preserve query parameters in next param', async ({ page }) => {
+        await page.goto('/transactions?filter=recent&sort=desc');
+        
+        // Next.js proxy should redirect us and encode the full path including search params
+        const encodedPath = encodeURIComponent('/transactions?filter=recent&sort=desc');
+        await expect(page).toHaveURL(new RegExp(`\/login\\?next=${encodedPath}`));
+    });
+
+    for (const route of PROTECTED_ROUTES.filter(r => r !== '/dashboard')) {
+        test(`unauthenticated navigation to ${route} should redirect to login`, async ({ page }) => {
             await page.goto(route);
             const encodedRoute = encodeURIComponent(route);
             await expect(page).toHaveURL(new RegExp(`\/login\\?next=${encodedRoute}`));
-        }
-    });
+        });
+    }
 
-    test('forged/invalid session cookie injection should be rejected and redirect to login', async ({ page, baseURL }) => {
-        for (const route of PROTECTED_ROUTES) {
+    for (const route of PROTECTED_ROUTES) {
+        test(`forged/invalid session cookie injection on ${route} should be rejected and redirect to login`, async ({ page, baseURL }) => {
             await page.context().clearCookies();
             // Set a forged session cookie
             await page.context().addCookies([
@@ -33,6 +41,6 @@ test.describe('Session Guarding & Security', () => {
             await page.goto(route);
             const encodedRoute = encodeURIComponent(route);
             await expect(page).toHaveURL(new RegExp(`\/login\\?next=${encodedRoute}`));
-        }
-    });
+        });
+    }
 });

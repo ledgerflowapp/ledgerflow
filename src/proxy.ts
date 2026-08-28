@@ -2,9 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 import { auth } from "@/lib/auth";
 
-function redirectToLogin(request: NextRequest, pathname: string) {
+function redirectToLogin(request: NextRequest) {
   const loginUrl = new URL("/login", request.url);
-  loginUrl.searchParams.set("next", pathname);
+  // Include search params in the next URL if they exist
+  const nextPath = request.nextUrl.pathname + request.nextUrl.search;
+  loginUrl.searchParams.set("next", nextPath);
   return NextResponse.redirect(loginUrl);
 }
 
@@ -33,7 +35,7 @@ export async function proxy(request: NextRequest) {
 
   if (!sessionCookie) {
     if (isProtectedPage) {
-      return redirectToLogin(request, pathname);
+      return redirectToLogin(request);
     }
     return NextResponse.next();
   }
@@ -50,7 +52,7 @@ export async function proxy(request: NextRequest) {
   const isValidSession = Boolean(session?.session && session?.user);
 
   if (isProtectedPage && !isValidSession) {
-    return redirectToLogin(request, pathname);
+    return redirectToLogin(request);
   }
 
   if (isAuthPage && isValidSession) {
