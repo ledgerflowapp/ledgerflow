@@ -20,6 +20,7 @@ test.describe('Session Guarding & Security', () => {
 
     test('forged/invalid session cookie injection should be rejected and redirect to login', async ({ page, baseURL }) => {
         for (const route of PROTECTED_ROUTES) {
+            await page.context().clearCookies();
             // Set a forged session cookie
             await page.context().addCookies([
                 {
