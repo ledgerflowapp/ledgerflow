@@ -19,10 +19,18 @@ import { paiseToRupees } from '@/lib/currency'
 import { getDefaultAccount } from '@/lib/account-utils'
 
 const businessTransactionSchema = z.object({
-    amount: z.coerce.number({ message: 'Please enter a valid amount' }).min(1, 'Amount must be greater than zero'),
-    name: z.string().min(1, 'Please provide a title for this transaction'),
+    amount: z.any().transform(v => (v === '' || v === undefined || v === null ? undefined : Number(v))).superRefine((val, ctx) => {
+        if (val === undefined) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please enter an amount' });
+        } else if (Number.isNaN(val)) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please enter a valid amount' });
+        } else if (val <= 0) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Amount must be greater than zero' });
+        }
+    }),
+    name: z.string().trim().min(1, 'Please provide a title for this transaction'),
     note: z.string().optional(),
-    contact_id: z.string({ message: 'Please select a contact' }).min(1, 'Please select a contact'),
+    contact_id: z.string().min(1, 'Please select a contact'),
     date: z.coerce.date(),
     due_date: z.coerce.date().optional(),
     flow: z.enum(['IN', 'OUT']),

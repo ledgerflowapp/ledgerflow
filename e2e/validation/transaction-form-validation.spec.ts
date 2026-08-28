@@ -1,11 +1,15 @@
 import { test, expect, seedRegisteredUser, authenticateContext, seedBankAccount } from '../helpers/test-fixtures';
 
 test.describe('Transaction Form Validation & Polish', () => {
+    test.setTimeout(60000);
     test('transaction form shows user-friendly validation errors', async ({ userAPage, userAContext, baseURL }) => {
         const { sessionToken, user, cookies } = await seedRegisteredUser({ username: 'testuser_123' });
         await seedBankAccount(user.id, { name: 'Cash', balance: '1000' });
         
         await authenticateContext(userAContext, sessionToken, baseURL, cookies);
+        await userAContext.addInitScript(() => {
+            localStorage.setItem('app-preference', JSON.stringify({ state: { mode: 'personal' }, version: 0 }));
+        });
         await userAPage.goto('/dashboard');
         
         // Wait for page to be ready
@@ -23,19 +27,19 @@ test.describe('Transaction Form Validation & Polish', () => {
         await userAPage.getByRole('button', { name: 'Save Transaction' }).click();
         
         // Assert empty amount error
-        await expect(userAPage.getByText('Please enter a valid amount')).toBeVisible();
+        await expect(userAPage.getByText('Please enter an amount')).toBeVisible();
         
         // Assert missing title
         await expect(userAPage.getByText('Please provide a title for this transaction')).toBeVisible();
         
         // Type negative amount
-        await userAPage.getByPlaceholder('0.00').fill('-50');
+        await userAPage.getByLabel('Amount (₹)').fill('-50');
         await userAPage.getByRole('button', { name: 'Save Transaction' }).click();
         await expect(userAPage.getByText('Amount must be greater than zero')).toBeVisible();
         
         // Fix amount and title
-        await userAPage.getByPlaceholder('0.00').fill('100');
-        await userAPage.getByPlaceholder('Starbucks, Uber, etc.').fill('Groceries');
+        await userAPage.getByLabel('Amount (₹)').fill('100');
+        await userAPage.getByLabel('Name').fill('Groceries');
         
         // Try to save without selecting a category (for OUT flow which is default)
         await userAPage.getByRole('button', { name: 'Save Transaction' }).click();

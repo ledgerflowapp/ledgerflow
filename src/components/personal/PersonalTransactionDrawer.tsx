@@ -39,12 +39,20 @@ export function getPersonalTransactionFormDefaults(initialData?: any) {
 }
 
 const personalTransactionSchema = z.object({
-    amount: z.coerce.number({ message: 'Please enter a valid amount' }).min(1, 'Amount must be greater than zero'),
-    name: z.string().min(1, 'Please provide a title for this transaction'),
+    amount: z.any().transform(v => (v === '' || v === undefined || v === null ? undefined : Number(v))).superRefine((val, ctx) => {
+        if (val === undefined) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please enter an amount' });
+        } else if (Number.isNaN(val)) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please enter a valid amount' });
+        } else if (val <= 0) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Amount must be greater than zero' });
+        }
+    }),
+    name: z.string().trim().min(1, 'Please provide a title for this transaction'),
     note: z.string().optional(),
     contact_id: z.string().nullable().optional(),
     category_id: z.string().nullable().optional(), // validated manually based on flow
-    account_id: z.string({ message: 'Please select an account' }).min(1, 'Please select an account'),
+    account_id: z.string().min(1, 'Please select an account'),
     date: z.coerce.date(),
     flow: z.enum(['IN', 'OUT']),
 })
