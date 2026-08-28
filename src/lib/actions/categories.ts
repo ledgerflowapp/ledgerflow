@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { categories, transactions } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { eq, and, asc, desc, gte, sql } from "drizzle-orm";
+import { eq, and, asc, desc, gte, lte, sql } from "drizzle-orm";
 import { addPaise, paiseToRupees } from "@/lib/currency";
 
 async function getAuthenticatedUser(reqHeaders?: Headers) {
@@ -236,7 +236,7 @@ export async function getMonthlyCategorySpend(month: number, year: number) {
         eq(transactions.userId, user.id),
         eq(transactions.flow, "OUT"),
         gte(transactions.date, startDate),
-        sql`${transactions.date} <= ${endDate}`
+        lte(transactions.date, endDate)
       )
     )
     .groupBy(categories.name);

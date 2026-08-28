@@ -79,25 +79,25 @@ export const auth = betterAuth({
         },
       },
       update: {
-        after: async ({ data, oldData }: any) => {
-          if (oldData?.email !== data?.email) {
-            console.log(`[AUDIT] Email updated for user ${data?.id}: ${oldData?.email} -> ${data?.email}`);
+        after: async (user) => {
+          if (user) {
+            console.log(`[AUDIT] User updated ${user.id}: ${user.email}`);
           }
         },
       },
     },
     session: {
       create: {
-        after: async ({ data }: any) => {
-          if (data) {
-            console.log(`[AUDIT] Session created for user ${data.userId} (ID: ${data.id})`);
+        after: async (session) => {
+          if (session) {
+            console.log(`[AUDIT] Session created for user ${session.userId} (ID: ${session.id})`);
           }
         },
       },
       delete: {
-        before: async ({ data }: any) => {
-          if (data) {
-            console.log(`[AUDIT] Session revoking (ID: ${data.id})`);
+        before: async (session) => {
+          if (session?.id) {
+            console.log(`[AUDIT] Session revoking (ID: ${session.id})`);
           }
         },
       },
