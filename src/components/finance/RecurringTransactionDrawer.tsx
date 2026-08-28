@@ -29,15 +29,15 @@ import { paiseToRupees } from '@/lib/currency'
 
 export const recurringSchema = z.object({
     amount: z
-        .number({ message: 'Amount is required' })
+        .number({ message: 'Please enter an amount' })
         .or(z.nan())
         .refine((val) => !isNaN(val) && val >= 1, {
-            message: 'Amount must be greater than 0',
+            message: 'Amount must be greater than zero',
         }),
-    name: z.string().min(1, 'Name is required'),
+    name: z.string().min(1, 'Please provide a title for this transaction'),
     note: z.string().optional(),
     category_id: z.string().optional(),
-    account_id: z.string().min(1, 'Account is required'),
+    account_id: z.string().min(1, 'Please select an account'),
     start_date: z.coerce.date(),
     frequency: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']),
     schedule_mode: z.enum(['CALENDAR', 'FIXED_INTERVAL']),
@@ -93,7 +93,7 @@ export function RecurringTransactionDrawer({
 
     const handleSubmit = async (values: z.infer<typeof recurringSchema>) => {
         if (!values.category_id && flow === 'OUT') {
-            toast.error('Please select a category')
+            toast.error('Please select a category for this expense')
             return
         }
 
