@@ -7,7 +7,11 @@ export function useAddPerson() {
 
     return useMutation({
         mutationFn: async (newPerson: { name: string; phone?: string; image_url?: string; }) => {
-            return await addPersonalPerson(newPerson)
+            const result = await addPersonalPerson(newPerson)
+            if ('error' in result) {
+                throw new Error(result.error)
+            }
+            return result
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['personal-people'] })

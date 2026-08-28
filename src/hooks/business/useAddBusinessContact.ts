@@ -12,10 +12,16 @@ export function useAddBusinessContact() {
         mutationFn: async (newContact: { name: string; phone?: string; type: Contact['type']; image_url?: string; }) => {
             if (!currentBusinessId) throw new Error('No business selected')
 
-            return await addBusinessContact({
+            const result = await addBusinessContact({
                 ...newContact,
                 businessId: currentBusinessId,
             })
+            
+            if ('error' in result) {
+                throw new Error(result.error)
+            }
+            
+            return result
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['contacts'] })

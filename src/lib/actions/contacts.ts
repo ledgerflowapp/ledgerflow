@@ -104,7 +104,7 @@ export async function addBusinessContact(params: {
 }) {
   const user = await getAuthenticatedUser();
 
-  const inserted = await db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
     const existing = await tx.query.contacts.findFirst({
       where: and(
         eq(contacts.userId, user.id),
@@ -114,7 +114,7 @@ export async function addBusinessContact(params: {
     });
 
     if (existing) {
-      throw new Error(`A contact named "${params.name}" already exists in this ledger.`);
+      return { error: `A contact named "${params.name}" already exists in this ledger.` };
     }
 
     const [insertedContact] = await tx
@@ -129,11 +129,13 @@ export async function addBusinessContact(params: {
       })
       .returning();
 
-    return insertedContact;
+    return { contact: insertedContact };
   });
 
+  if (result.error) return { error: result.error };
+
   revalidatePath('/dashboard/ledger');
-  return mapContact(inserted);
+  return mapContact(result.contact!);
 }
 
 export async function addPersonalPerson(params: {
@@ -143,7 +145,7 @@ export async function addPersonalPerson(params: {
 }) {
   const user = await getAuthenticatedUser();
 
-  const inserted = await db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
     const existing = await tx.query.contacts.findFirst({
       where: and(
         eq(contacts.userId, user.id),
@@ -153,7 +155,7 @@ export async function addPersonalPerson(params: {
     });
 
     if (existing) {
-      throw new Error(`You already have a person named "${params.name}" in your friends list.`);
+      return { error: `You already have a person named "${params.name}" in your friends list.` };
     }
 
     const [insertedContact] = await tx
@@ -168,11 +170,13 @@ export async function addPersonalPerson(params: {
       })
       .returning();
 
-    return insertedContact;
+    return { contact: insertedContact };
   });
 
+  if (result.error) return { error: result.error };
+
   revalidatePath('/dashboard/friends');
-  return mapContact(inserted);
+  return mapContact(result.contact!);
 }
 
 export async function updateContact(params: Partial<Contact> & { id: string }) {
