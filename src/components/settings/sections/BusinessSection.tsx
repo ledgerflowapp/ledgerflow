@@ -61,8 +61,8 @@ export function BusinessSection() {
     }
 
     return (
-        <Card className="border-0 shadow-none sm:border sm:shadow-sm">
-            <CardHeader className="px-0 sm:px-6 flex flex-row items-center justify-between space-y-0 pb-4">
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <div className="flex flex-col space-y-1.5">
                     <CardTitle>Business Details</CardTitle>
                     <CardDescription>
@@ -76,7 +76,7 @@ export function BusinessSection() {
                     </Button>
                 )}
             </CardHeader>
-            <CardContent className="space-y-6 px-0 sm:px-6">
+            <CardContent className="space-y-6">
                 {isEditing ? (
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

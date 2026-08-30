@@ -60,14 +60,14 @@ export function SecuritySection() {
     }
 
     return (
-        <Card className="border-0 shadow-none sm:border sm:shadow-sm">
-            <CardHeader className="px-0 sm:px-6">
+        <Card>
+            <CardHeader>
                 <CardTitle>Privacy & Security</CardTitle>
                 <CardDescription>
                     Manage your security preferences and discoverability.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-8 px-0 sm:px-6">
+            <CardContent className="space-y-8">
                 {profile && !profile.email && (
                     <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10 p-4 sm:p-6 shadow-sm">
                         <div className="flex flex-col sm:flex-row gap-4 items-start">

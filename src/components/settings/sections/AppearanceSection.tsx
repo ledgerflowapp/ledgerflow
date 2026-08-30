@@ -31,14 +31,14 @@ export function AppearanceSection() {
     }
 
     return (
-        <Card className="border-0 shadow-none sm:border sm:shadow-sm">
-            <CardHeader className="px-0 sm:px-6">
+        <Card>
+            <CardHeader>
                 <CardTitle>Appearance</CardTitle>
                 <CardDescription>
                     Customize the look and feel for {mode} mode.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-8 px-0 sm:px-6">
+            <CardContent className="space-y-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="space-y-1">
                         <Label className="text-base">Theme</Label>
