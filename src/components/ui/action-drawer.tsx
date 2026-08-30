@@ -126,12 +126,12 @@ export function ActionDrawer({
               const renderIcon = () => {
                 if (!action.icon) return null
                 if (React.isValidElement(action.icon)) {
-                  return <span className="mr-3 shrink-0">{action.icon}</span>
+                  return <span className="me-3 shrink-0">{action.icon}</span>
                 }
                 return (
                   <Icon
                     icon={action.icon as React.ComponentProps<typeof HugeiconsIcon>["icon"]}
-                    className="mr-3 h-5 w-5 shrink-0"
+                    className="me-3 h-5 w-5 shrink-0"
                   />
                 )
               }

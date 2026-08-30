@@ -87,9 +87,9 @@ export function MobileSidebar() {
             }>
                 <Icon icon={MenuIcon} className="h-6 w-6" />
             </SheetTrigger>
-            <SheetContent side="left">
+            <SheetContent side="left" className="pt-safe pb-safe pl-safe">
                 <SheetHeader className="text-left">
-                    <SheetTitle>MenuIcon</SheetTitle>
+                    <SheetTitle>Menu</SheetTitle>
                     <div className="flex items-center gap-3 mt-4 mb-2">
                         <Avatar className="h-10 w-10">
                             <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User'} />

@@ -46,7 +46,7 @@ export function RecurringTransactionsList() {
                         </Button>
                     </RecurringTransactionDrawer>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="pt-6 @container">
                     {isLoading ? (
                         <div className="flex justify-center p-4">
                             <Icon icon={LoaderIcon} className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -132,7 +132,7 @@ export function RecurringTransactionsList() {
                                                 </span>
 
                                                 {/* Desktop actions: hover-revealed without degrading mobile */}
-                                                <div className="desktop-actions hidden sm:flex items-center gap-1">
+                                                <div className="desktop-actions hidden @sm:flex items-center gap-1">
                                                     {isPaused && (
                                                         <Button
                                                             variant="outline"
@@ -172,7 +172,7 @@ export function RecurringTransactionsList() {
                                                 </div>
 
                                                 {/* Mobile actions: explicit "..." button opening ActionDrawer Bottom Sheet */}
-                                                <div className="flex sm:hidden">
+                                                <div className="flex @sm:hidden">
                                                     <ActionDrawer
                                                         title={t.name}
                                                         description={`${t.frequency} • ₹${paiseToRupees(t.amount).toNumber().toLocaleString()}`}

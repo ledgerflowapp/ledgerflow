@@ -4,8 +4,6 @@ import { createRoot, Root } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { CategoriesContent } from '../finance/CategoriesContent'
 
-(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true
-
 const { mockCategories } = vi.hoisted(() => ({
     mockCategories: [
         {

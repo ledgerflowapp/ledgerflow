@@ -9,6 +9,13 @@ loadEnvConfig(projectDir);
 
 import { vi } from 'vitest';
 
+declare global {
+  // eslint-disable-next-line no-var
+  var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
+}
+
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
 vi.mock('next/font/google', () => ({
   Inter: () => ({ className: 'font-inter', variable: '--font-inter' }),
   Plus_Jakarta_Sans: () => ({ className: 'font-jakarta', variable: '--font-jakarta' }),

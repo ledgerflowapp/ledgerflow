@@ -5,8 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RecurringTransactionsList } from '../finance/RecurringTransactionsList'
 import { RecurringTransaction } from '@/types'
 
-(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true
-
 const mockDeleteTransaction = vi.fn()
 const mockUpdateTransaction = vi.fn()
 

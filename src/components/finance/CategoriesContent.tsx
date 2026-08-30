@@ -72,7 +72,7 @@ export function CategoriesContent() {
                             {categories?.map((category) => (
                                 <div
                                     key={category.id}
-                                    className={`flex items-center justify-between p-4 border rounded-lg ${!category.active ? 'opacity-60 bg-muted/50' : 'bg-card'}`}
+                                    className={`flex items-center justify-between p-4 border rounded-lg group ${!category.active ? 'opacity-60 bg-muted/50' : 'bg-card hover:bg-accent/40'} transition-colors`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xl">
@@ -91,11 +91,16 @@ export function CategoriesContent() {
                                         </div>
                                     </div>
 
-                                    {/* Desktop actions: DropdownMenu */}
-                                    <div className="hidden sm:flex">
+                                    {/* Desktop actions: DropdownMenu with hover state */}
+                                    <div className="hidden @sm:flex">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger render={
-                                                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`More options for ${category.name}`} />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+                                                    aria-label={`More options for ${category.name}`}
+                                                />
                                             }>
                                                 <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
                                             </DropdownMenuTrigger>
@@ -138,7 +143,7 @@ export function CategoriesContent() {
                                     </div>
 
                                     {/* Mobile actions: ActionDrawer Bottom Sheet */}
-                                    <div className="flex sm:hidden">
+                                    <div className="flex @sm:hidden">
                                         <ActionDrawer
                                             title={category.name}
                                             description={`${category.type.toLowerCase()} category`}

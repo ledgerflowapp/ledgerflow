@@ -97,7 +97,7 @@ export default function LedgerPage() {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 @container">
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border border-muted">
@@ -108,7 +108,7 @@ export default function LedgerPage() {
                 </div>
                 <div className="ml-auto">
                     {/* Desktop dropdown */}
-                    <div className="hidden sm:flex">
+                    <div className="hidden @sm:flex">
                         <DropdownMenu>
                             <DropdownMenuTrigger render={
                                 <Button variant="ghost" size="icon" aria-label={`More options for ${contact.name}`} />
@@ -132,7 +132,7 @@ export default function LedgerPage() {
                     </div>
 
                     {/* Mobile ActionDrawer bottom sheet */}
-                    <div className="flex sm:hidden">
+                    <div className="flex @sm:hidden">
                         <ActionDrawer
                             title={contact.name}
                             description="Contact Options"

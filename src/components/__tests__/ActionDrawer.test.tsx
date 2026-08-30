@@ -3,8 +3,6 @@ import React, { act } from 'react'
 import { createRoot, Root } from 'react-dom/client'
 import { ActionDrawer, ActionDrawerItem } from '../ui/action-drawer'
 
-(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true
-
 describe('ActionDrawer Component', () => {
     let container: HTMLDivElement
     let root: Root

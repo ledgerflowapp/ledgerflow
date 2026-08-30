@@ -117,4 +117,60 @@ test.describe('Mobile Interaction Patterns: Bottom Sheets & Desktop Hover', () =
     await expect(drawerPopup.locator('text=Edit')).toBeVisible();
     await expect(drawerPopup.locator('text=Delete')).toBeVisible();
   });
+
+  test('desktop viewport reveals actions on hover and does not show mobile trigger', async ({
+    userAContext,
+    userAPage,
+    baseURL,
+  }) => {
+    const userResult = await seedRegisteredUser();
+    await authenticateContext(userAContext, userResult.sessionToken, baseURL, userResult.cookies);
+
+    const account = await seedBankAccount(userResult.user.id, {
+      name: 'Desktop Test Account',
+      balance: '5000.00',
+    });
+
+    const [category] = await db
+      .insert(categories)
+      .values({
+        userId: userResult.user.id,
+        name: 'Work Services',
+        icon: '💼',
+        type: 'EXPENSE',
+      })
+      .returning();
+
+    await db.insert(recurringTransactions).values({
+      userId: userResult.user.id,
+      accountId: account.id,
+      categoryId: category.id,
+      name: 'Cloud Server',
+      amount: '1200.00',
+      frequency: 'MONTHLY',
+      scheduleMode: 'CALENDAR',
+      startDate: new Date(),
+      nextRunDate: new Date(),
+      flow: 'OUT',
+      active: true,
+      failureCount: 0,
+    });
+
+    // Desktop viewport (1280x800)
+    await userAPage.setViewportSize({ width: 1280, height: 800 });
+    await userAPage.goto('/dashboard');
+    await userAPage.waitForLoadState('networkidle');
+
+    const txItem = userAPage.locator('text=Cloud Server').locator('xpath=ancestor::div[contains(@class, "border")][1]');
+    await expect(txItem).toBeVisible();
+
+    // On desktop, desktop-actions container is visible
+    const desktopActions = txItem.locator('.desktop-actions');
+    await expect(desktopActions).toBeVisible();
+
+    // Hover reveals edit/delete buttons
+    await txItem.hover();
+    const editBtn = desktopActions.locator('button[aria-label*="Edit" i]');
+    await expect(editBtn).toBeVisible();
+  });
 });

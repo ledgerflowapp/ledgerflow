@@ -102,7 +102,7 @@ export default function PersonDetailsPage() {
     if (!contact) return null // Loading state handled by parent usually, or flash
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 @container">
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border border-muted">
@@ -113,7 +113,7 @@ export default function PersonDetailsPage() {
                 </div>
                 <div className="ml-auto">
                     {/* Desktop dropdown */}
-                    <div className="hidden sm:flex">
+                    <div className="hidden @sm:flex">
                         <DropdownMenu>
                             <DropdownMenuTrigger render={
                                 <Button variant="ghost" size="icon" aria-label={`More options for ${contact.name}`} />
@@ -137,20 +137,23 @@ export default function PersonDetailsPage() {
                     </div>
 
                     {/* Mobile ActionDrawer bottom sheet */}
-                    <div className="flex sm:hidden">
+                    <div className="flex @sm:hidden">
                         <ActionDrawer
                             title={contact.name}
-                            description="Person Options"
-                            triggerOrientation="vertical"
-                            triggerAriaLabel={`More options for ${contact.name}`}
+                            description="Contact Actions"
+                            trigger={
+                                <Button variant="ghost" size="icon" aria-label={`More options for ${contact.name}`}>
+                                    <Icon icon={MoreVerticalIcon} className="h-4 w-4" />
+                                </Button>
+                            }
                             actions={[
                                 {
-                                    label: 'Edit Person',
+                                    label: 'Edit',
                                     icon: Edit04Icon,
                                     onClick: () => setPersonEditOpen(true),
                                 },
                                 {
-                                    label: 'Delete Person',
+                                    label: 'Delete',
                                     icon: TrashIcon,
                                     variant: 'destructive',
                                     onClick: () => setDeleteDialogOpen(true),
