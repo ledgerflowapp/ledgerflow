@@ -1,7 +1,8 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, EyeOff, Lock, UserCheck } from 'lucide-react';
+import { Icon } from "@/components/ui/icon";
+import { UserCheck02Icon, ShieldCheckIcon, EyeOffIcon, LockIcon } from "@hugeicons/core-free-icons";
 import Link from 'next/link';
 
 interface SecuritySectionProps {
@@ -34,7 +35,7 @@ export function SecuritySection({ user }: SecuritySectionProps) {
 
           <div className="flex gap-4">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0 h-12 w-12 flex items-center justify-center">
-              <EyeOff className="h-6 w-6" />
+              <Icon icon={EyeOffIcon} className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-foreground">Discoverability Settings</h3>
@@ -46,7 +47,7 @@ export function SecuritySection({ user }: SecuritySectionProps) {
 
           <div className="flex gap-4">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0 h-12 w-12 flex items-center justify-center">
-              <Lock className="h-6 w-6" />
+              <Icon icon={LockIcon} className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-foreground">Strict Mode Boundaries</h3>
@@ -58,7 +59,7 @@ export function SecuritySection({ user }: SecuritySectionProps) {
 
           <div className="flex gap-4">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0 h-12 w-12 flex items-center justify-center">
-              <UserCheck className="h-6 w-6" />
+              <Icon icon={UserCheck02Icon} className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-foreground">Multi-Auth Integration</h3>
@@ -70,7 +71,7 @@ export function SecuritySection({ user }: SecuritySectionProps) {
 
           <div className="flex gap-4">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0 h-12 w-12 flex items-center justify-center">
-              <ShieldCheck className="h-6 w-6" />
+              <Icon icon={ShieldCheckIcon} className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-foreground">High-Integrity Reconciliations</h3>

@@ -3,7 +3,8 @@
 import { useMonthlyCategorySpend } from '@/hooks/useAnalytics'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
-import { Loader2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon } from "@hugeicons/core-free-icons";
 import { paiseToRupees } from "@/lib/currency";
 import { AnalyticsDashboardSkeleton } from './AnalyticsDashboardSkeleton'
 
@@ -21,7 +22,7 @@ export function AnalyticsDashboard() {
     if (isLoading) {
         return (
             <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Icon icon={LoaderIcon} className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
         )
     }

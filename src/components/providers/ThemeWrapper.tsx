@@ -6,7 +6,7 @@ import { SplashScreen } from '@/components/ui/splash-screen';
 import { useRef } from 'react';
 
 export default function ThemeWrapper({ children }: { children: React.ReactNode }) {
-    const { mode, _hasHydrated, themeSettings } = useAppStore();
+    const { mode, _hasHydrated, themeSettings, fetchThemeSettings } = useAppStore();
     const [showSplash, setShowSplash] = useState(true);
     const [splashType, setSplashType] = useState<'initial' | 'switch'>('initial');
     const prevModeRef = useRef<string | null>(null);
@@ -19,8 +19,9 @@ export default function ThemeWrapper({ children }: { children: React.ReactNode }
     useEffect(() => {
         if (_hasHydrated) {
             // Keep splash visible for animation duration
+            fetchThemeSettings();
         }
-    }, [_hasHydrated]);
+    }, [_hasHydrated, fetchThemeSettings]);
 
     // Handle mode switch splash
     useEffect(() => {

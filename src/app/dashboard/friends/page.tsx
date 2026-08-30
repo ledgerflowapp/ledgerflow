@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GroupsList } from '@/components/groups/GroupsList'
 import { useProfile } from '@/hooks/use-profile'
 import { toast } from '@/components/ui/toast'
-import { UserPlus, Loader2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, UserPlusIcon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button'
 import { PendingRequestsList } from '@/components/friends/PendingRequestsList'
 
@@ -57,7 +58,7 @@ function FriendsContent() {
                     className="gap-2"
                     disabled={!profile?.friend_invite_token}
                 >
-                    <UserPlus className="w-4 h-4" />
+                    <Icon icon={UserPlusIcon} className="w-4 h-4" />
                     Invite Friend
                 </Button>
             </div>
@@ -124,7 +125,7 @@ function FriendsContent() {
 
 export default function FriendsPage() {
     return (
-        <Suspense fallback={<div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+        <Suspense fallback={<div className="flex h-64 items-center justify-center"><Icon icon={LoaderIcon} className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
             <FriendsContent />
         </Suspense>
     )

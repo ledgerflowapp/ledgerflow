@@ -3,7 +3,8 @@
 import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { acceptFriendInviteAction } from '@/lib/actions/friends'
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { CheckmarkCircle04Icon, LoaderIcon, CancelCircleIcon } from "@hugeicons/core-free-icons";
 
 interface PageProps {
     params: Promise<{
@@ -51,21 +52,21 @@ export default function FriendInvitePage(props: PageProps) {
             <div className="max-w-md w-full p-8 text-center space-y-6">
                 {status === 'LOADING' && (
                     <div className="flex flex-col items-center gap-4 text-primary">
-                        <Loader2 className="h-12 w-12 animate-spin" />
+                        <Icon icon={LoaderIcon} className="h-12 w-12 animate-spin" />
                         <h2 className="text-xl font-semibold">{message}</h2>
                     </div>
                 )}
 
                 {status === 'SUCCESS' && (
                     <div className="flex flex-col items-center gap-4 text-green-600 dark:text-green-500">
-                        <CheckCircle2 className="h-16 w-16" />
+                        <Icon icon={CheckmarkCircle04Icon} className="h-16 w-16" />
                         <h2 className="text-xl font-semibold">{message}</h2>
                     </div>
                 )}
 
                 {status === 'ERROR' && (
                     <div className="flex flex-col items-center gap-4 text-destructive">
-                        <XCircle className="h-16 w-16" />
+                        <Icon icon={CancelCircleIcon} className="h-16 w-16" />
                         <h2 className="text-xl font-semibold">Invite Failed</h2>
                         <p className="text-muted-foreground text-sm">{message}</p>
 

@@ -11,7 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAddBusinessContact } from '@/hooks/business/useAddBusinessContact'
 import { useUpdateContact } from '@/hooks/useUpdateContact'
-import { Loader2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon } from "@hugeicons/core-free-icons";
 import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Contact } from '@/types'
 
@@ -163,7 +164,7 @@ export function AddBusinessContactDrawer({ children, open, onOpenChange, initial
                                     )}
                                 />
                                 <Button type="submit" className="w-full" disabled={isPending}>
-                                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                     {initialData ? 'Save Changes' : 'Add Contact'}
                                 </Button>
                             </form>

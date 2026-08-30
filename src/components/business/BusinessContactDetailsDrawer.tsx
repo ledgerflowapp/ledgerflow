@@ -12,7 +12,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Contact } from '@/types'
-import { Trash2, Edit, Phone } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { TrashIcon, Edit04Icon, PhoneIcon } from "@hugeicons/core-free-icons";
 import { toast } from '@/components/ui/toast'
 import { useDeleteContact } from '@/hooks/useDeleteContact'
 
@@ -59,9 +60,9 @@ export function BusinessContactDetailsDrawer({ contact, open, onOpenChange }: Bu
 
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                                <Phone className="h-5 w-5 text-muted-foreground" />
+                                <Icon icon={PhoneIcon} className="h-5 w-5 text-muted-foreground" />
                                 <div>
-                                    <p className="text-sm font-medium">Phone</p>
+                                    <p className="text-sm font-medium">PhoneIcon</p>
                                     <p className="text-sm text-muted-foreground">{contact.phone || 'N/A'}</p>
                                 </div>
                             </div>
@@ -76,12 +77,12 @@ export function BusinessContactDetailsDrawer({ contact, open, onOpenChange }: Bu
                         </div>
 
                         <div className="flex gap-3">
-                            <Button variant="outline" className="flex-1 gap-2" onClick={() => toast.info('Edit feature coming soon')}>
-                                <Edit className="h-4 w-4" />
-                                Edit
+                            <Button variant="outline" className="flex-1 gap-2" onClick={() => toast.info('Edit04Icon feature coming soon')}>
+                                <Icon icon={Edit04Icon} className="h-4 w-4" />
+                                Edit04Icon
                             </Button>
                             <Button variant="destructive" className="flex-1 gap-2" onClick={handleDelete}>
-                                <Trash2 className="h-4 w-4" />
+                                <Icon icon={TrashIcon} className="h-4 w-4" />
                                 Delete
                             </Button>
                         </div>

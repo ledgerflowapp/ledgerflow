@@ -4,7 +4,8 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/u
 import { formatTransactionDate } from '@/lib/date-utils'
 import { TransactionSplit } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Trash2, Edit } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { TrashIcon, Edit04Icon } from "@hugeicons/core-free-icons";
 import { useState } from 'react'
 import { toast } from '@/components/ui/toast'
 import { deleteTransactionAction } from '@/lib/actions/transactions'
@@ -176,8 +177,8 @@ export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEd
                                         className="flex-1"
                                         onClick={handleEdit}
                                     >
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Edit
+                                        <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" />
+                                        Edit04Icon
                                     </Button>
                                     <Button
                                         variant="destructive"
@@ -185,7 +186,7 @@ export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEd
                                         onClick={handleDelete}
                                         disabled={isDeleting}
                                     >
-                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        <Icon icon={TrashIcon} className="mr-2 h-4 w-4" />
                                         Delete
                                     </Button>
                                 </div>

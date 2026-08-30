@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Loader2, AlertCircle, Users } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, UsersIcon, AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { toast } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 
@@ -111,7 +112,7 @@ export default function JoinGroupPage() {
                 <Card className="w-full max-w-md">
                     <CardHeader className="text-center">
                         <div className="mx-auto bg-destructive/10 h-20 w-20 rounded-full flex items-center justify-center mb-4">
-                            <AlertCircle className="h-10 w-10 text-destructive" />
+                            <Icon icon={AlertCircleIcon} className="h-10 w-10 text-destructive" />
                         </div>
                         <CardTitle className="text-xl">Invalid Invite Link</CardTitle>
                         <CardDescription>{error || 'This invite link is invalid or has expired.'}</CardDescription>
@@ -143,7 +144,7 @@ export default function JoinGroupPage() {
                             </AvatarFallback>
                         </Avatar>
                         <div className="absolute -bottom-2 -right-2 bg-primary text-primary-foreground h-8 w-8 rounded-full flex items-center justify-center shadow-sm">
-                            <Users className="h-4 w-4" />
+                            <Icon icon={UsersIcon} className="h-4 w-4" />
                         </div>
                     </div>
                     <div className="space-y-1.5">
@@ -199,7 +200,7 @@ export default function JoinGroupPage() {
                                     onClick={() => handleJoin(selectedGhost)}
                                 >
                                     {isJoining && selectedGhost ? (
-                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                        <Icon icon={LoaderIcon} className="mr-2 h-5 w-5 animate-spin" />
                                     ) : null}
                                     {selectedGhost
                                         ? `Yes, I am ${validGhosts.find(g => g.id === selectedGhost)?.name}`
@@ -224,7 +225,7 @@ export default function JoinGroupPage() {
                                     onClick={() => handleJoin(null)}
                                 >
                                     {isJoining && !selectedGhost ? (
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />
                                     ) : null}
                                     No, join as a new member
                                 </Button>
@@ -239,7 +240,7 @@ export default function JoinGroupPage() {
                                 onClick={() => handleJoin(null)}
                             >
                                 {isJoining ? (
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                    <Icon icon={LoaderIcon} className="mr-2 h-5 w-5 animate-spin" />
                                 ) : null}
                                 Join Group
                             </Button>

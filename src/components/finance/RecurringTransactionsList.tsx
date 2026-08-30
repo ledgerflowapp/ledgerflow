@@ -6,7 +6,8 @@ import { useDeleteRecurringTransaction } from '@/hooks/useDeleteRecurringTransac
 import { useUpdateRecurringTransaction } from '@/hooks/useUpdateRecurringTransaction'
 import { RecurringTransactionDrawer } from './RecurringTransactionDrawer'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, Edit, Loader2, Play, Plus, Repeat, Trash2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, RepeatIcon, TrashIcon, AlertCircleIcon, Edit04Icon, PlayIcon, PlusIcon } from "@hugeicons/core-free-icons";
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
@@ -23,7 +24,7 @@ export function RecurringTransactionsList() {
                 <CardTitle>Subscriptions & Recurring</CardTitle>
                 <RecurringTransactionDrawer>
                     <Button size="sm" variant="outline" className="h-8">
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                         Add
                     </Button>
                 </RecurringTransactionDrawer>
@@ -31,13 +32,13 @@ export function RecurringTransactionsList() {
             <CardContent className="pt-6">
                 {isLoading ? (
                     <div className="flex justify-center p-4">
-                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                        <Icon icon={LoaderIcon} className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
                 ) : transactions?.length === 0 ? (
                     <Empty>
                         <EmptyHeader>
                             <EmptyMedia variant="icon">
-                                <Repeat />
+                                <Icon icon={RepeatIcon} />
                             </EmptyMedia>
                             <EmptyTitle>No recurring payments</EmptyTitle>
                             <EmptyDescription>
@@ -72,7 +73,7 @@ export function RecurringTransactionsList() {
                                                     </Badge>
                                                     {isPaused && (
                                                         <Badge variant="destructive" className="text-[10px] px-1 py-0 h-5 flex items-center gap-1">
-                                                            <AlertCircle className="h-3 w-3" /> Paused
+                                                            <Icon icon={AlertCircleIcon} className="h-3 w-3" /> Paused
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -99,7 +100,7 @@ export function RecurringTransactionsList() {
                                                         })
                                                     }
                                                 >
-                                                    <Play className="h-3 w-3 mr-1" /> Resume
+                                                    <Icon icon={PlayIcon} className="h-3 w-3 mr-1" /> Resume
                                                 </Button>
                                             )}
 
@@ -109,7 +110,7 @@ export function RecurringTransactionsList() {
                                                     size="icon"
                                                     className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                                 >
-                                                    <Edit className="h-4 w-4" />
+                                                    <Icon icon={Edit04Icon} className="h-4 w-4" />
                                                 </Button>
                                             </RecurringTransactionDrawer>
 
@@ -123,14 +124,14 @@ export function RecurringTransactionsList() {
                                                     }
                                                 }}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Icon icon={TrashIcon} className="h-4 w-4" />
                                             </Button>
                                         </div>
                                     </div>
 
                                     {isPaused && t.last_failure_reason && (
                                         <div className="text-xs text-destructive bg-destructive/10 p-2 rounded flex items-center gap-1.5">
-                                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                            <Icon icon={AlertCircleIcon} className="h-3.5 w-3.5 shrink-0" />
                                             <span>Reason: {t.last_failure_reason}</span>
                                         </div>
                                     )}

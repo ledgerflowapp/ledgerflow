@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, Layers, ArrowRight, ClipboardList, TrendingUp } from 'lucide-react';
+import { Icon } from "@/components/ui/icon";
+import { ArrowRight05Icon, TrendingUpIcon, Briefcase09Icon, Layers02Icon, ClipboardListIcon } from "@hugeicons/core-free-icons";
 import Link from 'next/link';
 
 export function BusinessModeSection() {
@@ -26,7 +27,7 @@ export function BusinessModeSection() {
 
           <Card className="p-6 space-y-4 border border-border bg-card shadow-sm">
             <div className="p-2.5 bg-blue-500/10 text-blue-600 rounded-lg w-10 h-10 flex items-center justify-center">
-              <Briefcase className="h-5 w-5" />
+              <Icon icon={Briefcase09Icon} className="h-5 w-5" />
             </div>
             <h3 className="font-bold text-base text-foreground">Multi-Entity Switching</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -36,7 +37,7 @@ export function BusinessModeSection() {
 
           <Card className="p-6 space-y-4 border border-border bg-card shadow-sm">
             <div className="p-2.5 bg-blue-500/10 text-blue-600 rounded-lg w-10 h-10 flex items-center justify-center">
-              <Layers className="h-5 w-5" />
+              <Icon icon={Layers02Icon} className="h-5 w-5" />
             </div>
             <h3 className="font-bold text-base text-foreground">Customer & Supplier CRM</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -46,7 +47,7 @@ export function BusinessModeSection() {
 
           <Card className="p-6 space-y-4 border border-border bg-card shadow-sm">
             <div className="p-2.5 bg-blue-500/10 text-blue-600 rounded-lg w-10 h-10 flex items-center justify-center">
-              <ClipboardList className="h-5 w-5" />
+              <Icon icon={ClipboardListIcon} className="h-5 w-5" />
             </div>
             <h3 className="font-bold text-base text-foreground">Receivables & Payables</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">

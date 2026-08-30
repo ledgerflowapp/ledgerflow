@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from '@/components/ui/toast'
-import { Loader2, Mail, Lock, User, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, UserIcon, EyeIcon, AlertCircleIcon, ArrowLeft05Icon, Mail02Icon, EyeOffIcon, LockIcon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -197,7 +198,7 @@ function LoginContent() {
                     {error ? (
                         <div className="flex flex-col items-center gap-4">
                             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
-                                <AlertCircle className="h-10 w-10 text-destructive" />
+                                <Icon icon={AlertCircleIcon} className="h-10 w-10 text-destructive" />
                             </div>
                             <p className="text-center text-sm text-foreground font-medium">
                                 {error}
@@ -206,7 +207,7 @@ function LoginContent() {
                                 className="w-full"
                                 onClick={() => setError(null)}
                             >
-                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                <Icon icon={ArrowLeft05Icon} className="mr-2 h-4 w-4" />
                                 Try Again
                             </Button>
                         </div>
@@ -219,7 +220,7 @@ function LoginContent() {
                                 disabled={isLoading}
                             >
                                 {isGoogleLoading ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />
                                 ) : (
                                     <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
                                         <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
@@ -249,7 +250,7 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Email</FormLabel>
                                                     <div className="relative">
-                                                        <Mail className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={Mail02Icon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                                         <FormControl>
                                                             <Input className="pl-9" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
                                                         </FormControl>
@@ -265,7 +266,7 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Password</FormLabel>
                                                     <div className="relative">
-                                                        <Lock className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={LockIcon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                                         <FormControl>
                                                             <Input className="pl-9 pr-10" placeholder="••••••••" type={showPassword ? "text" : "password"} autoComplete="current-password" {...field} />
                                                         </FormControl>
@@ -276,9 +277,9 @@ function LoginContent() {
                                                             aria-label={showPassword ? "Hide password" : "Show password"}
                                                         >
                                                             {showPassword ? (
-                                                                <EyeOff className="h-4 w-4" />
+                                                                <Icon icon={EyeOffIcon} className="h-4 w-4" />
                                                             ) : (
-                                                                <Eye className="h-4 w-4" />
+                                                                <Icon icon={EyeIcon} className="h-4 w-4" />
                                                             )}
                                                         </button>
                                                     </div>
@@ -287,7 +288,7 @@ function LoginContent() {
                                             )}
                                         />
                                         <Button type="submit" className="w-full" disabled={isLoading}>
-                                            {isFormLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            {isFormLoading && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                             Sign In
                                         </Button>
                                     </form>
@@ -302,7 +303,7 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Full Name</FormLabel>
                                                     <div className="relative">
-                                                        <User className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={UserIcon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                                         <FormControl>
                                                             <Input className="pl-9" placeholder="John Doe" autoComplete="name" {...field} />
                                                         </FormControl>
@@ -318,7 +319,7 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Email</FormLabel>
                                                     <div className="relative">
-                                                        <Mail className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={Mail02Icon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                                         <FormControl>
                                                             <Input className="pl-9" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
                                                         </FormControl>
@@ -334,7 +335,7 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Password</FormLabel>
                                                     <div className="relative">
-                                                        <Lock className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={LockIcon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                                         <FormControl>
                                                             <Input className="pl-9 pr-10" placeholder="••••••••" type={showPassword ? "text" : "password"} autoComplete="new-password" {...field} />
                                                         </FormControl>
@@ -345,9 +346,9 @@ function LoginContent() {
                                                             aria-label={showPassword ? "Hide password" : "Show password"}
                                                         >
                                                             {showPassword ? (
-                                                                <EyeOff className="h-4 w-4" />
+                                                                <Icon icon={EyeOffIcon} className="h-4 w-4" />
                                                             ) : (
-                                                                <Eye className="h-4 w-4" />
+                                                                <Icon icon={EyeIcon} className="h-4 w-4" />
                                                             )}
                                                         </button>
                                                     </div>
@@ -356,7 +357,7 @@ function LoginContent() {
                                             )}
                                         />
                                         <Button type="submit" className="w-full" disabled={isLoading}>
-                                            {isFormLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            {isFormLoading && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                             Create Account
                                         </Button>
                                     </form>
@@ -404,7 +405,7 @@ function LoginContent() {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Icon icon={LoaderIcon} className="h-8 w-8 animate-spin" /></div>}>
             <LoginContent />
         </Suspense>
     )

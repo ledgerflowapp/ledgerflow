@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { Check, X, Users, UserCheck, UserX, Mail, Phone } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
+import { Cancel01Icon, UserRemove01Icon, PhoneIcon, UserCheck02Icon, Mail02Icon, UsersIcon, CheckIcon } from "@hugeicons/core-free-icons";
 import { toast } from "@/components/ui/toast";
 import {
   approveGroupGhostMerge,
@@ -89,7 +90,7 @@ export function GroupGhostMergeCard({
     <Card className="w-full border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-muted-foreground" />
+          <Icon icon={UsersIcon} className="h-4 w-4 text-muted-foreground" />
           <CardTitle className="text-sm font-semibold">
             {request.groupName}
           </CardTitle>
@@ -114,13 +115,13 @@ export function GroupGhostMergeCard({
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
               {request.targetUser.email && (
                 <span className="flex items-center gap-1 truncate">
-                  <Mail className="h-3 w-3" />
+                  <Icon icon={Mail02Icon} className="h-3 w-3" />
                   {request.targetUser.email}
                 </span>
               )}
               {request.targetUser.phone && (
                 <span className="flex items-center gap-1 truncate">
-                  <Phone className="h-3 w-3" />
+                  <Icon icon={PhoneIcon} className="h-3 w-3" />
                   {request.targetUser.phone}
                 </span>
               )}
@@ -154,7 +155,7 @@ export function GroupGhostMergeCard({
                   {loading === "reject" ? (
                     <Spinner className="h-3.5 w-3.5 mr-1" />
                   ) : (
-                    <X className="h-3.5 w-3.5 mr-1" />
+                    <Icon icon={Cancel01Icon} className="h-3.5 w-3.5 mr-1" />
                   )}
                   Reject
                 </Button>
@@ -169,7 +170,7 @@ export function GroupGhostMergeCard({
                   {loading === "approve" ? (
                     <Spinner className="h-3.5 w-3.5 mr-1" />
                   ) : (
-                    <Check className="h-3.5 w-3.5 mr-1" />
+                    <Icon icon={CheckIcon} className="h-3.5 w-3.5 mr-1" />
                   )}
                   Approve
                 </Button>
@@ -178,7 +179,7 @@ export function GroupGhostMergeCard({
 
             {status === "APPROVED" && (
               <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 px-2.5 py-1">
-                <UserCheck className="h-3.5 w-3.5 mr-1" /> Approved
+                <Icon icon={UserCheck02Icon} className="h-3.5 w-3.5 mr-1" /> Approved
               </Badge>
             )}
 
@@ -187,7 +188,7 @@ export function GroupGhostMergeCard({
                 variant="destructive"
                 className="px-2.5 py-1"
               >
-                <UserX className="h-3.5 w-3.5 mr-1" /> Rejected
+                <Icon icon={UserRemove01Icon} className="h-3.5 w-3.5 mr-1" /> Rejected
               </Badge>
             )}
           </div>

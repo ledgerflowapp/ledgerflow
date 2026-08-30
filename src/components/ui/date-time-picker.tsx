@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon, Clock } from "lucide-react"
+import { Icon } from "@/components/ui/icon";
+import { Clock01Icon, Calendar05Icon } from "@hugeicons/core-free-icons";
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -73,7 +74,7 @@ export function DateTimePicker({
                     )}
                 />
             }>
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <Icon icon={Calendar05Icon} className="mr-2 h-4 w-4" />
                 {date ? format(date, "PPP HH:mm") : <span>Pick a date</span>}
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -86,7 +87,7 @@ export function DateTimePicker({
                 <div className="p-3 border-t border-border">
                     <Label className="text-xs">Time</Label>
                     <div className="flex items-center gap-2 mt-1">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <Icon icon={Clock01Icon} className="h-4 w-4 text-muted-foreground" />
                         <Input
                             type="time"
                             className="h-8"

@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { useAddPerson } from '@/hooks/personal/useAddPerson'
 import { useUpdateContact } from '@/hooks/useUpdateContact'
-import { Loader2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon } from "@hugeicons/core-free-icons";
 import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Contact } from '@/types'
 import { useDetectUser, DetectedUser } from '@/hooks/friends/useDetectUser'
@@ -204,7 +205,7 @@ export function AddPersonDrawer({ children, open, onOpenChange, initialData }: A
                                 )}
 
                                 <Button type="submit" className="w-full" disabled={isPending || sendRequest.isPending || isDetecting}>
-                                    {(isPending || sendRequest.isPending || isDetecting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {(isPending || sendRequest.isPending || isDetecting) && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                     {detectedUser ? 'Save & Send Friend Request' : initialData ? 'Save Changes' : 'Add Person'}
                                 </Button>
                             </form>

@@ -4,7 +4,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { usePersonalPeople } from '@/hooks/personal/usePersonalPeople'
 import { useContactTransactions } from '@/hooks/useContactTransactions'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Receipt, MoreVertical, Edit, Trash2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { MoreVerticalIcon, ArrowLeft05Icon, TrashIcon, ReceiptIcon, Edit04Icon } from "@hugeicons/core-free-icons";
 import { Card, CardContent } from '@/components/ui/card'
 import { formatTransactionDate, filterAndSortTransactions, TimeFilter, SortOption } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
@@ -30,7 +31,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useDeleteContact } from '@/hooks/useDeleteContact'
-import { Loader2 } from 'lucide-react'
+import { LoaderIcon } from "@hugeicons/core-free-icons"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -79,7 +80,7 @@ export default function PersonDetailsPage() {
                     <EmptyHeader>
                         <EmptyMedia variant="icon">
                             <div className="p-3 bg-muted rounded-full">
-                                <ArrowLeft className="h-6 w-6 text-muted-foreground" />
+                                <Icon icon={ArrowLeft05Icon} className="h-6 w-6 text-muted-foreground" />
                             </div>
                         </EmptyMedia>
                         <EmptyTitle>Person Not Found</EmptyTitle>
@@ -114,18 +115,18 @@ export default function PersonDetailsPage() {
                         <DropdownMenuTrigger render={
                             <Button variant="ghost" size="icon" />
                         }>
-                            <MoreVertical className="h-4 w-4" />
+                            <Icon icon={MoreVerticalIcon} className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => setPersonEditOpen(true)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
+                                <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" />
+                                Edit04Icon
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="text-red-600 focus:text-red-600"
                                 onClick={() => setDeleteDialogOpen(true)}
                             >
-                                <Trash2 className="mr-2 h-4 w-4" />
+                                <Icon icon={TrashIcon} className="mr-2 h-4 w-4" />
                                 Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -181,13 +182,13 @@ export default function PersonDetailsPage() {
 
                 {isLoading ? (
                     <div className="flex justify-center p-8">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        <Icon icon={LoaderIcon} className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : filteredTransactions?.length === 0 ? (
                     <Empty>
                         <EmptyHeader>
                             <EmptyMedia variant="icon">
-                                <Receipt />
+                                <Icon icon={ReceiptIcon} />
                             </EmptyMedia>
                             <EmptyTitle>No transactions found</EmptyTitle>
                             <EmptyDescription>
@@ -265,7 +266,7 @@ export default function PersonDetailsPage() {
                             className="bg-red-600 hover:bg-red-700"
                             disabled={isDeleting}
                         >
-                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            {isDeleting ? <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>

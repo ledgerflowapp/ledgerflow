@@ -2,7 +2,8 @@
 
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Wallet, Landmark, CreditCard, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Icon } from "@/components/ui/icon";
+import { TrendingUpIcon, CreditCardIcon, TrendingDownIcon, LandmarkIcon, Wallet05Icon, ArrowDownLeft02Icon, ArrowUpRight03Icon } from "@hugeicons/core-free-icons";
 
 export function PersonalDashboardPreview() {
   return (
@@ -20,7 +21,7 @@ export function PersonalDashboardPreview() {
         {/* Accounts Card */}
         <Card className="p-6 space-y-6 border border-border shadow-sm bg-card hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm text-foreground">Multi-Wallet Accounts</h4>
+            <h4 className="font-semibold text-sm text-foreground">Multi-Wallet05Icon Accounts</h4>
             <Badge variant="outline" className="text-[10px] font-semibold">Live</Badge>
           </div>
 
@@ -28,11 +29,11 @@ export function PersonalDashboardPreview() {
             <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-500/10 text-emerald-600 rounded-md">
-                  <Wallet className="h-4 w-4" />
+                  <Icon icon={Wallet05Icon} className="h-4 w-4" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-semibold text-foreground">Cash Wallet</p>
-                  <p className="text-[10px] text-muted-foreground">Primary Wallet</p>
+                  <p className="text-xs font-semibold text-foreground">Cash Wallet05Icon</p>
+                  <p className="text-[10px] text-muted-foreground">Primary Wallet05Icon</p>
                 </div>
               </div>
               <p className="text-xs font-bold text-foreground">₹1,500.00</p>
@@ -41,7 +42,7 @@ export function PersonalDashboardPreview() {
             <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-500/10 text-blue-600 rounded-md">
-                  <Landmark className="h-4 w-4" />
+                  <Icon icon={LandmarkIcon} className="h-4 w-4" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">Bank Account</p>
@@ -54,7 +55,7 @@ export function PersonalDashboardPreview() {
             <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-rose-500/10 text-rose-600 rounded-md">
-                  <CreditCard className="h-4 w-4" />
+                  <Icon icon={CreditCardIcon} className="h-4 w-4" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">Credit Card</p>
@@ -77,7 +78,7 @@ export function PersonalDashboardPreview() {
             <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="p-1.5 bg-rose-500/10 text-rose-600 rounded-md">
-                  <ArrowDownLeft className="h-3 w-3" />
+                  <Icon icon={ArrowDownLeft02Icon} className="h-3 w-3" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">Supermarket</p>
@@ -90,7 +91,7 @@ export function PersonalDashboardPreview() {
             <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="p-1.5 bg-emerald-500/10 text-emerald-600 rounded-md">
-                  <ArrowUpRight className="h-3 w-3" />
+                  <Icon icon={ArrowUpRight03Icon} className="h-3 w-3" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">Monthly Salary</p>
@@ -103,7 +104,7 @@ export function PersonalDashboardPreview() {
             <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="p-1.5 bg-rose-500/10 text-rose-600 rounded-md">
-                  <ArrowDownLeft className="h-3 w-3" />
+                  <Icon icon={ArrowDownLeft02Icon} className="h-3 w-3" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">Internet Bill</p>
@@ -126,7 +127,7 @@ export function PersonalDashboardPreview() {
             <div className="p-3 bg-muted/50 rounded-lg space-y-1 text-left">
               <p className="text-[10px] uppercase font-semibold text-muted-foreground">Total Income</p>
               <div className="flex items-center gap-2 text-emerald-600">
-                <TrendingUp className="h-4 w-4" />
+                <Icon icon={TrendingUpIcon} className="h-4 w-4" />
                 <span className="text-sm font-bold">₹80,000.00</span>
               </div>
             </div>
@@ -134,7 +135,7 @@ export function PersonalDashboardPreview() {
             <div className="p-3 bg-muted/50 rounded-lg space-y-1 text-left">
               <p className="text-[10px] uppercase font-semibold text-muted-foreground">Total Outflows</p>
               <div className="flex items-center gap-2 text-rose-600">
-                <TrendingDown className="h-4 w-4" />
+                <Icon icon={TrendingDownIcon} className="h-4 w-4" />
                 <span className="text-sm font-bold">₹15,399.00</span>
               </div>
             </div>

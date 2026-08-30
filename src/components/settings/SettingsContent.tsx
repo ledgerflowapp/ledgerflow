@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useAppStore } from '@/store/useAppStore'
-import { Moon, Sun, Check, Loader2, User, Building2, Phone, Mail, Pencil, X, AlertTriangle, Shield, AtSign } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { Cancel01Icon, Sun03Icon, LoaderIcon, UserIcon, BuildingIcon, MoonIcon, PhoneIcon, Mail02Icon, Shield02Icon, CheckIcon, AtSignIcon, Alert01Icon, PencilIcon } from "@hugeicons/core-free-icons";
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -214,7 +215,7 @@ export function SettingsContent() {
                                                 : "text-muted-foreground hover:text-foreground"
                                         )}
                                     >
-                                        <Sun className="h-4 w-4" />
+                                        <Icon icon={Sun03Icon} className="h-4 w-4" />
                                         Light
                                     </button>
                                     <button
@@ -226,7 +227,7 @@ export function SettingsContent() {
                                                 : "text-muted-foreground hover:text-foreground"
                                         )}
                                     >
-                                        <Moon className="h-4 w-4" />
+                                        <Icon icon={MoonIcon} className="h-4 w-4" />
                                         Dark
                                     </button>
                                 </div>
@@ -260,7 +261,7 @@ export function SettingsContent() {
                                             <div className={cn("h-6 w-6 rounded-full", color.class)} />
                                             {currentSettings.accent === color.value && (
                                                 <div className="absolute inset-0 flex items-center justify-center">
-                                                    <Check className="h-4 w-4 text-white drop-shadow-md" />
+                                                    <Icon icon={CheckIcon} className="h-4 w-4 text-white drop-shadow-md" />
                                                 </div>
                                             )}
                                             <span className="sr-only">{color.name}</span>
@@ -282,7 +283,7 @@ export function SettingsContent() {
                             </div>
                             {!isEditing && !isProfileLoading && (
                                 <Button onClick={() => setIsEditing(true)} size="sm" variant="outline">
-                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <Icon icon={PencilIcon} className="mr-2 h-4 w-4" />
                                     Edit Profile
                                 </Button>
                             )}
@@ -290,7 +291,7 @@ export function SettingsContent() {
                         <CardContent className="pt-6">
                             {isProfileLoading ? (
                                 <div className="flex justify-center p-6">
-                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                    <Icon icon={LoaderIcon} className="h-6 w-6 animate-spin" />
                                 </div>
                             ) : isEditing ? (
                                 <Form {...form}>
@@ -337,7 +338,7 @@ export function SettingsContent() {
                                                         <FormLabel>Username</FormLabel>
                                                         <FormControl>
                                                             <div className="relative">
-                                                                <AtSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                                <Icon icon={AtSignIcon} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                                                 <Input
                                                                     placeholder="username"
                                                                     className="pl-9"
@@ -362,7 +363,7 @@ export function SettingsContent() {
                                                 name="phone"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Phone Number</FormLabel>
+                                                        <FormLabel>PhoneIcon Number</FormLabel>
                                                         <FormControl>
                                                             <Input placeholder="+1234567890" {...field} />
                                                         </FormControl>
@@ -394,7 +395,7 @@ export function SettingsContent() {
                                                 type="submit"
                                                 disabled={updateProfile.isPending || !form.formState.isDirty}
                                             >
-                                                {updateProfile.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                {updateProfile.isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                                 Save Changes
                                             </Button>
                                         </div>
@@ -404,7 +405,7 @@ export function SettingsContent() {
                                 <div className="space-y-8">
                                     <div className="flex items-center gap-6">
                                         <Avatar className="h-24 w-24 border-2 border-muted">
-                                            <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User'} className="object-cover" />
+                                            <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'UserIcon'} className="object-cover" />
                                             <AvatarFallback className="text-lg bg-primary/10 text-primary">
                                                 {profile?.full_name?.charAt(0) || 'U'}
                                             </AvatarFallback>
@@ -414,7 +415,7 @@ export function SettingsContent() {
                                             <p className="text-sm text-muted-foreground">{profile?.email || 'No email linked'}</p>
 
                                             <div className="flex items-center gap-2 mt-1">
-                                                <AtSign className="h-3.5 w-3.5 text-muted-foreground" />
+                                                <Icon icon={AtSignIcon} className="h-3.5 w-3.5 text-muted-foreground" />
                                                 {profile?.username ? (
                                                     <span className="text-sm font-medium text-foreground">{profile.username}</span>
                                                 ) : (
@@ -431,7 +432,7 @@ export function SettingsContent() {
                                                             disabled={claimingUsername || !newUsername || newUsername.length < 3}
                                                             onClick={handleClaimUsername}
                                                         >
-                                                            {claimingUsername ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Claim'}
+                                                            {claimingUsername ? <Icon icon={LoaderIcon} className="h-3 w-3 animate-spin" /> : 'Claim'}
                                                         </Button>
                                                     </div>
                                                 )}
@@ -443,11 +444,11 @@ export function SettingsContent() {
                                         <div className="space-y-3">
                                             <Label className="text-xs font-medium uppercase text-muted-foreground">Contact Information</Label>
                                             <div className="flex items-center gap-3 text-sm">
-                                                <User className="h-4 w-4 text-muted-foreground" />
+                                                <Icon icon={UserIcon} className="h-4 w-4 text-muted-foreground" />
                                                 <span>{profile?.full_name || 'Not set'}</span>
                                             </div>
                                             <div className="flex items-center gap-3 text-sm">
-                                                <Phone className="h-4 w-4 text-muted-foreground" />
+                                                <Icon icon={PhoneIcon} className="h-4 w-4 text-muted-foreground" />
                                                 <span>{profile?.phone || 'Not set'}</span>
                                             </div>
                                         </div>
@@ -455,7 +456,7 @@ export function SettingsContent() {
                                         <div className="space-y-3">
                                             <Label className="text-xs font-medium uppercase text-muted-foreground">Business Details</Label>
                                             <div className="flex items-center gap-3 text-sm">
-                                                <Building2 className="h-4 w-4 text-muted-foreground" />
+                                                <Icon icon={BuildingIcon} className="h-4 w-4 text-muted-foreground" />
                                                 <span>{profile?.business_name || 'Not set'}</span>
                                             </div>
                                         </div>
@@ -466,7 +467,7 @@ export function SettingsContent() {
                                             <CardContent className="p-4 sm:p-6">
                                                 <div className="flex flex-col sm:flex-row gap-4 items-start">
                                                     <div className="rounded-full bg-amber-100 p-2 dark:bg-amber-900/30 shrink-0">
-                                                        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-500" />
+                                                        <Icon icon={Alert01Icon} className="h-5 w-5 text-amber-600 dark:text-amber-500" />
                                                     </div>
                                                     <div className="flex-1 space-y-4 w-full">
                                                         <div className="space-y-1">
@@ -491,7 +492,7 @@ export function SettingsContent() {
                                                                     disabled={isUpdatingEmail || !newEmail}
                                                                     className="border-amber-200 hover:bg-amber-100 hover:text-amber-900 dark:border-amber-800 dark:hover:bg-amber-900/30 whitespace-nowrap"
                                                                 >
-                                                                    {isUpdatingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Link Email'}
+                                                                    {isUpdatingEmail ? <Icon icon={LoaderIcon} className="h-4 w-4 animate-spin" /> : 'Link Email'}
                                                                 </Button>
                                                             </div>
 
@@ -509,7 +510,7 @@ export function SettingsContent() {
                                                                 disabled={isLinkingGoogle}
                                                                 className="w-full sm:w-auto border-amber-200 hover:bg-amber-100 hover:text-amber-900 dark:border-amber-800 dark:hover:bg-amber-900/30"
                                                             >
-                                                                {isLinkingGoogle ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                                                {isLinkingGoogle ? <Icon icon={LoaderIcon} className="h-4 w-4 animate-spin mr-2" /> : null}
                                                                 Link Google Account
                                                             </Button>
                                                         </div>
@@ -521,19 +522,19 @@ export function SettingsContent() {
 
                                     <div className="rounded-lg border p-4 space-y-4">
                                         <h3 className="font-medium flex items-center gap-2">
-                                            <Shield className="h-4 w-4" />
+                                            <Icon icon={Shield02Icon} className="h-4 w-4" />
                                             Privacy Settings
                                         </h3>
                                         <div className="grid gap-4 md:grid-cols-2">
                                             <div className="flex items-center justify-between space-x-2 rounded-lg border p-3 shadow-sm">
                                                 <div className="space-y-1">
-                                                    <Label htmlFor="view-phone" className="text-base">Phone Discoverability</Label>
+                                                    <Label htmlFor="view-phone" className="text-base">PhoneIcon Discoverability</Label>
                                                     <p className="text-sm text-muted-foreground">
                                                         Allow searching by number
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    {updatingPrivacy === 'discoverable_by_phone' && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                                                    {updatingPrivacy === 'discoverable_by_phone' && <Icon icon={LoaderIcon} className="h-3 w-3 animate-spin text-muted-foreground" />}
                                                     <Switch
                                                         id="view-phone"
                                                         checked={profile?.discoverable_by_phone || false}
@@ -550,7 +551,7 @@ export function SettingsContent() {
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    {updatingPrivacy === 'discoverable_by_username' && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                                                    {updatingPrivacy === 'discoverable_by_username' && <Icon icon={LoaderIcon} className="h-3 w-3 animate-spin text-muted-foreground" />}
                                                     <Switch
                                                         id="view-username"
                                                         checked={profile?.discoverable_by_username || false}

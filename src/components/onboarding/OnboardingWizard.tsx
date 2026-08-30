@@ -34,7 +34,7 @@ export function OnboardingWizard({
     defaultStep = 1,
     defaultUsername = "",
     defaultMode = "personal",
-    defaultAccent = "emerald",
+    defaultAccent = "green",
     defaultCurrency = "₹",
     className,
     onComplete,
@@ -159,30 +159,49 @@ export function OnboardingWizard({
                 </QuestionnaireDescription>
                 <QuestionnaireChoices
                     value={accent}
-                    onValueChange={(val) => setAccent(val)}
+                    onValueChange={(val) => {
+                        setAccent(val);
+                        // Instant preview
+                        updateThemeSettings(mode, {
+                            theme: mode === "business" ? "light" : "dark",
+                            accent: val,
+                        });
+                    }}
                 >
-                    <QuestionnaireChoice value="emerald">
-                        <span className="font-medium">Emerald</span>
-                        <span className="text-xs text-muted-foreground">
-                            Clean green primary accents
-                        </span>
-                    </QuestionnaireChoice>
                     <QuestionnaireChoice value="blue">
                         <span className="font-medium">Blue</span>
                         <span className="text-xs text-muted-foreground">
                             Professional corporate blue accents
                         </span>
                     </QuestionnaireChoice>
-                    <QuestionnaireChoice value="purple">
-                        <span className="font-medium">Purple</span>
+                    <QuestionnaireChoice value="green">
+                        <span className="font-medium">Green</span>
+                        <span className="text-xs text-muted-foreground">
+                            Clean green primary accents
+                        </span>
+                    </QuestionnaireChoice>
+                    <QuestionnaireChoice value="violet">
+                        <span className="font-medium">Violet</span>
                         <span className="text-xs text-muted-foreground">
                             Modern vibrant violet accents
                         </span>
                     </QuestionnaireChoice>
-                    <QuestionnaireChoice value="amber">
-                        <span className="font-medium">Amber</span>
+                    <QuestionnaireChoice value="orange">
+                        <span className="font-medium">Orange</span>
                         <span className="text-xs text-muted-foreground">
-                            Warm high-contrast amber accents
+                            Warm high-contrast orange accents
+                        </span>
+                    </QuestionnaireChoice>
+                    <QuestionnaireChoice value="rose">
+                        <span className="font-medium">Rose</span>
+                        <span className="text-xs text-muted-foreground">
+                            Bold and expressive rose accents
+                        </span>
+                    </QuestionnaireChoice>
+                    <QuestionnaireChoice value="slate">
+                        <span className="font-medium">Slate</span>
+                        <span className="text-xs text-muted-foreground">
+                            Neutral and minimalist slate accents
                         </span>
                     </QuestionnaireChoice>
                 </QuestionnaireChoices>

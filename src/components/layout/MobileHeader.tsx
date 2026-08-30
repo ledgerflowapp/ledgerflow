@@ -3,7 +3,8 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { MobileSidebar } from '@/components/layout/MobileSidebar'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { ArrowLeft05Icon } from "@hugeicons/core-free-icons";
 import Image from 'next/image'
 
 const ROOT_ROUTES = [
@@ -28,7 +29,7 @@ export function MobileHeader() {
                     <MobileSidebar />
                 ) : (
                     <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                        <ArrowLeft className="h-5 w-5" />
+                        <Icon icon={ArrowLeft05Icon} className="h-5 w-5" />
                     </Button>
                 )}
             </div>

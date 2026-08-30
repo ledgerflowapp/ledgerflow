@@ -14,7 +14,8 @@ import { Button } from '@/components/ui/button'
 import { getCategoryTransactionCount, getCategories, deleteCategory, disableCategory } from '@/lib/actions/categories'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { toast } from '@/components/ui/toast'
-import { Loader2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon } from "@hugeicons/core-free-icons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 
@@ -94,7 +95,7 @@ export function CategoryActionDialog({ category, action, onClose }: CategoryActi
 
                 {countLoading ? (
                     <div className="flex justify-center py-4">
-                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <Icon icon={LoaderIcon} className="h-6 w-6 animate-spin" />
                     </div>
                 ) : hasTransactions ? (
                     <div className="py-4 space-y-4">
@@ -128,7 +129,7 @@ export function CategoryActionDialog({ category, action, onClose }: CategoryActi
                 <AlertDialogFooter>
                     <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
                     <Button variant="destructive" onClick={handleAction} disabled={isPending}>
-                        {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                         {action === 'DELETE' ? 'Delete' : 'Disable'}
                     </Button>
                 </AlertDialogFooter>

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
-import { Sparkles, X } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
+import { Cancel01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
@@ -33,7 +34,7 @@ export function UnverifiedEmailBanner() {
   return (
     <div className="mb-4">
       <Alert className="border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200">
-        <Sparkles className="size-4 text-amber-600 dark:text-amber-400" />
+        <Icon icon={SparklesIcon} className="size-4 text-amber-600 dark:text-amber-400" />
         <AlertTitle className="flex items-center gap-2 font-semibold">
           <span>Welcome to LedgerFlow!</span>
           <span className="inline-flex items-center rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
@@ -51,7 +52,7 @@ export function UnverifiedEmailBanner() {
             className="text-amber-800 hover:bg-amber-500/20 hover:text-amber-950 dark:text-amber-300 dark:hover:text-amber-100"
             aria-label="Dismiss banner"
           >
-            <X className="size-4" />
+            <Icon icon={Cancel01Icon} className="size-4" />
           </Button>
         </AlertAction>
       </Alert>

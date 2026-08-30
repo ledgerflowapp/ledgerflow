@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { Check, ChevronsUpDown, Plus, Building2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { BuildingIcon, ChevronsDownUpIcon, PlusIcon, CheckIcon } from "@hugeicons/core-free-icons";
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -77,13 +78,13 @@ export function BusinessSwitcher() {
                 }>
                     {selectedBusiness ? (
                         <div className="flex items-center gap-2 truncate">
-                            <Building2 className="h-4 w-4 shrink-0 opacity-50" />
+                            <Icon icon={BuildingIcon} className="h-4 w-4 shrink-0 opacity-50" />
                             <span className="truncate">{selectedBusiness.name}</span>
                         </div>
                     ) : (
                         "Select Business"
                     )}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Icon icon={ChevronsDownUpIcon} className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0">
                     <Command>
@@ -100,9 +101,9 @@ export function BusinessSwitcher() {
                                         }}
                                         className="text-sm"
                                     >
-                                        <Building2 className="mr-2 h-4 w-4 opacity-50" />
+                                        <Icon icon={BuildingIcon} className="mr-2 h-4 w-4 opacity-50" />
                                         {business.name}
-                                        <Check
+                                        <Icon icon={CheckIcon}
                                             className={cn(
                                                 "ml-auto h-4 w-4",
                                                 currentBusinessId === business.id
@@ -123,7 +124,7 @@ export function BusinessSwitcher() {
                                         setShowNewBusinessDialog(true)
                                     }}
                                 >
-                                    <Plus className="mr-2 h-5 w-5" />
+                                    <Icon icon={PlusIcon} className="mr-2 h-5 w-5" />
                                     Create Business
                                 </CommandItem>
                             </CommandGroup>

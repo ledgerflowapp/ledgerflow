@@ -27,7 +27,8 @@ import { PersonalTransactionList } from '@/components/finance/PersonalTransactio
 import { AccountsList } from '@/components/finance/AccountsList'
 import { RecurringTransactionsList } from '@/components/finance/RecurringTransactionsList'
 import { SharedBalancesCard } from '@/components/finance/SharedBalancesCard'
-import { Plus } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { PlusIcon } from "@hugeicons/core-free-icons";
 
 import { BusinessSwitcher } from '@/components/layout/BusinessSwitcher'
 
@@ -123,7 +124,7 @@ function GoalsList() {
                 <h3 className="font-semibold">Goals</h3>
                 <AddGoalDrawer>
                     <Button size="sm" variant="outline">
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                         Add Goal
                     </Button>
                 </AddGoalDrawer>

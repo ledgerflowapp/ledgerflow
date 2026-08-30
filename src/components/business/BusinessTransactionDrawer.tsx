@@ -1,3 +1,4 @@
+"use client"
 import { useState } from 'react'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { useForm } from 'react-hook-form'
@@ -12,7 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { Loader2, Plus } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, PlusIcon } from "@hugeicons/core-free-icons";
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { paiseToRupees } from '@/lib/currency'
@@ -149,7 +151,7 @@ export function BusinessTransactionDrawer({
                         size="default"
                         className="fixed bottom-20 md:bottom-6 right-6 shadow-lg z-40 rounded-full h-14 px-6"
                      />}>
-                        <Plus className="h-6 w-6 mr-2" />
+                        <Icon icon={PlusIcon} className="h-6 w-6 mr-2" />
                         <span className="hidden md:inline">Add Transaction</span>
                         <span className="md:hidden">Add</span>
                     </DrawerTrigger>
@@ -299,7 +301,7 @@ export function BusinessTransactionDrawer({
                                 />
 
                                 <Button type="submit" className="w-full" disabled={isPending}>
-                                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                     Save Transaction
                                 </Button>
                             </form>

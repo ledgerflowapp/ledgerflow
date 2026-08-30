@@ -5,7 +5,8 @@ import { useFriendRequestActions } from "@/hooks/friends/useFriendRequestActions
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Loader2, Check, X, Clock } from "lucide-react"
+import { Icon } from "@/components/ui/icon";
+import { Cancel01Icon, LoaderIcon, Clock01Icon, CheckIcon } from "@hugeicons/core-free-icons";
 
 export function PendingRequestsList() {
     const { data: requests, isLoading } = useFriendRequests()
@@ -14,7 +15,7 @@ export function PendingRequestsList() {
     if (isLoading) {
         return (
             <div className="flex justify-center p-4">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Icon icon={LoaderIcon} className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
         )
     }
@@ -50,7 +51,7 @@ export function PendingRequestsList() {
                                         onClick={() => acceptRequest.mutate(req.id)}
                                         disabled={acceptRequest.isPending || rejectRequest.isPending}
                                     >
-                                        {acceptRequest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                                        {acceptRequest.isPending ? <Icon icon={LoaderIcon} className="h-4 w-4 animate-spin" /> : <Icon icon={CheckIcon} className="h-4 w-4" />}
                                         Accept
                                     </Button>
                                     <Button
@@ -59,7 +60,7 @@ export function PendingRequestsList() {
                                         onClick={() => rejectRequest.mutate(req.id)}
                                         disabled={acceptRequest.isPending || rejectRequest.isPending}
                                     >
-                                        {rejectRequest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                                        {rejectRequest.isPending ? <Icon icon={LoaderIcon} className="h-4 w-4 animate-spin" /> : <Icon icon={Cancel01Icon} className="h-4 w-4" />}
                                         Decline
                                     </Button>
                                 </div>
@@ -83,7 +84,7 @@ export function PendingRequestsList() {
                                     <div className="min-w-0">
                                         <h4 className="font-medium text-sm truncate">{req.profile.full_name}</h4>
                                         <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-500">
-                                            <Clock className="h-3 w-3" />
+                                            <Icon icon={Clock01Icon} className="h-3 w-3" />
                                             <span>Pending</span>
                                         </div>
                                     </div>
@@ -95,7 +96,7 @@ export function PendingRequestsList() {
                                     onClick={() => rejectRequest.mutate(req.id)}
                                     disabled={rejectRequest.isPending}
                                 >
-                                    {rejectRequest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Cancel'}
+                                    {rejectRequest.isPending ? <Icon icon={LoaderIcon} className="h-4 w-4 animate-spin" /> : 'Cancel'}
                                 </Button>
                             </Card>
                         ))}

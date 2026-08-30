@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { usePersonalPeople } from '@/hooks/personal/usePersonalPeople'
-import { Users, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { ArrowDownLeft02Icon, UsersIcon, ArrowUpRight03Icon } from "@hugeicons/core-free-icons";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
 import { paiseToRupees } from "@/lib/currency";
@@ -47,7 +48,7 @@ export function SharedBalancesCard() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-base font-semibold">Shared Balances</CardTitle>
                 <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/friends')}>
-                    <Users className="h-4 w-4 mr-2" />
+                    <Icon icon={UsersIcon} className="h-4 w-4 mr-2" />
                     Manage People
                 </Button>
             </CardHeader>
@@ -69,7 +70,7 @@ export function SharedBalancesCard() {
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             <div className="flex flex-col space-y-1 p-4 bg-green-500/10 rounded-xl border border-green-500/20">
                                 <span className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center">
-                                    <ArrowDownLeft className="h-4 w-4 mr-1" />
+                                    <Icon icon={ArrowDownLeft02Icon} className="h-4 w-4 mr-1" />
                                     Get back
                                 </span>
                                 <span className="text-2xl font-bold text-green-700 dark:text-green-500">
@@ -78,7 +79,7 @@ export function SharedBalancesCard() {
                             </div>
                             <div className="flex flex-col space-y-1 p-4 bg-red-500/10 rounded-xl border border-red-500/20">
                                 <span className="text-sm font-medium text-red-600 dark:text-red-400 flex items-center">
-                                    <ArrowUpRight className="h-4 w-4 mr-1" />
+                                    <Icon icon={ArrowUpRight03Icon} className="h-4 w-4 mr-1" />
                                     You owe
                                 </span>
                                 <span className="text-2xl font-bold text-red-700 dark:text-red-500">

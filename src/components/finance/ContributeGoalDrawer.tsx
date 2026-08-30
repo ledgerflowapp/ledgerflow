@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useContributeGoal } from '@/hooks/useContributeGoal'
-import { Loader2, Plus } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, PlusIcon } from "@hugeicons/core-free-icons";
 
 interface ContributeGoalDrawerProps {
     goalId: string
@@ -53,7 +54,7 @@ export function ContributeGoalDrawer({ goalId, goalName, children }: ContributeG
                                 />
                             </div>
                             <Button type="submit" className="w-full" disabled={isPending || !amount}>
-                                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                 Add Funds
                             </Button>
                         </form>

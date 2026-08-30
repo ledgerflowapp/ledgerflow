@@ -1,3 +1,4 @@
+"use client"
 import { useState } from 'react'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { useForm } from 'react-hook-form'
@@ -15,7 +16,8 @@ import { Input } from '@/components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Loader2, Plus, AlertCircle } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { AlertCircleIcon, LoaderIcon, PlusIcon } from "@hugeicons/core-free-icons";
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AddAccountDrawer } from '@/components/finance/AddAccountDrawer'
@@ -173,7 +175,7 @@ export function PersonalTransactionDrawer({
                         size="icon"
                         className="fixed bottom-20 md:bottom-6 right-6 shadow-lg z-40 rounded-full h-14 w-14"
                      />}>
-                        <Plus className="h-6 w-6" />
+                        <Icon icon={PlusIcon} className="h-6 w-6" />
                         <span className="sr-only">Add</span>
                     </DrawerTrigger>
             )}
@@ -299,7 +301,7 @@ export function PersonalTransactionDrawer({
                                                 {accounts?.length === 0 ? (
                                                     <div className="flex flex-col items-center justify-center p-4 border border-dashed rounded-lg bg-muted/20 text-center space-y-2">
                                                         <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 font-medium">
-                                                            <AlertCircle className="h-4 w-4" />
+                                                            <Icon icon={AlertCircleIcon} className="h-4 w-4" />
                                                             No accounts found
                                                         </div>
                                                         <p className="text-xs text-muted-foreground">
@@ -307,7 +309,7 @@ export function PersonalTransactionDrawer({
                                                         </p>
                                                         <AddAccountDrawer>
                                                             <Button size="sm" variant="outline" type="button" className="mt-1">
-                                                                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                                                                <Icon icon={PlusIcon} className="mr-1.5 h-3.5 w-3.5" />
                                                                 Add Account
                                                             </Button>
                                                         </AddAccountDrawer>
@@ -386,7 +388,7 @@ export function PersonalTransactionDrawer({
                                 />
 
                                 <Button type="submit" className="w-full" disabled={isPending}>
-                                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                     {initialData?.id ? 'Update Transaction' : 'Save Transaction'}
                                 </Button>
                             </form>

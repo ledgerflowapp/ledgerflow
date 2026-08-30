@@ -5,7 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Loader2, Camera } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, Camera03Icon } from "@hugeicons/core-free-icons";
 import { toast } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 import Cropper from 'react-easy-crop'
@@ -102,9 +103,9 @@ export function AvatarUpload({ value, onChange, disabled, name }: AvatarUploadPr
                     uploading && "opacity-100 cursor-not-allowed"
                 )}>
                     {uploading ? (
-                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                        <Icon icon={LoaderIcon} className="w-6 h-6 text-white animate-spin" />
                     ) : (
-                        <Camera className="w-6 h-6 text-white" />
+                        <Icon icon={Camera03Icon} className="w-6 h-6 text-white" />
                     )}
                 </div>
             </div>
@@ -168,7 +169,7 @@ export function AvatarUpload({ value, onChange, disabled, name }: AvatarUploadPr
                                 disabled={uploading}
                                 className="flex-1 sm:flex-none"
                             >
-                                {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {uploading && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                 Save
                             </Button>
                         </div>

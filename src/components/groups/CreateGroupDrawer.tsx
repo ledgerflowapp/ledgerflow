@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Loader2, Plus, X, UserPlus, Users } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { Cancel01Icon, LoaderIcon, UserPlusIcon, UsersIcon, PlusIcon } from "@hugeicons/core-free-icons";
 import { toast } from '@/components/ui/toast'
 import { createGroupAction } from '@/lib/actions/groups'
 import { useQueryClient } from '@tanstack/react-query'
@@ -186,7 +187,7 @@ export function CreateGroupDrawer({ children }: { children: React.ReactNode }) {
                                                             onClick={() => toggleMember(member.id, member.name, member.type)}
                                                             className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
                                                         >
-                                                            <X className="h-3 w-3" />
+                                                            <Icon icon={Cancel01Icon} className="h-3 w-3" />
                                                         </button>
                                                     </div>
                                                     <span className="text-[10px] truncate w-full text-center">{member.name}</span>
@@ -203,7 +204,7 @@ export function CreateGroupDrawer({ children }: { children: React.ReactNode }) {
                                                 onChange={(e) => setGhostName(e.target.value)}
                                             />
                                             <Button type="button" size="sm" onClick={handleAddGhost} disabled={!ghostName.trim()}>
-                                                <Plus className="h-4 w-4" />
+                                                <Icon icon={PlusIcon} className="h-4 w-4" />
                                             </Button>
                                         </div>
 
@@ -240,7 +241,7 @@ export function CreateGroupDrawer({ children }: { children: React.ReactNode }) {
 
                                 <DrawerFooter className="px-0">
                                     <Button type="submit" disabled={isSubmitting}>
-                                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isSubmitting && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                         Create Group
                                     </Button>
                                     <DrawerClose render={<Button variant="outline" />}>Cancel</DrawerClose>

@@ -4,14 +4,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAppStore } from '@/store/useAppStore'
 import { cn } from '@/lib/utils'
-import {
-    LayoutDashboard,
-    Users,
-    PieChart,
-    Settings,
-    Briefcase,
-    Wallet,
-} from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { PieChartIcon, Briefcase09Icon, LayoutDashboardIcon, UsersIcon, Wallet05Icon, Settings05Icon } from "@hugeicons/core-free-icons";
 
 import { MobileSidebar } from './MobileSidebar'
 import { InteractiveBottomNav } from '@/components/ui/interactive-bottom-nav'
@@ -23,18 +17,18 @@ export function BottomNav() {
         {
             label: 'Home',
             href: '/dashboard',
-            icon: LayoutDashboard,
+            icon: LayoutDashboardIcon,
         },
         {
             label: 'Friends',
             href: '/dashboard/friends',
-            icon: Users,
+            icon: UsersIcon,
             showIn: 'personal' as const,
         },
         {
             label: 'Analytics',
             href: '/dashboard/analytics',
-            icon: PieChart,
+            icon: PieChartIcon,
             showIn: 'personal' as const,
         },
         // We might want to add more items for business mode or general items if needed

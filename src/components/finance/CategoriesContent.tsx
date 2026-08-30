@@ -5,9 +5,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getCategories, updateCategory } from '@/lib/actions/categories'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, MoreVertical, Edit, Trash2, EyeOff, CheckCircle2, Loader2 } from 'lucide-react'
 import { CategoryDrawer } from '@/components/finance/CategoryDrawer'
 import { CategoryActionDialog } from '@/components/finance/CategoryActionDialog'
+import { DynamicIcon } from '@/components/ui/DynamicIcon'
+import { HugeiconsIcon } from "@hugeicons/react"
+import { PlusSignIcon, MoreVerticalIcon, Edit02Icon, Delete02Icon, ViewOffIcon, TickDouble02Icon, Loading02Icon } from "@hugeicons/core-free-icons"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -49,7 +51,7 @@ export function CategoriesContent() {
                 </div>
                 <CategoryDrawer>
                     <Button>
-                        <Plus className="mr-2 h-4 w-4" />
+                        <HugeiconsIcon icon={PlusSignIcon} className="mr-2 h-4 w-4" />
                         Add Category
                     </Button>
                 </CategoryDrawer>
@@ -62,7 +64,7 @@ export function CategoriesContent() {
                 <CardContent>
                     {isLoading ? (
                         <div className="flex justify-center p-8">
-                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                            <HugeiconsIcon icon={Loading02Icon} className="h-8 w-8 animate-spin text-muted-foreground" />
                         </div>
                     ) : (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -73,7 +75,7 @@ export function CategoriesContent() {
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-xl">
-                                            {category.icon}
+                                            <DynamicIcon name={category.icon || ''} size={20} />
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
@@ -92,14 +94,14 @@ export function CategoriesContent() {
                                         <DropdownMenuTrigger render={
                                             <Button variant="ghost" size="icon" className="h-8 w-8" />
                                         }>
-                                            <MoreVertical className="h-4 w-4" />
+                                            <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuItem onClick={() => {
                                                 setEditingCategory(category)
                                                 setEditOpen(true)
                                             }}>
-                                                <Edit className="mr-2 h-4 w-4" />
+                                                <HugeiconsIcon icon={Edit02Icon} className="mr-2 h-4 w-4" />
                                                 Edit
                                             </DropdownMenuItem>
 
@@ -108,12 +110,12 @@ export function CategoriesContent() {
                                                     setActionCategory(category)
                                                     setActionType('DISABLE')
                                                 }}>
-                                                    <EyeOff className="mr-2 h-4 w-4" />
+                                                    <HugeiconsIcon icon={ViewOffIcon} className="mr-2 h-4 w-4" />
                                                     Disable
                                                 </DropdownMenuItem>
                                             ) : (
                                                 <DropdownMenuItem onClick={() => handleEnable(category)}>
-                                                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                                                    <HugeiconsIcon icon={TickDouble02Icon} className="mr-2 h-4 w-4" />
                                                     Enable
                                                 </DropdownMenuItem>
                                             )}
@@ -125,7 +127,7 @@ export function CategoriesContent() {
                                                     setActionType('DELETE')
                                                 }}
                                             >
-                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                <HugeiconsIcon icon={Delete02Icon} className="mr-2 h-4 w-4" />
                                                 Delete
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>

@@ -13,7 +13,8 @@ import {
   ExpenseAddedCard,
   GenericNotificationCard,
 } from "./NotificationCards";
-import { Bell, RefreshCw, CheckCheck } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
+import { RefreshCwIcon, TickDouble02Icon, BellIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
@@ -99,7 +100,7 @@ export function NotificationFeed({
     <div className="w-full space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Bell className="h-5 w-5 text-primary" />
+          <Icon icon={BellIcon} className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold tracking-tight">
             Notifications Feed
           </h2>
@@ -118,7 +119,7 @@ export function NotificationFeed({
               onClick={handleMarkAllRead}
               className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground"
             >
-              <CheckCheck className="h-3.5 w-3.5" />
+              <Icon icon={TickDouble02Icon} className="h-3.5 w-3.5" />
               Mark all read
             </Button>
           )}
@@ -129,7 +130,7 @@ export function NotificationFeed({
             disabled={loading || isPending}
             className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
-            <RefreshCw
+            <Icon icon={RefreshCwIcon}
               className={`h-3.5 w-3.5 ${
                 loading || isPending ? "animate-spin" : ""
               }`}
@@ -160,7 +161,7 @@ export function NotificationFeed({
         </div>
       ) : filteredNotifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 px-4 text-center border rounded-lg bg-card/50">
-          <Bell className="h-10 w-10 text-muted-foreground/40 mb-3" />
+          <Icon icon={BellIcon} className="h-10 w-10 text-muted-foreground/40 mb-3" />
           <h3 className="text-sm font-medium text-foreground">
             No notifications found
           </h3>

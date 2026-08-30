@@ -1,6 +1,7 @@
 'use client'
 
-import { AlertTriangle } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { Alert01Icon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -19,7 +20,7 @@ export default function GlobalErrorFallback({
                 <CardHeader className="text-center pb-2">
                     <div className="flex justify-center mb-4">
                         <div className="p-3 bg-destructive/10 rounded-full">
-                            <AlertTriangle className="h-8 w-8 text-destructive" />
+                            <Icon icon={Alert01Icon} className="h-8 w-8 text-destructive" />
                         </div>
                     </div>
                     <CardTitle className="text-xl">Something went wrong!</CardTitle>

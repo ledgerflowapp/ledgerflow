@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Icon } from "@/components/ui/icon";
+import { Cancel01Icon, MenuIcon } from "@hugeicons/core-free-icons";
 
 interface LandingHeaderProps {
   user?: {
@@ -82,9 +83,9 @@ export function LandingHeader({ user }: LandingHeaderProps) {
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="md:hidden p-2 text-muted-foreground hover:text-foreground focus:outline-none"
-          aria-label="Toggle Menu"
+          aria-label="Toggle MenuIcon"
         >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {mobileMenuOpen ? <Icon icon={Cancel01Icon} className="h-6 w-6" /> : <Icon icon={MenuIcon} className="h-6 w-6" />}
         </button>
       </div>
 

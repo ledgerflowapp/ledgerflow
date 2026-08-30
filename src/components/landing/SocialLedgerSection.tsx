@@ -1,7 +1,8 @@
 import { SplitSimulator } from './SplitSimulator';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Link2, UserMinus, Plus, CheckCircle, Smartphone } from 'lucide-react';
+import { Icon } from "@/components/ui/icon";
+import { CheckmarkCircle04Icon, UsersIcon, SmartphoneIcon, UserMinus02Icon, LinkIcon, PlusIcon } from "@hugeicons/core-free-icons";
 
 export function SocialLedgerSection() {
   return (
@@ -52,7 +53,7 @@ export function SocialLedgerSection() {
               {/* Feature Bullet 2 */}
               <div className="flex gap-4">
                 <div className="p-2 bg-primary/10 text-primary rounded-lg shrink-0 h-9 w-9 flex items-center justify-center">
-                  <Users className="h-5 w-5" />
+                  <Icon icon={UsersIcon} className="h-5 w-5" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-foreground">Ghost Member Participation</h4>
@@ -65,7 +66,7 @@ export function SocialLedgerSection() {
               {/* Feature Bullet 3 */}
               <div className="flex gap-4">
                 <div className="p-2 bg-primary/10 text-primary rounded-lg shrink-0 h-9 w-9 flex items-center justify-center">
-                  <Link2 className="h-5 w-5" />
+                  <Icon icon={LinkIcon} className="h-5 w-5" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-foreground">Automated Contact Merging</h4>

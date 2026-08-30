@@ -4,7 +4,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { useBusinessContacts } from '@/hooks/business/useBusinessContacts'
 import { useContactTransactions } from '@/hooks/useContactTransactions'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Plus, Receipt, Filter, ArrowUpDown, MoreVertical, Edit, Trash2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { MoreVerticalIcon, ArrowUpDownIcon, FilterIcon, ArrowLeft05Icon, TrashIcon, ReceiptIcon, Edit04Icon, PlusIcon } from "@hugeicons/core-free-icons";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatTransactionDate, filterAndSortTransactions, TimeFilter, SortOption } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
@@ -30,7 +31,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useDeleteContact } from '@/hooks/useDeleteContact'
-import { Loader2 } from 'lucide-react'
+import { LoaderIcon } from "@hugeicons/core-free-icons"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -76,7 +77,7 @@ export default function LedgerPage() {
                     <EmptyHeader>
                         <EmptyMedia variant="icon">
                             <div className="p-3 bg-muted rounded-full">
-                                <ArrowLeft className="h-6 w-6 text-muted-foreground" />
+                                <Icon icon={ArrowLeft05Icon} className="h-6 w-6 text-muted-foreground" />
                             </div>
                         </EmptyMedia>
                         <EmptyTitle>Contact Not Found</EmptyTitle>
@@ -109,18 +110,18 @@ export default function LedgerPage() {
                         <DropdownMenuTrigger render={
                             <Button variant="ghost" size="icon" />
                         }>
-                            <MoreVertical className="h-4 w-4" />
+                            <Icon icon={MoreVerticalIcon} className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => setContactEditOpen(true)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
+                                <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" />
+                                Edit04Icon
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="text-red-600 focus:text-red-600"
                                 onClick={() => setDeleteDialogOpen(true)}
                             >
-                                <Trash2 className="mr-2 h-4 w-4" />
+                                <Icon icon={TrashIcon} className="mr-2 h-4 w-4" />
                                 Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -150,7 +151,7 @@ export default function LedgerPage() {
                     <div className="flex gap-2">
                         <Select items={[ {value: 'ALL', label: 'All Time'}, {value: 'TODAY', label: 'Today'}, {value: 'WEEK', label: 'This Week'}, {value: 'MONTH', label: 'This Month'}, {value: 'YEAR', label: 'This Year'} ]} value={timeFilter} onValueChange={(v) => setTimeFilter(v as TimeFilter)}>
                             <SelectTrigger className="w-[110px] h-8 text-xs">
-                                <SelectValue placeholder="Filter" />
+                                <SelectValue placeholder="FilterIcon" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="ALL">All Time</SelectItem>
@@ -176,13 +177,13 @@ export default function LedgerPage() {
 
                 {isLoading ? (
                     <div className="flex justify-center p-8">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        <Icon icon={LoaderIcon} className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : filteredTransactions?.length === 0 ? (
                     <Empty>
                         <EmptyHeader>
                             <EmptyMedia variant="icon">
-                                <Receipt />
+                                <Icon icon={ReceiptIcon} />
                             </EmptyMedia>
                             <EmptyTitle>No transactions found</EmptyTitle>
                             <EmptyDescription>
@@ -259,7 +260,7 @@ export default function LedgerPage() {
                             className="bg-red-600 hover:bg-red-700"
                             disabled={isDeleting}
                         >
-                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            {isDeleting ? <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>

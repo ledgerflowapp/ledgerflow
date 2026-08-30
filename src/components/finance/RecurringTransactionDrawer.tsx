@@ -11,7 +11,8 @@ import { useUpdateRecurringTransaction } from '@/hooks/useUpdateRecurringTransac
 import { useAccounts } from '@/hooks/useAccounts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Loader2, Plus, Edit } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, Edit04Icon, PlusIcon } from "@hugeicons/core-free-icons";
 import { useBudgets } from '@/hooks/useBudgets'
 import {
     Select,
@@ -141,14 +142,14 @@ export function RecurringTransactionDrawer({
                 <DrawerTrigger render={children as React.ReactElement} />
             ) : (
                 <DrawerTrigger render={<Button size="sm" variant="outline" />}>
-                    {isEdit ? <Edit className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
-                    {isEdit ? 'Edit Subscription' : 'Add Subscription'}
+                    {isEdit ? <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" /> : <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />}
+                    {isEdit ? 'Edit04Icon Subscription' : 'Add Subscription'}
                 </DrawerTrigger>
             )}
             <DrawerContent className="max-h-[90dvh]">
                 <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
                     <DrawerHeader className="shrink-0">
-                        <DrawerTitle>{isEdit ? 'Edit Recurring Payment' : 'Add Recurring Payment'}</DrawerTitle>
+                        <DrawerTitle>{isEdit ? 'Edit04Icon Recurring Payment' : 'Add Recurring Payment'}</DrawerTitle>
                     </DrawerHeader>
                     <div className="p-4 pb-8 overflow-y-auto flex-1 min-h-0">
                         <Tabs value={flow} className="w-full mb-4" onValueChange={(v) => setFlow(v as 'IN' | 'OUT')}>
@@ -356,7 +357,7 @@ export function RecurringTransactionDrawer({
                                 />
 
                                 <Button type="submit" className="w-full" disabled={isPending}>
-                                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                     {isEdit ? 'Save Changes' : 'Save Subscription'}
                                 </Button>
                             </form>

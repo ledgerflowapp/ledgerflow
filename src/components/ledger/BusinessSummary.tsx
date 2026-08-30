@@ -2,7 +2,8 @@
 
 import { useBusinessContacts } from '@/hooks/business/useBusinessContacts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { ArrowDownLeft02Icon, ArrowUpRight03Icon } from "@hugeicons/core-free-icons";
 import { paiseToRupees } from "@/lib/currency";
 
 export function BusinessSummary() {
@@ -25,7 +26,7 @@ export function BusinessSummary() {
                     <CardTitle className="text-sm font-medium text-green-600">
                         You will get
                     </CardTitle>
-                    <ArrowDownLeft className="h-4 w-4 text-green-600" />
+                    <Icon icon={ArrowDownLeft02Icon} className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold text-green-600">
@@ -38,7 +39,7 @@ export function BusinessSummary() {
                     <CardTitle className="text-sm font-medium text-red-600">
                         You will give
                     </CardTitle>
-                    <ArrowUpRight className="h-4 w-4 text-red-600" />
+                    <Icon icon={ArrowUpRight03Icon} className="h-4 w-4 text-red-600" />
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold text-red-600">

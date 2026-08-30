@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { getPersonalTransactionsAction } from '@/lib/actions/transactions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Receipt } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { ReceiptIcon } from "@hugeicons/core-free-icons";
 import { formatTransactionDate, filterAndSortTransactions } from '@/lib/date-utils'
 import { TransactionDetailsDrawer } from './TransactionDetailsDrawer'
 import { Badge } from '@/components/ui/badge'
@@ -120,7 +121,7 @@ export function PersonalTransactionList({ onEdit }: PersonalTransactionListProps
                         <Empty className="mt-8">
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
-                                    <Receipt />
+                                    <Icon icon={ReceiptIcon} />
                                 </EmptyMedia>
                                 <EmptyTitle>No transactions found</EmptyTitle>
                                 <EmptyDescription>

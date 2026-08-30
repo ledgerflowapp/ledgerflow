@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon } from "@hugeicons/core-free-icons";
 import { toast } from '@/components/ui/toast'
 
 import { Button } from '@/components/ui/button'
@@ -116,7 +117,7 @@ export function OnboardingModal() {
                                     </Button>
                                     <Button type="submit" disabled={updateProfile.isPending}>
                                         {updateProfile.isPending && (
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />
                                         )}
                                         Claim Username
                                     </Button>

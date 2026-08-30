@@ -2,7 +2,8 @@
 
 import { useGroups } from '@/hooks/groups/useGroups'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Users } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { UsersIcon, PlusIcon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button'
 import { CreateGroupDrawer } from './CreateGroupDrawer'
 import { useRouter } from 'next/navigation'
@@ -31,7 +32,7 @@ export function GroupsList() {
                 <Empty className="py-0">
                     <EmptyHeader>
                         <EmptyMedia variant="icon">
-                            <Users className="h-10 w-10 text-muted-foreground" />
+                            <Icon icon={UsersIcon} className="h-10 w-10 text-muted-foreground" />
                         </EmptyMedia>
                         <EmptyTitle>No Groups Yet</EmptyTitle>
                         <EmptyDescription>
@@ -42,7 +43,7 @@ export function GroupsList() {
                 <div className="mt-4">
                     <CreateGroupDrawer>
                         <Button>
-                            <Plus className="mr-2 h-4 w-4" />
+                            <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                             Create Group
                         </Button>
                     </CreateGroupDrawer>
@@ -57,7 +58,7 @@ export function GroupsList() {
                 <h2 className="text-lg font-semibold">Your Groups</h2>
                 <CreateGroupDrawer>
                     <Button size="sm" variant="outline">
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                         New Group
                     </Button>
                 </CreateGroupDrawer>

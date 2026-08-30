@@ -11,7 +11,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Loader2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon } from "@hugeicons/core-free-icons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const categorySchema = z.object({
@@ -44,7 +45,7 @@ export function CategoryDrawer({
         resolver: zodResolver(categorySchema),
         defaultValues: {
             name: '',
-            icon: '💰',
+            icon: 'Wallet01Icon',
             type: 'EXPENSE' as 'INCOME' | 'EXPENSE',
         },
     })
@@ -59,7 +60,7 @@ export function CategoryDrawer({
         } else {
             form.reset({
                 name: '',
-                icon: '💰',
+                icon: 'Wallet01Icon',
                 type: 'EXPENSE',
             })
         }
@@ -121,9 +122,9 @@ export function CategoryDrawer({
                                         name="icon"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Icon (Emoji)</FormLabel>
+                                                <FormLabel>Icon Name (Hugeicons)</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="🍔" {...field} />
+                                                    <Input placeholder="Wallet01Icon" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -154,7 +155,7 @@ export function CategoryDrawer({
                                 </div>
 
                                 <Button type="submit" className="w-full" disabled={isPending}>
-                                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                     {initialData ? 'Update Category' : 'Create Category'}
                                 </Button>
                             </form>

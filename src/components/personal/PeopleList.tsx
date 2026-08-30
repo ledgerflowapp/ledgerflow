@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
-import { Plus, Search, Users } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { Search02Icon, UsersIcon, PlusIcon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button'
 import { AddPersonDrawer } from './AddPersonDrawer'
 import { Input } from '@/components/ui/input'
@@ -112,7 +113,7 @@ export function PeopleList({
                     {showAddButton && (
                         <AddPersonDrawer>
                             <Button size="sm">
-                                <Plus className="mr-2 h-4 w-4" />
+                                <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                                 Add New
                             </Button>
                         </AddPersonDrawer>
@@ -120,9 +121,9 @@ export function PeopleList({
                 </div>
 
                 <div className="relative">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Icon icon={Search02Icon} className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search..."
+                        placeholder="Search02Icon..."
                         className="pl-8"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -135,7 +136,7 @@ export function PeopleList({
                         <Empty className="py-12">
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
-                                    <Users />
+                                    <Icon icon={UsersIcon} />
                                 </EmptyMedia>
                                 <EmptyTitle>{emptyMessage}</EmptyTitle>
                                 <EmptyDescription>

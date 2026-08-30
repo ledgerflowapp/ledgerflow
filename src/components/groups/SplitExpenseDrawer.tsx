@@ -9,7 +9,8 @@ import { GroupMember } from '@/types'
 import { useSplitCalculator, SplitType } from '@/hooks/finance/useSplitCalculator'
 import { useAddTransaction } from '@/hooks/useAddTransaction'
 import { toast } from '@/components/ui/toast'
-import { Check, ChevronRight, ArrowLeft, Plus } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { ChevronRightIcon, ArrowLeft05Icon, PlusIcon, CheckIcon } from "@hugeicons/core-free-icons";
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 import { useAccounts } from '@/hooks/useAccounts'
@@ -172,7 +173,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
                 <div className="mx-auto w-full max-w-sm mt-4 px-4 flex items-center justify-between">
                     {step === 2 ? (
                         <Button variant="ghost" size="icon" onClick={() => setStep(1)}>
-                            <ArrowLeft className="h-4 w-4" />
+                            <Icon icon={ArrowLeft05Icon} className="h-4 w-4" />
                         </Button>
                     ) : (
                         <div />
@@ -216,7 +217,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
                                         <p className="text-xs text-muted-foreground">No account found to pay from.</p>
                                         <AddAccountDrawer>
                                             <Button size="sm" variant="outline" type="button">
-                                                <Plus className="mr-1 h-3.5 w-3.5" />
+                                                <Icon icon={PlusIcon} className="mr-1 h-3.5 w-3.5" />
                                                 Add Account
                                             </Button>
                                         </AddAccountDrawer>
@@ -363,7 +364,7 @@ export function SplitExpenseDrawer({ children, groupId, members, currentUserId }
                     {step === 1 ? (
                         <Button onClick={handleNext} className="w-full">
                             Next
-                            <ChevronRight className="ml-2 h-4 w-4" />
+                            <Icon icon={ChevronRightIcon} className="ml-2 h-4 w-4" />
                         </Button>
                     ) : (
                         <Button onClick={handleSubmit} disabled={isPending} className="w-full">

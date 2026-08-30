@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowLeft, Copy, Settings, Plus, Handshake } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { HandshakeIcon, ArrowLeft05Icon, CopyIcon, PlusIcon, Settings05Icon } from "@hugeicons/core-free-icons";
 import { toast } from '@/components/ui/toast'
 import { GroupSettingsDrawer } from '@/components/groups/GroupSettingsDrawer'
 import { SplitExpenseDrawer } from '@/components/groups/SplitExpenseDrawer'
@@ -98,7 +99,7 @@ function GroupBalancesList({ groupId, members, currentUserId }: {
 
             <SettleUpDrawer groupId={groupId} members={members} currentUserId={currentUserId}>
                 <Button variant="outline" className="w-full gap-2">
-                    <Handshake className="h-4 w-4" />
+                    <Icon icon={HandshakeIcon} className="h-4 w-4" />
                     Settle Up
                 </Button>
             </SettleUpDrawer>
@@ -142,13 +143,13 @@ export default function GroupDetailsPage() {
             <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" onClick={() => router.back()} className="-ml-2">
-                        <ArrowLeft className="h-4 w-4" />
+                        <Icon icon={ArrowLeft05Icon} className="h-4 w-4" />
                     </Button>
                     <h1 className="text-xl font-bold tracking-tight">Group Details</h1>
                 </div>
                 <GroupSettingsDrawer groupDetails={groupDetails}>
                     <Button variant="ghost" size="icon">
-                        <Settings className="h-5 w-5" />
+                        <Icon icon={Settings05Icon} className="h-5 w-5" />
                     </Button>
                 </GroupSettingsDrawer>
             </div>
@@ -170,7 +171,7 @@ export default function GroupDetailsPage() {
 
                     <div className="flex gap-2 w-full max-w-xs">
                         <Button className="flex-1" variant="outline" onClick={copyInviteLink}>
-                            <Copy className="mr-2 h-4 w-4" />
+                            <Icon icon={CopyIcon} className="mr-2 h-4 w-4" />
                             Invite
                         </Button>
                         {profile?.id ? (
@@ -180,13 +181,13 @@ export default function GroupDetailsPage() {
                                 currentUserId={profile.id}
                             >
                                 <Button className="flex-1">
-                                    <Plus className="mr-2 h-4 w-4" />
+                                    <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                                     Add Expense
                                 </Button>
                             </SplitExpenseDrawer>
                         ) : (
                             <Button className="flex-1" disabled>
-                                <Plus className="mr-2 h-4 w-4" />
+                                <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                                 Loading...
                             </Button>
                         )}

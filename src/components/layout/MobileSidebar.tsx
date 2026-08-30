@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store/useAppStore'
 import { signOut } from '@/lib/auth-client'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { Briefcase, LogOut, Menu, Wallet, Settings, Users, LayoutDashboard, PieChart, List, Bell } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { PieChartIcon, ListIcon, Briefcase09Icon, LayoutDashboardIcon, MenuIcon, Logout05Icon, UsersIcon, Wallet05Icon, BellIcon, Settings05Icon } from "@hugeicons/core-free-icons";
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { toast } from '@/components/ui/toast'
@@ -40,42 +41,42 @@ export function MobileSidebar() {
         {
             label: 'Dashboard',
             href: '/dashboard',
-            icon: LayoutDashboard,
+            icon: LayoutDashboardIcon,
         },
         {
             label: 'Friends',
             href: '/dashboard/friends',
-            icon: Users,
+            icon: UsersIcon,
             showIn: 'personal',
         },
         {
             label: 'Groups',
             href: '/dashboard/friends?tab=groups',
-            icon: Users,
+            icon: UsersIcon,
             showIn: 'personal',
         },
         {
             label: 'Analytics',
             href: '/dashboard/analytics',
-            icon: PieChart,
+            icon: PieChartIcon,
             showIn: 'personal',
         },
         {
             label: 'Manage Categories',
             href: '/dashboard/categories',
-            icon: List,
+            icon: ListIcon,
             showIn: 'personal',
         },
         {
             label: 'Notifications',
             href: '/dashboard/notifications',
-            icon: Bell,
+            icon: BellIcon,
             showIn: 'personal',
         },
         {
             label: 'Settings',
             href: '/dashboard/settings',
-            icon: Settings,
+            icon: Settings05Icon,
         },
     ]
 
@@ -84,11 +85,11 @@ export function MobileSidebar() {
             <SheetTrigger render={
                 <Button variant="ghost" size="icon" className="md:hidden" />
             }>
-                <Menu className="h-6 w-6" />
+                <Icon icon={MenuIcon} className="h-6 w-6" />
             </SheetTrigger>
             <SheetContent side="left">
                 <SheetHeader className="text-left">
-                    <SheetTitle>Menu</SheetTitle>
+                    <SheetTitle>MenuIcon</SheetTitle>
                     <div className="flex items-center gap-3 mt-4 mb-2">
                         <Avatar className="h-10 w-10">
                             <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User'} />
@@ -103,7 +104,7 @@ export function MobileSidebar() {
                 <div className="flex flex-col gap-2 mt-4">
                     {navItems.map((item) => {
                         if (item.showIn && item.showIn !== mode) return null
-                        const Icon = item.icon
+                        const NavIcon = item.icon
 
                         let isActive = pathname === item.href
 
@@ -129,7 +130,7 @@ export function MobileSidebar() {
                                     setOpen(false)
                                 }}
                             >
-                                <Icon className="h-4 w-4" />
+                                <Icon icon={NavIcon} className="h-4 w-4" />
                                 <span>{item.label}</span>
                             </Button>
                         )
@@ -144,12 +145,12 @@ export function MobileSidebar() {
                     >
                         {mode === 'business' ? (
                             <>
-                                <Wallet className="h-4 w-4" />
+                                <Icon icon={Wallet05Icon} className="h-4 w-4" />
                                 <span>Switch to Personal</span>
                             </>
                         ) : (
                             <>
-                                <Briefcase className="h-4 w-4" />
+                                <Icon icon={Briefcase09Icon} className="h-4 w-4" />
                                 <span>Switch to Business</span>
                             </>
                         )}
@@ -160,7 +161,7 @@ export function MobileSidebar() {
                         className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={handleLogout}
                     >
-                        <LogOut className="h-4 w-4" />
+                        <Icon icon={Logout05Icon} className="h-4 w-4" />
                         <span>Logout</span>
                     </Button>
                 </div>

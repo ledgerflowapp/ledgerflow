@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { PlusIcon } from "@hugeicons/core-free-icons";
 import { Progress } from '@/components/ui/progress'
 import { ContributeGoalDrawer } from './ContributeGoalDrawer'
 import { paiseToRupees } from "@/lib/currency";
@@ -26,7 +27,7 @@ export function GoalCard({ id, name, current, target, deadline }: GoalCardProps)
                 <CardTitle className="text-sm font-medium">{name}</CardTitle>
                 <ContributeGoalDrawer goalId={id} goalName={name}>
                     <Button size="icon" variant="ghost" className="h-6 w-6">
-                        <Plus className="h-4 w-4" />
+                        <Icon icon={PlusIcon} className="h-4 w-4" />
                     </Button>
                 </ContributeGoalDrawer>
             </CardHeader>

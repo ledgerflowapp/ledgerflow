@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { useAddAccount } from '@/hooks/useAddAccount'
-import { Loader2, Plus } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LoaderIcon, PlusIcon } from "@hugeicons/core-free-icons";
 
 const accountSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -46,7 +47,7 @@ export function AddAccountDrawer({ children }: { children?: React.ReactNode }) {
                 <DrawerTrigger render={children as React.ReactElement} />
             ) : (
                 <DrawerTrigger render={<Button size="sm" variant="outline" className="w-full" />}>
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                     Add Account
                 </DrawerTrigger>
             )}
@@ -114,7 +115,7 @@ export function AddAccountDrawer({ children }: { children?: React.ReactNode }) {
                                     )}
                                 />
                                 <Button type="submit" className="w-full" disabled={isPending}>
-                                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isPending && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                     Create Account
                                 </Button>
                             </form>

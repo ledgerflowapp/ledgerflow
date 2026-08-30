@@ -1,5 +1,6 @@
 'use client';
 
+import { Icon } from "@/components/ui/icon";
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -8,7 +9,7 @@ type IconComponentType = React.ElementType<{ className?: string }>;
 export interface InteractiveMenuItem {
     label: string;
     href?: string;
-    icon: IconComponentType;
+    icon: any;
     showIn?: 'business' | 'personal';
 }
 
@@ -92,7 +93,7 @@ const InteractiveBottomNav: React.FC<InteractiveMenuProps> = ({ items, className
                         style={{ '--lineWidth': '0px' } as React.CSSProperties}
                     >
                         <div className="menu__icon">
-                            <IconComponent className="icon" />
+                            <Icon icon={item.icon} className="icon" />
                         </div>
                         <strong
                             className={`menu__text ${isActive ? 'active' : ''}`}

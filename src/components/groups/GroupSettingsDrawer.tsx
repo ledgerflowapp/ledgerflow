@@ -4,12 +4,13 @@ import { useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Loader2, Settings, Trash2, X, Link2 } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { LinkIcon, Settings05Icon, TrashIcon, LoaderIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { toast } from '@/components/ui/toast'
 import { updateGroupAction, deleteGroupAction, removeGroupMemberAction, getGroupTransactionCountAction } from '@/lib/actions/groups'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { AlertTriangle } from 'lucide-react'
+import { Alert01Icon } from "@hugeicons/core-free-icons"
 import { GroupDetails } from '@/hooks/groups/useGroupDetails'
 import { useFriendships } from '@/hooks/friends/useFriendships'
 import { useLinkGhostMember } from '@/hooks/groups/useGroupActions'
@@ -174,7 +175,7 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                                         )}
                                     />
                                     <Button type="submit" size="sm" disabled={isSubmitting || !form.formState.isDirty}>
-                                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isSubmitting && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                         Save Changes
                                     </Button>
                                 </form>
@@ -220,7 +221,7 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                                                                 disabled={isLinking}
                                                             />
                                                         }>
-                                                            <Link2 className="h-4 w-4" />
+                                                            <Icon icon={LinkIcon} className="h-4 w-4" />
                                                         </PopoverTrigger>
                                                         <PopoverContent align="end" className="w-[280px] p-0">
                                                             <div className="p-3 border-b text-sm font-medium">
@@ -265,7 +266,7 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                                                     onClick={() => onRemoveMember(member.id)}
                                                     disabled={isLinking}
                                                 >
-                                                    <X className="h-4 w-4" />
+                                                    <Icon icon={Cancel01Icon} className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         )}
@@ -286,7 +287,7 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                                         onClick={checkTransactions}
                                     />
                                 }>
-                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <Icon icon={TrashIcon} className="mr-2 h-4 w-4" />
                                     Delete Group
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
@@ -296,7 +297,7 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                                             {transactionCount !== null && transactionCount > 0 ? (
                                                 <div className="rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-900">
                                                     <div className="flex items-start gap-2">
-                                                        <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                                        <Icon icon={Alert01Icon} className="h-4 w-4 mt-0.5 flex-shrink-0" />
                                                         <div className="space-y-1">
                                                             <p className="font-medium">Group History Warning</p>
                                                             <p>
@@ -324,7 +325,7 @@ export function GroupSettingsDrawer({ children, groupDetails }: GroupSettingsDra
                                             onClick={onDeleteGroup}
                                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                         >
-                                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                            {isDeleting ? <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" /> : null}
                                             {transactionCount && transactionCount > 0 ? 'Delete & Keep History' : 'Delete'}
                                         </AlertDialogAction>
                                     </AlertDialogFooter>

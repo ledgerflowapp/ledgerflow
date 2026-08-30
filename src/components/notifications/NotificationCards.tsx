@@ -6,18 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Check,
-  X,
-  UserPlus,
-  Users,
-  Receipt,
-  Bell,
-  Mail,
-  CheckCheck,
-  UserCheck,
-  UserX,
-} from "lucide-react";
+import { Icon } from "@/components/ui/icon";
+import { Cancel01Icon, UserRemove01Icon, UserPlusIcon, ReceiptIcon, UserCheck02Icon, Mail02Icon, UsersIcon, CheckIcon, TickDouble02Icon, BellIcon } from "@hugeicons/core-free-icons";
 import { toast } from "@/components/ui/toast";
 import {
   PersonalNotification,
@@ -108,7 +98,7 @@ export function FriendRequestCard({ notification, onUpdate }: NotificationCardBa
     <Card className={`w-full border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md ${!isRead ? "border-l-4 border-l-blue-500 bg-blue-50/20 dark:bg-blue-950/10" : ""}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
-          <UserPlus className="h-4 w-4 text-blue-500" />
+          <Icon icon={UserPlusIcon} className="h-4 w-4 text-blue-500" />
           <CardTitle className="text-sm font-semibold">Friend Request</CardTitle>
         </div>
         {!isRead && (
@@ -127,7 +117,7 @@ export function FriendRequestCard({ notification, onUpdate }: NotificationCardBa
             <span className="text-sm font-medium truncate">{initiatorName}</span>
             {initiator?.email && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                <Mail className="h-3 w-3" />
+                <Icon icon={Mail02Icon} className="h-3 w-3" />
                 {initiator.email}
               </span>
             )}
@@ -160,7 +150,7 @@ export function FriendRequestCard({ notification, onUpdate }: NotificationCardBa
                 {loading === "markRead" ? (
                   <Spinner className="h-3.5 w-3.5" />
                 ) : (
-                  <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                  <Icon icon={TickDouble02Icon} className="h-3.5 w-3.5 mr-1" />
                 )}
                 Mark read
               </Button>
@@ -179,7 +169,7 @@ export function FriendRequestCard({ notification, onUpdate }: NotificationCardBa
                   {loading === "reject" ? (
                     <Spinner className="h-3.5 w-3.5 mr-1" />
                   ) : (
-                    <X className="h-3.5 w-3.5 mr-1" />
+                    <Icon icon={Cancel01Icon} className="h-3.5 w-3.5 mr-1" />
                   )}
                   Reject
                 </Button>
@@ -194,7 +184,7 @@ export function FriendRequestCard({ notification, onUpdate }: NotificationCardBa
                   {loading === "accept" ? (
                     <Spinner className="h-3.5 w-3.5 mr-1" />
                   ) : (
-                    <Check className="h-3.5 w-3.5 mr-1" />
+                    <Icon icon={CheckIcon} className="h-3.5 w-3.5 mr-1" />
                   )}
                   Accept
                 </Button>
@@ -203,13 +193,13 @@ export function FriendRequestCard({ notification, onUpdate }: NotificationCardBa
 
             {status === "ACCEPTED" && (
               <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20 px-2.5 py-1">
-                <UserCheck className="h-3.5 w-3.5 mr-1" /> Accepted
+                <Icon icon={UserCheck02Icon} className="h-3.5 w-3.5 mr-1" /> Accepted
               </Badge>
             )}
 
             {status === "REJECTED" && (
               <Badge variant="destructive" className="px-2.5 py-1">
-                <UserX className="h-3.5 w-3.5 mr-1" /> Rejected
+                <Icon icon={UserRemove01Icon} className="h-3.5 w-3.5 mr-1" /> Rejected
               </Badge>
             )}
           </div>
@@ -288,7 +278,7 @@ export function GroupInviteCard({ notification, onUpdate }: NotificationCardBase
     <Card className={`w-full border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md ${!isRead ? "border-l-4 border-l-purple-500 bg-purple-50/20 dark:bg-purple-950/10" : ""}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-purple-500" />
+          <Icon icon={UsersIcon} className="h-4 w-4 text-purple-500" />
           <CardTitle className="text-sm font-semibold">{groupName}</CardTitle>
         </div>
         <Badge variant="secondary" className="text-xs font-normal">
@@ -329,7 +319,7 @@ export function GroupInviteCard({ notification, onUpdate }: NotificationCardBase
                 {loading === "markRead" ? (
                   <Spinner className="h-3.5 w-3.5" />
                 ) : (
-                  <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                  <Icon icon={TickDouble02Icon} className="h-3.5 w-3.5 mr-1" />
                 )}
                 Mark read
               </Button>
@@ -348,7 +338,7 @@ export function GroupInviteCard({ notification, onUpdate }: NotificationCardBase
                   {loading === "reject" ? (
                     <Spinner className="h-3.5 w-3.5 mr-1" />
                   ) : (
-                    <X className="h-3.5 w-3.5 mr-1" />
+                    <Icon icon={Cancel01Icon} className="h-3.5 w-3.5 mr-1" />
                   )}
                   Decline
                 </Button>
@@ -363,7 +353,7 @@ export function GroupInviteCard({ notification, onUpdate }: NotificationCardBase
                   {loading === "accept" ? (
                     <Spinner className="h-3.5 w-3.5 mr-1" />
                   ) : (
-                    <Check className="h-3.5 w-3.5 mr-1" />
+                    <Icon icon={CheckIcon} className="h-3.5 w-3.5 mr-1" />
                   )}
                   Join Group
                 </Button>
@@ -372,13 +362,13 @@ export function GroupInviteCard({ notification, onUpdate }: NotificationCardBase
 
             {status === "ACCEPTED" && (
               <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20 px-2.5 py-1">
-                <UserCheck className="h-3.5 w-3.5 mr-1" /> Joined
+                <Icon icon={UserCheck02Icon} className="h-3.5 w-3.5 mr-1" /> Joined
               </Badge>
             )}
 
             {status === "REJECTED" && (
               <Badge variant="destructive" className="px-2.5 py-1">
-                <UserX className="h-3.5 w-3.5 mr-1" /> Declined
+                <Icon icon={UserRemove01Icon} className="h-3.5 w-3.5 mr-1" /> Declined
               </Badge>
             )}
           </div>
@@ -424,7 +414,7 @@ export function ExpenseAddedCard({ notification, onUpdate }: NotificationCardBas
     <Card className={`w-full border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md ${!isRead ? "border-l-4 border-l-amber-500 bg-amber-50/20 dark:bg-amber-950/10" : ""}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
-          <Receipt className="h-4 w-4 text-amber-500" />
+          <Icon icon={ReceiptIcon} className="h-4 w-4 text-amber-500" />
           <CardTitle className="text-sm font-semibold">
             {notification.title || "Expense Added"}
           </CardTitle>
@@ -469,7 +459,7 @@ export function ExpenseAddedCard({ notification, onUpdate }: NotificationCardBas
                 {loading ? (
                   <Spinner className="h-3.5 w-3.5" />
                 ) : (
-                  <CheckCheck className="h-3.5 w-3.5" />
+                  <Icon icon={TickDouble02Icon} className="h-3.5 w-3.5" />
                 )}
                 Mark as read
               </Button>
@@ -508,7 +498,7 @@ export function GenericNotificationCard({ notification, onUpdate }: Notification
     <Card className={`w-full border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md ${!isRead ? "border-l-4 border-l-primary bg-primary/5" : ""}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
-          <Bell className="h-4 w-4 text-primary" />
+          <Icon icon={BellIcon} className="h-4 w-4 text-primary" />
           <CardTitle className="text-sm font-semibold">
             {notification.title || "Notification"}
           </CardTitle>
@@ -546,7 +536,7 @@ export function GenericNotificationCard({ notification, onUpdate }: Notification
                 {loading ? (
                   <Spinner className="h-3.5 w-3.5" />
                 ) : (
-                  <CheckCheck className="h-3.5 w-3.5" />
+                  <Icon icon={TickDouble02Icon} className="h-3.5 w-3.5" />
                 )}
                 Mark as read
               </Button>

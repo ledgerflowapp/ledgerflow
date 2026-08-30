@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Receipt } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { ReceiptIcon } from "@hugeicons/core-free-icons";
 import { formatTransactionDate } from '@/lib/date-utils'
 import { TransactionDetailsDrawer } from '@/components/finance/TransactionDetailsDrawer'
 import { Badge } from '@/components/ui/badge'
@@ -69,7 +70,7 @@ export function GroupTransactionList({ groupId, currentUserId }: GroupTransactio
                         <Empty className="mt-8">
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
-                                    <Receipt />
+                                    <Icon icon={ReceiptIcon} />
                                 </EmptyMedia>
                                 <EmptyTitle>No expenses yet</EmptyTitle>
                                 <EmptyDescription>

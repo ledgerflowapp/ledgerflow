@@ -132,7 +132,6 @@ export const useAppStore = create<AppState>()(
             name: 'app-preference', // Saves to localStorage
             onRehydrateStorage: () => (state) => {
                 state?.setHasHydrated(true)
-                state?.fetchThemeSettings() // Fetch fresh settings on hydration
             }
         }
     )

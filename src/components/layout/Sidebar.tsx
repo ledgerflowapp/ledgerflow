@@ -4,19 +4,8 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useAppStore } from '@/store/useAppStore'
 import { cn } from '@/lib/utils'
-import {
-    LayoutDashboard,
-    Users,
-    PieChart,
-    Settings,
-    LogOut,
-    Moon,
-    Sun,
-    Briefcase,
-    Wallet,
-    List,
-    Bell,
-} from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { PieChartIcon, Sun03Icon, ListIcon, Briefcase09Icon, LayoutDashboardIcon, MoonIcon, Logout05Icon, UsersIcon, Wallet05Icon, BellIcon, Settings05Icon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button'
 import { signOut } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
@@ -45,42 +34,42 @@ export function Sidebar() {
         {
             label: 'Dashboard',
             href: '/dashboard',
-            icon: LayoutDashboard,
+            icon: LayoutDashboardIcon,
         },
         {
             label: 'Friends',
             href: '/dashboard/friends',
-            icon: Users,
+            icon: UsersIcon,
             showIn: 'personal',
         },
         {
             label: 'Groups',
             href: '/dashboard/friends?tab=groups',
-            icon: Users,
+            icon: UsersIcon,
             showIn: 'personal',
         },
         {
             label: 'Analytics',
             href: '/dashboard/analytics',
-            icon: PieChart,
+            icon: PieChartIcon,
             showIn: 'personal',
         },
         {
             label: 'Manage Categories',
             href: '/dashboard/categories',
-            icon: List,
+            icon: ListIcon,
             showIn: 'personal',
         },
         {
             label: 'Notifications',
             href: '/dashboard/notifications',
-            icon: Bell,
+            icon: BellIcon,
             showIn: 'personal',
         },
         {
             label: 'Settings',
             href: '/dashboard/settings',
-            icon: Settings,
+            icon: Settings05Icon,
         },
     ]
 
@@ -100,7 +89,7 @@ export function Sidebar() {
                 <nav className="grid gap-1 px-2">
                     {navItems.map((item) => {
                         if (item.showIn && item.showIn !== mode) return null
-                        const Icon = item.icon
+                        const NavIcon = item.icon
 
                         let isActive = pathname === item.href
 
@@ -124,7 +113,7 @@ export function Sidebar() {
                                         : 'text-muted-foreground'
                                 )}
                             >
-                                <Icon className="h-4 w-4" />
+                                <Icon icon={NavIcon} className="h-4 w-4" />
                                 {item.label}
                             </Link>
                         )
@@ -145,12 +134,12 @@ export function Sidebar() {
                     >
                         {mode === 'business' ? (
                             <>
-                                <Wallet className="h-4 w-4" />
+                                <Icon icon={Wallet05Icon} className="h-4 w-4" />
                                 <span>Switch to Personal</span>
                             </>
                         ) : (
                             <>
-                                <Briefcase className="h-4 w-4" />
+                                <Icon icon={Briefcase09Icon} className="h-4 w-4" />
                                 <span>Switch to Business</span>
                             </>
                         )}
@@ -162,7 +151,7 @@ export function Sidebar() {
                         onClick={handleLogout}
                         title="Logout"
                     >
-                        <LogOut className="h-4 w-4" />
+                        <Icon icon={Logout05Icon} className="h-4 w-4" />
                         <span>Logout</span>
                     </Button>
                 </div>

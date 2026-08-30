@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label'
 import { useBudgets } from '@/hooks/useBudgets'
 import { useUpdateCategory } from '@/hooks/useUpdateCategory'
 import { useAddCategory } from '@/hooks/useAddCategory'
-import { Loader2, Settings2, Plus, X } from 'lucide-react'
+import { Icon } from "@/components/ui/icon";
+import { Cancel01Icon, LoaderIcon, PlusIcon, Settings05Icon } from "@hugeicons/core-free-icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const PRESET_ICONS = ['🍔', '🚗', '🎬', '🛍️', '💡', '🏥', '✈️', '🏠', '📚', '🏋️', '🍕', '🍺', '🎁', '🔧']
@@ -44,7 +45,7 @@ export function ManageCategoriesDrawer() {
     return (
         <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
-                    <Settings2 className="h-4 w-4" />
+                    <Icon icon={Settings05Icon} className="h-4 w-4" />
                 </DrawerTrigger>
             <DrawerContent>
                 <div className="mx-auto w-full max-w-md">
@@ -90,7 +91,7 @@ export function ManageCategoriesDrawer() {
                                         </div>
                                     </div>
                                     <Button type="submit" className="w-full" disabled={isAdding || !newCategoryName}>
-                                        {isAdding && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isAdding && <Icon icon={LoaderIcon} className="mr-2 h-4 w-4 animate-spin" />}
                                         Create Category
                                     </Button>
                                 </form>
@@ -98,7 +99,7 @@ export function ManageCategoriesDrawer() {
                         ) : (
                             <>
                                 <Button className="w-full" onClick={() => setIsAddingMode(true)}>
-                                    <Plus className="mr-2 h-4 w-4" />
+                                    <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />
                                     Add New Category
                                 </Button>
 
