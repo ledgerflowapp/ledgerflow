@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -50,10 +50,21 @@
   --color-component-active-bg: var(--secondary);
   --color-component-line-inactive: var(--border);
   --color-component-active-color-default: var(--primary);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-jakarta);
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* 8pt grid spacing tokens */
+  --spacing-grid-1: 0.5rem;   /*  8px */
+  --spacing-grid-2: 1rem;     /* 16px */
+  --spacing-grid-3: 1.5rem;   /* 24px */
+  --spacing-grid-4: 2rem;     /* 32px */
+  --spacing-grid-5: 2.5rem;   /* 40px */
+  --spacing-grid-6: 3rem;     /* 48px — minimum touch target */
+  --spacing-grid-8: 4rem;     /* 64px */
+  --spacing-grid-10: 5rem;    /* 80px */
+  --spacing-grid-12: 6rem;    /* 96px */
 }
 
 :root {
@@ -268,6 +279,10 @@
   }
   html {
     @apply font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
   }
 
   input:-webkit-autofill,
