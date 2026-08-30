@@ -17,3 +17,22 @@ export function getURL() {
   url = url.charAt(url.length - 1) === '/' ? url : `${url}/`
   return url
 }
+
+/**
+ * Truncates text to a specified maximum length and appends an ellipsis.
+ */
+export function truncate(text: string | null | undefined, maxLength: number): string {
+  if (!text) return ""
+  if (text.length <= maxLength) return text
+  return `${text.slice(0, maxLength)}…`
+}
+
+/**
+ * Provides an inline fallback (defaulting to '—') for null, undefined, or empty values.
+ */
+export function fallback(value: string | number | null | undefined, fallbackValue = "—"): string | number {
+  if (value === null || value === undefined || value === "") {
+    return fallbackValue
+  }
+  return value
+}

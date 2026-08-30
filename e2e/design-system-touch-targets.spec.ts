@@ -8,7 +8,7 @@ import { test, expect } from './helpers/test-fixtures';
  * Design touch target guidelines. The 48px value aligns with our 8pt grid
  * (48 = 6 × 8).
  *
- * These tests are marked with `test.fixme()` — they define the target state
+ * These tests are marked with `test()` — they define the target state
  * for the design system, not the current state. As components are migrated to
  * use the 8pt grid spacing tokens (e.g., `p-grid-6`, `min-h-grid-6`), remove
  * the `.fixme` annotation to activate each test.
@@ -122,7 +122,7 @@ async function assertNoTouchTargetViolations(
 }
 
 test.describe('Design System: 48×48px Touch Targets', () => {
-  test.fixme(
+  test(
     'landing page interactive elements meet 48×48px minimum bounding box',
     async ({ page }) => {
       await page.goto('/');
@@ -131,7 +131,7 @@ test.describe('Design System: 48×48px Touch Targets', () => {
     }
   );
 
-  test.fixme(
+  test(
     'login page interactive elements meet 48×48px minimum bounding box',
     async ({ page }) => {
       await page.goto('/login');
@@ -140,7 +140,7 @@ test.describe('Design System: 48×48px Touch Targets', () => {
     }
   );
 
-  test.fixme(
+  test(
     'landing page interactive elements meet 48×48px on mobile viewport',
     async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
