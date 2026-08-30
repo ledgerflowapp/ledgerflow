@@ -45,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${plusJakartaSans.variable} ${geistMono.variable}`}>
       <body
-        className="antialiased"
+        className="font-sans antialiased"
       >
         <QueryProvider>
           <ErrorBoundary>

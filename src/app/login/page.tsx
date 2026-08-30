@@ -250,9 +250,9 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Email</FormLabel>
                                                     <div className="relative">
-                                                        <Icon icon={Mail02Icon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={Mail02Icon} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                                         <FormControl>
-                                                            <Input className="pl-9" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
+                                                            <Input className="pl-10" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
                                                         </FormControl>
                                                     </div>
                                                     <FormMessage />
@@ -266,20 +266,20 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Password</FormLabel>
                                                     <div className="relative">
-                                                        <Icon icon={LockIcon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={LockIcon} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                                         <FormControl>
-                                                            <Input className="pl-9 pr-10" placeholder="••••••••" type={showPassword ? "text" : "password"} autoComplete="current-password" {...field} />
+                                                            <Input className="pl-10 pr-10" placeholder="••••••••" type={showPassword ? "text" : "password"} autoComplete="current-password" {...field} />
                                                         </FormControl>
                                                         <button
                                                             type="button"
                                                             onClick={() => setShowPassword(!showPassword)}
-                                                            className="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
                                                             aria-label={showPassword ? "Hide password" : "Show password"}
                                                         >
                                                             {showPassword ? (
-                                                                <Icon icon={EyeOffIcon} className="h-4 w-4" />
+                                                                <Icon icon={EyeOffIcon} className="h-5 w-5" />
                                                             ) : (
-                                                                <Icon icon={EyeIcon} className="h-4 w-4" />
+                                                                <Icon icon={EyeIcon} className="h-5 w-5" />
                                                             )}
                                                         </button>
                                                     </div>
@@ -303,9 +303,9 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Full Name</FormLabel>
                                                     <div className="relative">
-                                                        <Icon icon={UserIcon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={UserIcon} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                                         <FormControl>
-                                                            <Input className="pl-9" placeholder="John Doe" autoComplete="name" {...field} />
+                                                            <Input className="pl-10" placeholder="John Doe" autoComplete="name" {...field} />
                                                         </FormControl>
                                                     </div>
                                                     <FormMessage />
@@ -319,9 +319,9 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Email</FormLabel>
                                                     <div className="relative">
-                                                        <Icon icon={Mail02Icon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={Mail02Icon} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                                         <FormControl>
-                                                            <Input className="pl-9" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
+                                                            <Input className="pl-10" placeholder="m@example.com" type="email" autoComplete="email" {...field} />
                                                         </FormControl>
                                                     </div>
                                                     <FormMessage />
@@ -335,20 +335,20 @@ function LoginContent() {
                                                 <FormItem>
                                                     <FormLabel>Password</FormLabel>
                                                     <div className="relative">
-                                                        <Icon icon={LockIcon} className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                        <Icon icon={LockIcon} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                                         <FormControl>
-                                                            <Input className="pl-9 pr-10" placeholder="••••••••" type={showPassword ? "text" : "password"} autoComplete="new-password" {...field} />
+                                                            <Input className="pl-10 pr-10" placeholder="••••••••" type={showPassword ? "text" : "password"} autoComplete="new-password" {...field} />
                                                         </FormControl>
                                                         <button
                                                             type="button"
                                                             onClick={() => setShowPassword(!showPassword)}
-                                                            className="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
                                                             aria-label={showPassword ? "Hide password" : "Show password"}
                                                         >
                                                             {showPassword ? (
-                                                                <Icon icon={EyeOffIcon} className="h-4 w-4" />
+                                                                <Icon icon={EyeOffIcon} className="h-5 w-5" />
                                                             ) : (
-                                                                <Icon icon={EyeIcon} className="h-4 w-4" />
+                                                                <Icon icon={EyeIcon} className="h-5 w-5" />
                                                             )}
                                                         </button>
                                                     </div>
