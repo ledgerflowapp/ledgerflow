@@ -21,6 +21,7 @@ import { AlertCircleIcon, LoaderIcon, PlusIcon } from "@hugeicons/core-free-icon
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AddAccountDrawer } from '@/components/finance/AddAccountDrawer'
+import { DynamicIcon } from '@/components/ui/DynamicIcon'
 import { paiseToRupees } from '@/lib/currency'
 
 export function getPersonalTransactionFormDefaults(initialData?: any) {
@@ -279,7 +280,7 @@ export function PersonalTransactionDrawer({
                                                                 aria-label={cat.name}
                                                                 className="h-9 px-3 border border-input data-pressed:bg-primary data-pressed:text-primary-foreground"
                                                             >
-                                                                <span className="mr-2">{cat.icon}</span>
+                                                                <DynamicIcon name={cat.icon} className="mr-2 h-4 w-4" size={16} />
                                                                 {cat.name}
                                                             </ToggleGroupItem>
                                                         ))}

@@ -14,6 +14,7 @@ import { useProfile } from '@/hooks/use-profile'
 
 import { BusinessTransactionDrawer } from '@/components/business/BusinessTransactionDrawer'
 import { PersonalTransactionDrawer } from '@/components/personal/PersonalTransactionDrawer'
+import { DynamicIcon } from '@/components/ui/DynamicIcon'
 import { paiseToRupees } from "@/lib/currency";
 
 interface TransactionDetailsDrawerProps {
@@ -96,7 +97,8 @@ export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEd
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Category</span>
                                 <span className="font-medium flex items-center gap-2">
-                                    {transaction.category?.icon} {transaction.category?.name || 'Uncategorized'}
+                                    {transaction.category?.icon && <DynamicIcon name={transaction.category.icon} className="h-4 w-4" size={16} />} 
+                                    {transaction.category?.name || 'Uncategorized'}
                                 </span>
                             </div>
                             <div className="grid gap-1">

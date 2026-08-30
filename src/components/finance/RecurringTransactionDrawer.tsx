@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { DynamicIcon } from '@/components/ui/DynamicIcon'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RecurringTransaction } from '@/types'
@@ -286,7 +287,7 @@ export function RecurringTransactionDrawer({
                                                                 aria-label={cat.name}
                                                                 className="h-9 px-3 border border-input data-pressed:bg-primary data-pressed:text-primary-foreground"
                                                             >
-                                                                <span className="mr-2">{cat.icon}</span>
+                                                                <DynamicIcon name={cat.icon} className="mr-2 h-4 w-4" size={16} />
                                                                 {cat.name}
                                                             </ToggleGroupItem>
                                                         ))}

@@ -18,6 +18,7 @@ import { Icon } from "@/components/ui/icon";
 import { LoaderIcon } from "@hugeicons/core-free-icons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { DynamicIcon } from '@/components/ui/DynamicIcon'
 
 interface CategoryActionDialogProps {
     category: { id: string; name: string; type: 'INCOME' | 'EXPENSE'; icon: string } | null
@@ -113,7 +114,9 @@ export function CategoryActionDialog({ category, action, onClose }: CategoryActi
                                     <SelectItem value="uncategorized">Remove Category (Uncategorized)</SelectItem>
                                     {otherCategories?.map(cat => (
                                         <SelectItem key={cat.id} value={cat.id}>
-                                            Move to {cat.icon} {cat.name}
+                                            <div className="flex items-center gap-2">
+                                                Move to <DynamicIcon name={cat.icon} className="h-4 w-4" size={16} /> {cat.name}
+                                            </div>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
