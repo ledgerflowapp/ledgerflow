@@ -20,7 +20,7 @@ Mode-specific visual appearance settings:
 ## 2. Identity & Social Entities
 
 ### Registered Profile
-An authenticated user in LedgerFlow possessing a verified identity, user settings, profile picture avatar, phone number, and optional claimed `@username` handle.
+An authenticated user in LedgerFlow possessing a verified identity, user settings, profile picture avatar, phone number, and mandatory `@username` handle.
 
 ### Unregistered Contact
 A local contact entry created by a Registered Profile (User A) to record 1:1 transactions, IOUs, or balances with an external individual (User B) who does not yet have an active LedgerFlow account. An Unregistered Contact is scoped locally to the user who created it.
@@ -56,3 +56,7 @@ Centralizes the composition and fan-out of activity notifications (e.g., deleted
 
 ### Web Push Subscription
 A browser-specific device registration (containing an endpoint and VAPID auth keys) linked to a `Registered Profile`, enabling the delivery of offline push notifications to the user's device.
+## 5. Ledger & Transactions
+
+### Transaction Category
+A user-defined classification (Income or Expense) used to group and track personal or business transactions. Categories dictate the visual representation of transactions (via icons) and form the basis for budgeting and analytics.

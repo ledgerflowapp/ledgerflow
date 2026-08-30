@@ -14,6 +14,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Icon } from "@/components/ui/icon";
 import { LoaderIcon } from "@hugeicons/core-free-icons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import dynamic from 'next/dynamic'
+
+const IconPicker = dynamic(() => import('@/components/finance/IconPicker').then(mod => mod.IconPicker), { ssr: false })
 
 const categorySchema = z.object({
     name: z.string().min(1, 'Name is required'),
@@ -122,9 +125,9 @@ export function CategoryDrawer({
                                         name="icon"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Icon Name (Hugeicons)</FormLabel>
+                                                <FormLabel>Icon</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Wallet01Icon" {...field} />
+                                                    <IconPicker value={field.value} onChange={field.onChange} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

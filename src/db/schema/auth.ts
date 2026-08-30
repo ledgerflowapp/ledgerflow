@@ -66,7 +66,7 @@ export const profiles = pgTable("profiles", {
   currencySymbol: text("currency_symbol").default("₹"),
   phone: text("phone"),
   avatarUrl: text("avatar_url"),
-  username: text("username").unique(),
+  username: text("username").notNull().unique(),
   email: text("email"),
   discoverableByPhone: boolean("discoverable_by_phone").default(true),
   discoverableByUsername: boolean("discoverable_by_username").default(true),
