@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import { Cancel01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export function UnverifiedEmailBanner() {
   const { data: session } = useSession();
@@ -37,9 +38,9 @@ export function UnverifiedEmailBanner() {
         <Icon icon={SparklesIcon} className="size-4 text-amber-600 dark:text-amber-400" />
         <AlertTitle className="flex items-center gap-2 font-semibold">
           <span>Welcome to LedgerFlow!</span>
-          <span className="inline-flex items-center rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
+          <Badge className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border-transparent">
             Early Access
-          </span>
+          </Badge>
         </AlertTitle>
         <AlertDescription className="text-amber-800/90 dark:text-amber-300/90">
           Email verification is currently optional while we upgrade our messaging systems. You have full, unrestricted access to your workspace!

@@ -101,7 +101,7 @@ export function MobileSidebar() {
                         </div>
                     </div>
                 </SheetHeader>
-                <div className="flex flex-col gap-2 mt-4">
+                <div className="flex flex-col gap-2 mt-4 px-6 pb-6 overflow-y-auto">
                     {navItems.map((item) => {
                         if (item.showIn && item.showIn !== mode) return null
                         const NavIcon = item.icon
