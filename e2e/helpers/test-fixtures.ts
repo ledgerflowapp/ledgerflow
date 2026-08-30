@@ -113,10 +113,10 @@ export async function seedRegisteredUser(options: SeedUserOptions = {}): Promise
     .insert(profiles)
     .values({
       id: data.user.id,
+      username: options.username || data.user.id,
       email: data.user.email,
       onboardingCompleted: true,
       onboardingStep: 4,
-      ...(options.username ? { username: options.username } : {}),
     })
     .onConflictDoUpdate({
       target: profiles.id,

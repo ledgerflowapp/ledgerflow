@@ -8,6 +8,7 @@ export async function initializeNewUser(user: { id: string; name?: string | null
       .insert(schema.profiles)
       .values({
         id: user.id,
+        username: user.id,
         fullName: user.name || null,
         email: user.email || null,
         avatarUrl: user.image || null,
