@@ -28,11 +28,11 @@ export function PendingRequestsList() {
     const outgoing = requests.filter(r => r.type === 'OUTGOING')
 
     return (
-        <div className="space-y-6 mb-8">
+        <div className="space-y-6 mb-8 @container">
             {incoming.length > 0 && (
                 <div className="space-y-3">
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Incoming Friend Requests</h3>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-3 @sm:grid-cols-2 @lg:grid-cols-3">
                         {incoming.map(req => (
                             <Card key={req.id} className="p-4 flex flex-col gap-4">
                                 <div className="flex items-center gap-3">
@@ -73,7 +73,7 @@ export function PendingRequestsList() {
             {outgoing.length > 0 && (
                 <div className="space-y-3">
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Sent Friend Requests</h3>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-3 @sm:grid-cols-2 @lg:grid-cols-3">
                         {outgoing.map(req => (
                             <Card key={req.id} className="p-4 flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3 min-w-0">

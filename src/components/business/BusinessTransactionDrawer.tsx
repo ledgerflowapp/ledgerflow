@@ -149,7 +149,7 @@ export function BusinessTransactionDrawer({
             {!hideTrigger && (
                 <DrawerTrigger render={<Button
                         size="default"
-                        className="fixed bottom-20 md:bottom-6 right-6 shadow-lg z-40 rounded-full h-14 px-6"
+                        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-[calc(1.5rem+env(safe-area-inset-right,0px))] shadow-lg z-40 rounded-full h-14 px-6"
                      />}>
                         <Icon icon={PlusIcon} className="h-6 w-6 mr-2" />
                         <span className="hidden md:inline">Add Transaction</span>

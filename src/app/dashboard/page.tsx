@@ -62,13 +62,13 @@ export default function DashboardPage() {
                     <BusinessTransactionDrawer />
                 </>
             ) : (
-                <div className="space-y-4">
-                    <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-                        <div className="lg:col-span-4 space-y-4 flex flex-col">
+                <div className="space-y-4 @container">
+                    <div className="grid gap-4 grid-cols-1 @4xl:grid-cols-7">
+                        <div className="@4xl:col-span-4 space-y-4 flex flex-col">
                             <AnalyticsDashboard />
                             <PersonalTransactionList />
                         </div>
-                        <div className="lg:col-span-3 space-y-4">
+                        <div className="@4xl:col-span-3 space-y-4">
                             <AccountsList />
                             <SharedBalancesCard />
                             <RecurringTransactionsList />

@@ -62,7 +62,7 @@ export function BusinessContactDetailsDrawer({ contact, open, onOpenChange }: Bu
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                                 <Icon icon={PhoneIcon} className="h-5 w-5 text-muted-foreground" />
                                 <div>
-                                    <p className="text-sm font-medium">PhoneIcon</p>
+                                    <p className="text-sm font-medium">Phone</p>
                                     <p className="text-sm text-muted-foreground">{contact.phone || 'N/A'}</p>
                                 </div>
                             </div>
@@ -77,9 +77,9 @@ export function BusinessContactDetailsDrawer({ contact, open, onOpenChange }: Bu
                         </div>
 
                         <div className="flex gap-3">
-                            <Button variant="outline" className="flex-1 gap-2" onClick={() => toast.info('Edit04Icon feature coming soon')}>
+                            <Button variant="outline" className="flex-1 gap-2" onClick={() => toast.info('Edit feature coming soon')}>
                                 <Icon icon={Edit04Icon} className="h-4 w-4" />
-                                Edit04Icon
+                                Edit
                             </Button>
                             <Button variant="destructive" className="flex-1 gap-2" onClick={handleDelete}>
                                 <Icon icon={TrashIcon} className="h-4 w-4" />

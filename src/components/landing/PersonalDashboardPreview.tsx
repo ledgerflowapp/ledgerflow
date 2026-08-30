@@ -7,7 +7,7 @@ import { TrendingUpIcon, CreditCardIcon, TrendingDownIcon, LandmarkIcon, Wallet0
 
 export function PersonalDashboardPreview() {
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
+    <div className="w-full max-w-4xl mx-auto space-y-6 @container">
       <div className="text-center space-y-2">
         <h3 className="text-2xl font-bold tracking-tight text-foreground">
           Interactive Personal Mode Preview
@@ -17,11 +17,11 @@ export function PersonalDashboardPreview() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 @md:grid-cols-3 gap-6">
         {/* Accounts Card */}
         <Card className="p-6 space-y-6 border border-border shadow-sm bg-card hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm text-foreground">Multi-Wallet05Icon Accounts</h4>
+            <h4 className="font-semibold text-sm text-foreground">Multi-Wallet Accounts</h4>
             <Badge variant="outline" className="text-[10px] font-semibold">Live</Badge>
           </div>
 
@@ -32,8 +32,8 @@ export function PersonalDashboardPreview() {
                   <Icon icon={Wallet05Icon} className="h-4 w-4" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-semibold text-foreground">Cash Wallet05Icon</p>
-                  <p className="text-[10px] text-muted-foreground">Primary Wallet05Icon</p>
+                  <p className="text-xs font-semibold text-foreground">Cash Wallet</p>
+                  <p className="text-[10px] text-muted-foreground">Primary Wallet</p>
                 </div>
               </div>
               <p className="text-xs font-bold text-foreground">₹1,500.00</p>

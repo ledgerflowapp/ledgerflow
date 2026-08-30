@@ -20,6 +20,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ActionDrawer } from '@/components/ui/action-drawer'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -106,26 +107,52 @@ export default function LedgerPage() {
                     <h1 className="text-2xl font-bold tracking-tight">{contact.name}</h1>
                 </div>
                 <div className="ml-auto">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger render={
-                            <Button variant="ghost" size="icon" />
-                        }>
-                            <Icon icon={MoreVerticalIcon} className="h-4 w-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setContactEditOpen(true)}>
-                                <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" />
-                                Edit04Icon
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="text-red-600 focus:text-red-600"
-                                onClick={() => setDeleteDialogOpen(true)}
-                            >
-                                <Icon icon={TrashIcon} className="mr-2 h-4 w-4" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    {/* Desktop dropdown */}
+                    <div className="hidden sm:flex">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger render={
+                                <Button variant="ghost" size="icon" aria-label={`More options for ${contact.name}`} />
+                            }>
+                                <Icon icon={MoreVerticalIcon} className="h-4 w-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setContactEditOpen(true)}>
+                                    <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" />
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600"
+                                    onClick={() => setDeleteDialogOpen(true)}
+                                >
+                                    <Icon icon={TrashIcon} className="mr-2 h-4 w-4" />
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+
+                    {/* Mobile ActionDrawer bottom sheet */}
+                    <div className="flex sm:hidden">
+                        <ActionDrawer
+                            title={contact.name}
+                            description="Contact Options"
+                            triggerOrientation="vertical"
+                            triggerAriaLabel={`More options for ${contact.name}`}
+                            actions={[
+                                {
+                                    label: 'Edit Contact',
+                                    icon: Edit04Icon,
+                                    onClick: () => setContactEditOpen(true),
+                                },
+                                {
+                                    label: 'Delete Contact',
+                                    icon: TrashIcon,
+                                    variant: 'destructive',
+                                    onClick: () => setDeleteDialogOpen(true),
+                                },
+                            ]}
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -151,7 +178,7 @@ export default function LedgerPage() {
                     <div className="flex gap-2">
                         <Select items={[ {value: 'ALL', label: 'All Time'}, {value: 'TODAY', label: 'Today'}, {value: 'WEEK', label: 'This Week'}, {value: 'MONTH', label: 'This Month'}, {value: 'YEAR', label: 'This Year'} ]} value={timeFilter} onValueChange={(v) => setTimeFilter(v as TimeFilter)}>
                             <SelectTrigger className="w-[110px] h-8 text-xs">
-                                <SelectValue placeholder="FilterIcon" />
+                                <SelectValue placeholder="Filter" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="ALL">All Time</SelectItem>

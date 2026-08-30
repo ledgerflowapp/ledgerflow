@@ -20,7 +20,8 @@ export function BusinessSummary() {
     if (isLoading) return null
 
     return (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="@container w-full">
+            <div className="grid gap-4 @sm:grid-cols-2">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-green-600">
@@ -47,6 +48,7 @@ export function BusinessSummary() {
                     </div>
                 </CardContent>
             </Card>
+            </div>
         </div>
     )
 }

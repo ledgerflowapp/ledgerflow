@@ -42,7 +42,7 @@ export function BottomNav() {
     )
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden pb-[env(safe-area-inset-bottom,0px)] pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] bg-card border-t border-border/40">
             <InteractiveBottomNav items={filteredItems} />
         </div>
     )

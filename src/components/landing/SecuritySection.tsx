@@ -15,7 +15,7 @@ interface SecuritySectionProps {
 export function SecuritySection({ user }: SecuritySectionProps) {
   return (
     <section id="security" className="py-20 lg:py-28 bg-background border-b border-border">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-20 @container">
 
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -31,7 +31,7 @@ export function SecuritySection({ user }: SecuritySectionProps) {
         </div>
 
         {/* Feature Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+        <div className="grid grid-cols-1 @md:grid-cols-2 gap-8 text-left">
 
           <div className="flex gap-4">
             <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0 h-12 w-12 flex items-center justify-center">

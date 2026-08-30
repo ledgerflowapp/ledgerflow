@@ -7,7 +7,7 @@ import Link from 'next/link';
 export function BusinessModeSection() {
   return (
     <section id="business-mode" className="py-20 lg:py-28 bg-muted/20 border-b border-border">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-16 @container">
 
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -23,7 +23,7 @@ export function BusinessModeSection() {
         </div>
 
         {/* Feature Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+        <div className="grid grid-cols-1 @md:grid-cols-3 gap-6 text-left">
 
           <Card className="p-6 space-y-4 border border-border bg-card shadow-sm">
             <div className="p-2.5 bg-blue-500/10 text-blue-600 rounded-lg w-10 h-10 flex items-center justify-center">
@@ -58,7 +58,7 @@ export function BusinessModeSection() {
         </div>
 
         {/* Business Mode UI Mock Preview */}
-        <Card className="p-6 border border-border bg-card shadow-md max-w-3xl mx-auto text-left space-y-6">
+        <Card className="p-6 border border-border bg-card shadow-md max-w-3xl mx-auto text-left space-y-6 @container">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Active Workspace</span>
@@ -69,7 +69,7 @@ export function BusinessModeSection() {
             </Badge>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 @sm:grid-cols-2 gap-4">
             <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/10 space-y-1">
               <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Net Receivables (To Receive)</span>
               <p className="text-xl font-black text-emerald-600">₹1,43,900.00</p>

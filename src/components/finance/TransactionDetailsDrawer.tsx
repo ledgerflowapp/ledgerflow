@@ -178,7 +178,7 @@ export function TransactionDetailsDrawer({ transaction, open, onOpenChange, onEd
                                         onClick={handleEdit}
                                     >
                                         <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" />
-                                        Edit04Icon
+                                        Edit
                                     </Button>
                                     <Button
                                         variant="destructive"

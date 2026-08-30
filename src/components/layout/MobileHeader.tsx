@@ -23,7 +23,7 @@ export function MobileHeader() {
     const isRootRoute = ROOT_ROUTES.includes(pathname)
 
     return (
-        <div className="flex h-22 items-center border-b px-4 bg-background md:hidden sticky top-0 z-50 gap-4">
+        <header className="flex min-h-14 h-[calc(3.5rem+env(safe-area-inset-top,0px))] items-center border-b px-4 pt-[env(safe-area-inset-top,0px)] pl-[calc(1rem+env(safe-area-inset-left,0px))] pr-[calc(1rem+env(safe-area-inset-right,0px))] bg-background md:hidden sticky top-0 z-50 gap-4">
             <div className="flex items-center">
                 {isRootRoute ? (
                     <MobileSidebar />
@@ -45,6 +45,6 @@ export function MobileHeader() {
                 </div>
                 <span className="font-semibold text-md">LedgerFlow</span>
             </div>
-        </div>
+        </header>
     )
 }

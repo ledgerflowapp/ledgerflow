@@ -66,16 +66,30 @@ export function getFormDefaults(initialData?: RecurringTransaction | null) {
 export function RecurringTransactionDrawer({
     children,
     initialData,
+    open: controlledOpen,
+    onOpenChange: setControlledOpen,
+    hideTrigger = false,
 }: {
     children?: React.ReactNode
     initialData?: RecurringTransaction | null
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    hideTrigger?: boolean
 }) {
     const { data: budgets } = useBudgets()
     const { data: accounts } = useAccounts()
     const { mutate: addRecurring, isPending: isAdding } = useAddRecurringTransaction()
     const { mutate: updateRecurring, isPending: isUpdating } = useUpdateRecurringTransaction()
     const isPending = isAdding || isUpdating
-    const [open, setOpen] = useState(false)
+    const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+    const isControlled = controlledOpen !== undefined
+    const open = isControlled ? controlledOpen : uncontrolledOpen
+    const setOpen = (newOpen: boolean) => {
+        if (!isControlled) {
+            setUncontrolledOpen(newOpen)
+        }
+        setControlledOpen?.(newOpen)
+    }
     const [flow, setFlow] = useState<'IN' | 'OUT'>(initialData?.flow || 'OUT')
 
     const isEdit = !!initialData
@@ -138,18 +152,20 @@ export function RecurringTransactionDrawer({
 
     return (
         <Drawer open={open} onOpenChange={setOpen}>
-            {children ? (
-                <DrawerTrigger render={children as React.ReactElement} />
-            ) : (
-                <DrawerTrigger render={<Button size="sm" variant="outline" />}>
-                    {isEdit ? <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" /> : <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />}
-                    {isEdit ? 'Edit04Icon Subscription' : 'Add Subscription'}
-                </DrawerTrigger>
+            {!hideTrigger && (
+                children ? (
+                    <DrawerTrigger render={children as React.ReactElement} />
+                ) : (
+                    <DrawerTrigger render={<Button size="sm" variant="outline" />}>
+                        {isEdit ? <Icon icon={Edit04Icon} className="mr-2 h-4 w-4" /> : <Icon icon={PlusIcon} className="mr-2 h-4 w-4" />}
+                        {isEdit ? 'Edit Subscription' : 'Add Subscription'}
+                    </DrawerTrigger>
+                )
             )}
             <DrawerContent className="max-h-[90dvh]">
                 <div className="mx-auto w-full max-w-sm flex flex-col min-h-0 max-h-[90dvh]">
                     <DrawerHeader className="shrink-0">
-                        <DrawerTitle>{isEdit ? 'Edit04Icon Recurring Payment' : 'Add Recurring Payment'}</DrawerTitle>
+                        <DrawerTitle>{isEdit ? 'Edit Recurring Payment' : 'Add Recurring Payment'}</DrawerTitle>
                     </DrawerHeader>
                     <div className="p-4 pb-8 overflow-y-auto flex-1 min-h-0">
                         <Tabs value={flow} className="w-full mb-4" onValueChange={(v) => setFlow(v as 'IN' | 'OUT')}>

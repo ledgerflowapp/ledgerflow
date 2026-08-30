@@ -246,9 +246,9 @@ export function SettingsContent() {
                                 />
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-3 @container">
                                 <Label>Accent Color</Label>
-                                <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                                <div className="grid grid-cols-3 @md:grid-cols-6 gap-4">
                                     {ACCENT_COLORS.map((color) => (
                                         <button
                                             key={color.value}
@@ -315,7 +315,7 @@ export function SettingsContent() {
                                             )}
                                         />
 
-                                        <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="grid gap-4 @md:grid-cols-2">
                                             <FormField
                                                 control={form.control}
                                                 name="full_name"
@@ -357,13 +357,13 @@ export function SettingsContent() {
                                             />
                                         </div>
 
-                                        <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="grid gap-4 @md:grid-cols-2">
                                             <FormField
                                                 control={form.control}
                                                 name="phone"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>PhoneIcon Number</FormLabel>
+                                                        <FormLabel>Phone Number</FormLabel>
                                                         <FormControl>
                                                             <Input placeholder="+1234567890" {...field} />
                                                         </FormControl>
@@ -440,7 +440,7 @@ export function SettingsContent() {
                                         </div>
                                     </div>
 
-                                    <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="grid gap-6 @md:grid-cols-2">
                                         <div className="space-y-3">
                                             <Label className="text-xs font-medium uppercase text-muted-foreground">Contact Information</Label>
                                             <div className="flex items-center gap-3 text-sm">
@@ -525,10 +525,10 @@ export function SettingsContent() {
                                             <Icon icon={Shield02Icon} className="h-4 w-4" />
                                             Privacy Settings
                                         </h3>
-                                        <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="grid gap-4 @md:grid-cols-2">
                                             <div className="flex items-center justify-between space-x-2 rounded-lg border p-3 shadow-sm">
                                                 <div className="space-y-1">
-                                                    <Label htmlFor="view-phone" className="text-base">PhoneIcon Discoverability</Label>
+                                                    <Label htmlFor="view-phone" className="text-base">Phone Discoverability</Label>
                                                     <p className="text-sm text-muted-foreground">
                                                         Allow searching by number
                                                     </p>

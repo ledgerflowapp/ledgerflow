@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/components/ui/toast'
+import { ActionDrawer } from '@/components/ui/action-drawer'
 
 export function CategoriesContent() {
     const queryClient = useQueryClient()
@@ -61,13 +62,13 @@ export function CategoriesContent() {
                 <CardHeader>
                     <CardTitle>All Categories</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="@container">
                     {isLoading ? (
                         <div className="flex justify-center p-8">
                             <HugeiconsIcon icon={Loading02Icon} className="h-8 w-8 animate-spin text-muted-foreground" />
                         </div>
                     ) : (
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-4 @sm:grid-cols-2 @lg:grid-cols-3">
                             {categories?.map((category) => (
                                 <div
                                     key={category.id}
@@ -90,48 +91,94 @@ export function CategoriesContent() {
                                         </div>
                                     </div>
 
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger render={
-                                            <Button variant="ghost" size="icon" className="h-8 w-8" />
-                                        }>
-                                            <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem onClick={() => {
-                                                setEditingCategory(category)
-                                                setEditOpen(true)
-                                            }}>
-                                                <HugeiconsIcon icon={Edit02Icon} className="mr-2 h-4 w-4" />
-                                                Edit
-                                            </DropdownMenuItem>
-
-                                            {category.active ? (
+                                    {/* Desktop actions: DropdownMenu */}
+                                    <div className="hidden sm:flex">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger render={
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`More options for ${category.name}`} />
+                                            }>
+                                                <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
                                                 <DropdownMenuItem onClick={() => {
-                                                    setActionCategory(category)
-                                                    setActionType('DISABLE')
+                                                    setEditingCategory(category)
+                                                    setEditOpen(true)
                                                 }}>
-                                                    <HugeiconsIcon icon={ViewOffIcon} className="mr-2 h-4 w-4" />
-                                                    Disable
+                                                    <HugeiconsIcon icon={Edit02Icon} className="mr-2 h-4 w-4" />
+                                                    Edit
                                                 </DropdownMenuItem>
-                                            ) : (
-                                                <DropdownMenuItem onClick={() => handleEnable(category)}>
-                                                    <HugeiconsIcon icon={TickDouble02Icon} className="mr-2 h-4 w-4" />
-                                                    Enable
-                                                </DropdownMenuItem>
-                                            )}
 
-                                            <DropdownMenuItem
-                                                className="text-destructive focus:text-destructive"
-                                                onClick={() => {
-                                                    setActionCategory(category)
-                                                    setActionType('DELETE')
-                                                }}
-                                            >
-                                                <HugeiconsIcon icon={Delete02Icon} className="mr-2 h-4 w-4" />
-                                                Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                                {category.active ? (
+                                                    <DropdownMenuItem onClick={() => {
+                                                        setActionCategory(category)
+                                                        setActionType('DISABLE')
+                                                    }}>
+                                                        <HugeiconsIcon icon={ViewOffIcon} className="mr-2 h-4 w-4" />
+                                                        Disable
+                                                    </DropdownMenuItem>
+                                                ) : (
+                                                    <DropdownMenuItem onClick={() => handleEnable(category)}>
+                                                        <HugeiconsIcon icon={TickDouble02Icon} className="mr-2 h-4 w-4" />
+                                                        Enable
+                                                    </DropdownMenuItem>
+                                                )}
+
+                                                <DropdownMenuItem
+                                                    className="text-destructive focus:text-destructive"
+                                                    onClick={() => {
+                                                        setActionCategory(category)
+                                                        setActionType('DELETE')
+                                                    }}
+                                                >
+                                                    <HugeiconsIcon icon={Delete02Icon} className="mr-2 h-4 w-4" />
+                                                    Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+
+                                    {/* Mobile actions: ActionDrawer Bottom Sheet */}
+                                    <div className="flex sm:hidden">
+                                        <ActionDrawer
+                                            title={category.name}
+                                            description={`${category.type.toLowerCase()} category`}
+                                            triggerOrientation="vertical"
+                                            triggerAriaLabel={`More options for ${category.name}`}
+                                            actions={[
+                                                {
+                                                    label: 'Edit',
+                                                    icon: <HugeiconsIcon icon={Edit02Icon} className="h-5 w-5" />,
+                                                    onClick: () => {
+                                                        setEditingCategory(category)
+                                                        setEditOpen(true)
+                                                    },
+                                                },
+                                                category.active
+                                                    ? {
+                                                          label: 'Disable',
+                                                          icon: <HugeiconsIcon icon={ViewOffIcon} className="h-5 w-5" />,
+                                                          onClick: () => {
+                                                              setActionCategory(category)
+                                                              setActionType('DISABLE')
+                                                          },
+                                                      }
+                                                    : {
+                                                          label: 'Enable',
+                                                          icon: <HugeiconsIcon icon={TickDouble02Icon} className="h-5 w-5" />,
+                                                          onClick: () => handleEnable(category),
+                                                      },
+                                                {
+                                                    label: 'Delete',
+                                                    icon: <HugeiconsIcon icon={Delete02Icon} className="h-5 w-5" />,
+                                                    variant: 'destructive',
+                                                    onClick: () => {
+                                                        setActionCategory(category)
+                                                        setActionType('DELETE')
+                                                    },
+                                                },
+                                            ]}
+                                        />
+                                    </div>
                                 </div>
                             ))}
                         </div>

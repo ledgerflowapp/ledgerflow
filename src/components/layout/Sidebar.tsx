@@ -74,7 +74,7 @@ export function Sidebar() {
     ]
 
     return (
-        <div className="hidden h-screen w-64 flex-col border-r bg-sidebar text-sidebar-foreground md:flex">
+        <aside className="hidden h-dvh min-h-dvh w-64 flex-col border-r bg-sidebar text-sidebar-foreground md:flex pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] pl-[env(safe-area-inset-left,0px)] shrink-0">
             <div className="flex h-16 items-center border-b px-4 gap-3">
                 <Avatar className="h-8 w-8">
                     <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User'} />
@@ -156,6 +156,6 @@ export function Sidebar() {
                     </Button>
                 </div>
             </div>
-        </div>
+        </aside>
     )
 }

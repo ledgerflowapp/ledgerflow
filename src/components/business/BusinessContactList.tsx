@@ -128,7 +128,7 @@ export function BusinessContactList({
                 <div className="relative">
                     <Icon icon={Search02Icon} className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search02Icon..."
+                        placeholder="Search..."
                         className="pl-8"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}

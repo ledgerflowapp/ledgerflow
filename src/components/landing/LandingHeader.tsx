@@ -32,7 +32,7 @@ export function LandingHeader({ user }: LandingHeaderProps) {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-200 border-b',
+        'sticky top-0 z-50 w-full transition-all duration-200 border-b pt-[env(safe-area-inset-top,0px)]',
         scrolled
           ? 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm border-border'
           : 'bg-background border-transparent'

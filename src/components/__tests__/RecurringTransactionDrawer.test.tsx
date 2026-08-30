@@ -101,7 +101,7 @@ describe('recurringSchema amount validation', () => {
         const result = recurringSchema.safeParse({ ...validBase, amount: NaN })
         expect(result.success).toBe(false)
         if (!result.success) {
-            expect(result.error.issues[0].message).toBe('Amount must be greater than 0')
+            expect(result.error.issues[0].message).toBe('Amount must be greater than zero')
         }
     })
 
@@ -109,7 +109,7 @@ describe('recurringSchema amount validation', () => {
         const result = recurringSchema.safeParse({ ...validBase, amount: 0 })
         expect(result.success).toBe(false)
         if (!result.success) {
-            expect(result.error.issues[0].message).toBe('Amount must be greater than 0')
+            expect(result.error.issues[0].message).toBe('Amount must be greater than zero')
         }
     })
 

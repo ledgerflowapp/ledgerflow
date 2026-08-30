@@ -7,7 +7,7 @@ import { CheckmarkCircle04Icon, UsersIcon, SmartphoneIcon, UserMinus02Icon, Link
 export function SocialLedgerSection() {
   return (
     <section id="social-ledger" className="py-20 lg:py-28 bg-background border-b border-border">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl space-y-16 @container">
 
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -23,10 +23,10 @@ export function SocialLedgerSection() {
         </div>
 
         {/* Feature grid with Split Simulator embedded */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="grid grid-cols-1 @lg:grid-cols-12 gap-8 items-center">
 
           {/* Left: Explainer content */}
-          <div className="lg:col-span-6 space-y-8 text-left">
+          <div className="@lg:col-span-6 space-y-8 text-left">
 
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-foreground">Fractional Split Calculations</h3>
@@ -99,7 +99,7 @@ export function SocialLedgerSection() {
           </div>
 
           {/* Right: Split Simulator Embedding */}
-          <div className="lg:col-span-6 w-full">
+          <div className="@lg:col-span-6 w-full">
             <SplitSimulator />
           </div>
 
