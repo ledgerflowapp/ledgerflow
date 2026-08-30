@@ -52,4 +52,7 @@ The process of linking one or more `Unregistered Contact` entries (1:1 context) 
 Centralizes the multi-domain initialization of a newly registered user, decoupling the `auth` lifecycle from the provisioning of default profiles, preferences, businesses, accounts, and budget categories.
 
 ### Notification Service
-Centralizes the composition and fan-out of activity notifications (e.g., deleted transactions) to relevant contacts and group members, keeping transaction actions focused solely on state changes.
+Centralizes the composition and fan-out of activity notifications (e.g., deleted transactions) to relevant contacts and group members. It handles both in-app notification state and out-of-app delivery (such as filtering and dispatching high-priority alerts via Web Push).
+
+### Web Push Subscription
+A browser-specific device registration (containing an endpoint and VAPID auth keys) linked to a `Registered Profile`, enabling the delivery of offline push notifications to the user's device.
